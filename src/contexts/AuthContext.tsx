@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Listen to Firebase auth state changes (only in production mode)
   useEffect(() => {
-    if (!isDemoMode()) {
+    if (!isDemoMode() && auth) {
       const unsubscribe = onAuthStateChanged(
         auth,
         (user) => {
