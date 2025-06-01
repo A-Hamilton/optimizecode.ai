@@ -18,6 +18,7 @@ import SignUpPage from "./pages/SignUpPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import ProfilePage from "./pages/ProfilePage";
+import TestPage from "./pages/TestPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import Footer from "./components/Footer";
@@ -45,6 +46,7 @@ function App(): JSX.Element {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/subscription" element={<SubscriptionPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/test" element={<TestPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
             </Routes>
             <Footer />
