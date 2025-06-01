@@ -142,21 +142,28 @@ function ResultsDisplay({
       {/* Optimization Summary */}
       {optimizationSummary && Object.keys(optimizationSummary).length > 0 && (
         <div className="optimization-summary">
-          <h4 className="summary-title">Optimizations Applied:</h4>
+          <h4 className="summary-title">⚡ Optimizations Applied</h4>
           <div className="summary-content">
             {Object.entries(optimizationSummary).map(
               ([filename, optimizations]) => (
                 <div key={filename} className="file-summary">
-                  <span className="file-summary-name">
-                    {filename === "pasted-code" ? "Pasted Code" : filename}:
-                  </span>
-                  <ul className="optimizations-list">
+                  <div className="file-summary-header">
+                    <span className="file-summary-name">
+                      {filename === "pasted-code"
+                        ? "📄 Pasted Code"
+                        : `📁 ${filename}`}
+                    </span>
+                    <span className="optimizations-count">
+                      {optimizations.length} improvements
+                    </span>
+                  </div>
+                  <div className="optimizations-grid">
                     {optimizations.map((opt, index) => (
-                      <li key={index} className="optimization-item">
+                      <div key={index} className="optimization-tag">
                         ✓ {opt}
-                      </li>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               ),
             )}

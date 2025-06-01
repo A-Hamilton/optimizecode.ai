@@ -66,112 +66,102 @@ function FileDropZone({ onFilesSelected, files }) {
     const files = [];
     const MAX_FILES = 15;
     const MAX_FILE_SIZE = 500 * 1024; // 500KB
-    const MAX_TOTAL_FILES_TO_CHECK = 5000; // Stop checking after 5000 files
+    const MAX_TOTAL_FILES_TO_CHECK = 10000; // Increased limit
+
+    console.log(
+      `📂 Processing entry: ${path}${entry.name} (${entry.isFile ? "file" : "directory"})`,
+    );
 
     // Early exit if we've found enough files or checked too many
-    if (
-      collected.count >= MAX_TOTAL_FILES_TO_CHECK ||
-      files.length >= MAX_FILES
-    ) {
+    if (collected.count >= MAX_TOTAL_FILES_TO_CHECK) {
+      console.log(`⚠️ Reached file check limit (${MAX_TOTAL_FILES_TO_CHECK})`);
+      return files;
+    }
+
+    if (files.length >= MAX_FILES) {
+      console.log(`⚠️ Found enough files (${MAX_FILES})`);
       return files;
     }
 
     if (entry.isFile) {
       collected.count++;
-      const file = await new Promise((resolve) => entry.file(resolve));
-      const fullPath = path + file.name;
+      try {
+        const file = await new Promise((resolve) => entry.file(resolve));
+        const fullPath = path + file.name;
 
-      if (isCodeFile(file.name, fullPath) && file.size <= MAX_FILE_SIZE) {
-        Object.defineProperty(file, "webkitRelativePath", {
-          value: fullPath,
-          writable: false,
-        });
-        files.push(file);
+        console.log(`📄 File found: ${fullPath} (${file.size} bytes)`);
+
+        if (file.size <= MAX_FILE_SIZE && isCodeFile(file.name, fullPath)) {
+          Object.defineProperty(file, "webkitRelativePath", {
+            value: fullPath,
+            writable: false,
+          });
+          files.push(file);
+          console.log(`✅ Added file: ${fullPath}`);
+        } else if (file.size > MAX_FILE_SIZE) {
+          console.log(
+            `❌ File too large: ${fullPath} (${file.size} > ${MAX_FILE_SIZE})`,
+          );
+        }
+      } catch (error) {
+        console.error(`Error processing file ${path}${entry.name}:`, error);
       }
     } else if (entry.isDirectory) {
-      // More aggressive directory filtering
+      // Less aggressive directory filtering - let more through
       const excludedDirs = [
         "node_modules",
         ".git",
         "dist",
         "build",
-        "coverage",
-        ".next",
-        ".nuxt",
-        "vendor",
-        "target",
-        "bin",
-        "obj",
         "__pycache__",
-        ".cache",
-        "tmp",
-        "temp",
-        ".vscode",
-        ".idea",
-        "public",
-        ".github",
-        "tests",
-        "test",
-        "spec",
       ];
 
       const dirName = entry.name.toLowerCase();
-      if (
-        excludedDirs.some((dir) => dirName === dir || dirName.includes(dir))
-      ) {
-        console.log(`Skipping excluded directory: ${path}${entry.name}`);
+      const shouldExclude = excludedDirs.some((dir) => dirName === dir);
+
+      if (shouldExclude) {
+        console.log(`⏭️ Skipping excluded directory: ${path}${entry.name}`);
         return files;
       }
+
+      console.log(`📁 Entering directory: ${path}${entry.name}`);
 
       try {
         const dirReader = entry.createReader();
         const entries = await new Promise((resolve, reject) => {
           const timeout = setTimeout(() => {
-            reject(new Error("Directory read timeout"));
-          }, 5000); // 5 second timeout per directory
+            console.warn(`⏱️ Timeout reading directory: ${path}${entry.name}`);
+            resolve([]); // Don't reject, just return empty array
+          }, 3000); // Reduced timeout
 
           dirReader.readEntries((entries) => {
             clearTimeout(timeout);
+            console.log(
+              `📋 Found ${entries.length} entries in ${path}${entry.name}`,
+            );
             resolve(entries);
           });
         });
 
-        // Process files first, then directories
-        const fileEntries = entries.filter((e) => e.isFile);
-        const dirEntries = entries.filter((e) => e.isDirectory);
-
-        // Process files first (faster)
-        for (const fileEntry of fileEntries) {
+        // Process all entries
+        for (const childEntry of entries) {
           if (
             files.length >= MAX_FILES ||
             collected.count >= MAX_TOTAL_FILES_TO_CHECK
-          )
+          ) {
             break;
-          const childFiles = await getAllFiles(
-            fileEntry,
-            path + entry.name + "/",
-            collected,
-          );
-          files.push(...childFiles);
-        }
+          }
 
-        // Then process directories
-        for (const dirEntry of dirEntries) {
-          if (
-            files.length >= MAX_FILES ||
-            collected.count >= MAX_TOTAL_FILES_TO_CHECK
-          )
-            break;
           const childFiles = await getAllFiles(
-            dirEntry,
+            childEntry,
             path + entry.name + "/",
             collected,
           );
           files.push(...childFiles);
         }
       } catch (error) {
-        console.warn(
-          `Error reading directory ${path}${entry.name}:`,
+        console.error(
+          `❌ Error reading directory ${path}${entry.name}:`,
           error.message,
         );
       }
@@ -182,7 +172,7 @@ function FileDropZone({ onFilesSelected, files }) {
 
   const handleFiles = async (fileList) => {
     if (!fileList || fileList.length === 0) {
-      console.log("No files provided");
+      console.log("❌ No files provided");
       setIsProcessing(false);
       return;
     }
@@ -193,13 +183,19 @@ function FileDropZone({ onFilesSelected, files }) {
     let skippedFiles = 0;
     let oversizedFiles = 0;
 
-    console.log(`Starting to process ${fileList.length} files...`);
+    console.log(`🚀 Starting to process ${fileList.length} files...`);
+    console.log(
+      `📋 First 10 files:`,
+      Array.from(fileList)
+        .slice(0, 10)
+        .map((f) => f.webkitRelativePath || f.name),
+    );
 
     try {
       // If too many files, show warning and limit processing
       if (fileList.length > 10000) {
         console.warn(
-          `Large folder detected (${fileList.length} files). Processing first 5000 files only.`,
+          `⚠️ Large folder detected (${fileList.length} files). Processing first 5000 files only.`,
         );
         fileList = Array.from(fileList).slice(0, 5000);
       }
@@ -351,34 +347,23 @@ function FileDropZone({ onFilesSelected, files }) {
   };
 
   const isCodeFile = (filename, filepath = "") => {
-    // Folders/paths to exclude (be more specific about paths)
-    const excludedPaths = [
-      "/node_modules/",
-      "\\node_modules\\",
-      "/.git/",
-      "\\.git\\",
-      "/dist/",
-      "\\dist\\",
-      "/build/",
-      "\\build\\",
-      "/coverage/",
-      "\\coverage\\",
-      "/.next/",
-      "\\.next\\",
-      "/.nuxt/",
-      "\\.nuxt\\",
-      "/vendor/",
-      "\\vendor\\",
-      "/target/",
-      "\\target\\",
-      "/__pycache__/",
-      "\\__pycache__\\",
-      "/.cache/",
-      "\\.cache\\",
-      "/.vscode/",
-      "\\.vscode\\",
-      "/.idea/",
-      "\\.idea\\",
+    console.log(`🔍 Checking file: ${filepath} (${filename})`);
+
+    // More lenient exclusion - only exclude if CLEARLY in these folders
+    const excludedFolders = [
+      "node_modules",
+      ".git",
+      "dist",
+      "build",
+      "coverage",
+      ".next",
+      ".nuxt",
+      "vendor",
+      "target",
+      "__pycache__",
+      ".cache",
+      ".vscode",
+      ".idea",
     ];
 
     // Files to exclude (exact matches)
@@ -395,32 +380,30 @@ function FileDropZone({ onFilesSelected, files }) {
       "vite.config.js",
       "tsconfig.json",
       "babel.config.js",
-      ".env",
-      ".env.local",
-      ".env.development",
-      ".env.production",
     ];
 
-    // Check if file is in excluded path (more precise matching)
-    const normalizedPath = filepath.replace(/\\/g, "/").toLowerCase();
-    const isInExcludedPath = excludedPaths.some((path) => {
-      const normalizedExcludedPath = path.replace(/\\/g, "/").toLowerCase();
-      return normalizedPath.includes(normalizedExcludedPath);
-    });
+    // Check if file is in excluded folder (more lenient)
+    const pathParts = filepath.toLowerCase().split(/[/\\]/);
+    const isInExcludedFolder = excludedFolders.some((folder) =>
+      pathParts.includes(folder.toLowerCase()),
+    );
 
     // Check if file is excluded (exact filename match)
     const isExcludedFile = excludedFiles.some(
       (excludedFile) => filename.toLowerCase() === excludedFile.toLowerCase(),
     );
 
-    if (isInExcludedPath || isExcludedFile) {
-      console.log(
-        `Excluded file: ${filepath} (${isInExcludedPath ? "path" : "filename"})`,
-      );
+    if (isInExcludedFolder) {
+      console.log(`❌ Excluded (folder): ${filepath}`);
       return false;
     }
 
-    // Code file extensions (removed .txt as it's not typically code)
+    if (isExcludedFile) {
+      console.log(`❌ Excluded (filename): ${filepath}`);
+      return false;
+    }
+
+    // Code file extensions - be more inclusive
     const codeExtensions = [
       ".js",
       ".jsx",
@@ -454,11 +437,6 @@ function FileDropZone({ onFilesSelected, files }) {
       ".yaml",
       ".yml",
       ".md",
-      ".sh",
-      ".bash",
-      ".ps1",
-      ".bat",
-      ".cmd",
     ];
 
     const isCodeFile = codeExtensions.some((ext) =>
@@ -466,12 +444,12 @@ function FileDropZone({ onFilesSelected, files }) {
     );
 
     if (isCodeFile) {
-      console.log(`Accepted code file: ${filepath}`);
+      console.log(`✅ Accepted: ${filepath}`);
+      return true;
     } else {
-      console.log(`Not a code file: ${filepath}`);
+      console.log(`❓ Not a code file: ${filepath}`);
+      return false;
     }
-
-    return isCodeFile;
   };
 
   const getFileExtension = (filename) => {
