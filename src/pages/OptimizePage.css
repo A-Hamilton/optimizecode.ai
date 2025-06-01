@@ -40,6 +40,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
   margin-bottom: 3rem;
+  align-items: start; /* Prevent stretching */
 }
 
 .input-section {
@@ -50,6 +51,10 @@
   padding: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
+  /* IMPORTANT: Prevent overflow */
+  overflow: hidden;
+  min-width: 0; /* Allow flex item to shrink */
+  box-sizing: border-box;
 }
 
 /* Section Divider Styling */
@@ -83,18 +88,50 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Action Controls Styling */
+/* Action Controls Styling - FIXED LAYOUT */
 .action-controls {
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  /* CRITICAL: Prevent button overflow */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-/* Button Base Styles */
+/* Button Container Fix */
+.action-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+/* Button Base Styles - FIXED SIZING */
 .action-controls button {
   position: relative;
   overflow: hidden;
   background-clip: padding-box;
+  /* IMPORTANT: Prevent button from growing beyond container */
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Optimize Button - Main CTA */
+.action-controls button:first-child {
+  flex: 2; /* Take more space but not overflow */
+  min-width: 140px; /* Minimum readable width */
+}
+
+/* Reset Button */
+.action-controls button:last-child {
+  flex: 1;
+  min-width: 100px;
+  max-width: 150px; /* Prevent it from getting too wide */
 }
 
 .action-controls button::before {
@@ -152,16 +189,21 @@
   animation: pulse-glow 2s infinite;
 }
 
-/* Reset Button Styles */
-.action-controls button:last-child {
-  min-width: 120px;
+/* Results Section - Also prevent overflow */
+.optimize-main > div:last-child {
+  overflow: hidden;
+  min-width: 0;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
+/* Responsive Design - IMPROVED */
+@media (max-width: 1200px) {
   .optimize-main {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+
+  .input-section {
+    max-width: 100%;
   }
 }
 
@@ -179,8 +221,14 @@
     gap: 1rem;
   }
 
-  .action-controls button:last-child {
-    min-width: auto;
+  .action-controls button {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .input-section {
+    padding: 1rem;
   }
 }
 
@@ -189,8 +237,17 @@
     font-size: 2rem;
   }
 
+  .optimize-container {
+    padding: 0 0.5rem;
+  }
+
   .input-section {
-    padding: 1rem;
+    padding: 0.75rem;
+  }
+
+  .action-controls button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
   }
 }
 
@@ -221,4 +278,26 @@
     );
   pointer-events: none;
   z-index: -1;
+}
+
+/* Additional overflow prevention for all containers */
+* {
+  box-sizing: border-box;
+}
+
+.optimize-main * {
+  max-width: 100%;
+}
+
+/* Ensure grid doesn't create overflow */
+.optimize-main {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* File drop zone container fix */
+.input-section > * {
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
