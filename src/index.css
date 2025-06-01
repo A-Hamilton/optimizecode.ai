@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Design System */
+@import "./components/ui/DesignSystem.css";
+
 @layer base {
   :root {
     color-scheme: light dark;
