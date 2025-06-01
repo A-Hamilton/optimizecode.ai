@@ -1,6 +1,8 @@
 // Updated for TypeScript migration
 import React from "react";
 import { Link } from "react-router-dom";
+import Newsletter from "./Newsletter";
+import "./Newsletter.css";
 
 const Footer: React.FC = () => {
   const FooterSection: React.FC<{
@@ -108,22 +110,7 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Newsletter Signup */}
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-              <h5 className="text-white font-medium mb-2">Stay Updated</h5>
-              <p className="text-white/60 text-sm mb-3">
-                Get the latest updates on new features and optimizations.
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  className="flex-1 bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm placeholder-white/50 focus:outline-none focus:border-primary transition-colors"
-                />
-                <button className="bg-primary hover:bg-primary-light text-white px-4 py-2 rounded text-sm font-medium transition-colors">
-                  Subscribe
-                </button>
-              </div>
-            </div>
+            <Newsletter />
           </div>
 
           {/* Product Links */}
