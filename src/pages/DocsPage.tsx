@@ -1,3 +1,4 @@
+// Updated for TypeScript migration
 import React, { useState, useEffect } from "react";
 import "./DocsPage.css";
 

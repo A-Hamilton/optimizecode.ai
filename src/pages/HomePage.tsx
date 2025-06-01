@@ -1,3 +1,4 @@
+// Updated for TypeScript migration
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
@@ -464,7 +465,7 @@ const HomePage: React.FC = () => {
           <h2 className="section-title">What Developers Say</h2>
           <div className="testimonials-grid">
             <div className="testimonial">
-              <div className="testimonial-rating">⭐⭐⭐⭐⭐</div>
+              <div className="testimonial-rating">⭐⭐⭐���⭐</div>
               <div className="testimonial-content">
                 "OptimizeCode.ai reduced our API response time by 45%. Our users
                 love the faster experience and our server costs dropped

@@ -1,3 +1,4 @@
+// Updated for TypeScript migration
 import React, { useState } from "react";
 import "./PricingPage.css";
 

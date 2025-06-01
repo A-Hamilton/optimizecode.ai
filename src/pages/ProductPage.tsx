@@ -1,3 +1,4 @@
+// Updated for TypeScript migration
 import React, { useState } from "react";
 import "./ProductPage.css";
 
@@ -50,7 +51,7 @@ for (var k = 0; k < elements.length; k++) {
   elements[k].style.display = 'none';
 }`,
       after: `// After: O(n) complexity - Optimized with modern patterns
-const findUsersByRole = (users, targetRole) => 
+const findUsersByRole = (users, targetRole) =>
   users.filter(user => user.roles.includes(targetRole));
 
 // Single DOM query with efficient batch operation
@@ -71,11 +72,11 @@ def process_large_dataset(data):
     # Loading entire dataset into memory
     results = []
     all_items = load_all_data(data)  # 10GB+ in memory
-    
+
     for item in all_items:
         processed = expensive_operation(item)
         results.append(processed)
-    
+
     return results
 
 # Inefficient string concatenation
@@ -130,14 +131,14 @@ const app = express();
 app.use(helmet()); // Security headers
 
 // SQL injection prevention with parameterized queries
-app.get('/user/:id', 
+app.get('/user/:id',
   param('id').isInt().withMessage('Invalid user ID'),
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    
+
     const query = 'SELECT * FROM users WHERE id = ?';
     db.query(query, [req.params.id], (err, result) => {
       res.json(result);
