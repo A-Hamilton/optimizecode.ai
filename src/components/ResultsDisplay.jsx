@@ -13,11 +13,72 @@ function ResultsDisplay({
 
   const copyToClipboard = async (text) => {
     try {
-      await navigator.clipboard.writeText(text);
-      // You could add a toast notification here
+      // Try modern Clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        showCopyFeedback("Copied to clipboard!");
+        return;
+      }
     } catch (err) {
-      console.error("Failed to copy text: ", err);
+      console.warn("Clipboard API failed, trying fallback method:", err);
     }
+
+    // Fallback method for when Clipboard API is blocked
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        showCopyFeedback("Copied to clipboard!");
+      } else {
+        showCopyFeedback("Copy failed - please copy manually", true);
+      }
+    } catch (fallbackErr) {
+      console.error("All copy methods failed:", fallbackErr);
+      showCopyFeedback("Copy not supported - please copy manually", true);
+    }
+  };
+
+  const showCopyFeedback = (message, isError = false) => {
+    // Create a temporary notification
+    const notification = document.createElement("div");
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${isError ? "#ef4444" : "#22c55e"};
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    `;
+
+    document.body.appendChild(notification);
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.style.opacity = "0";
+      notification.style.transform = "translateY(-10px)";
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          document.body.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
   };
 
   const downloadFile = (content, filename) => {
