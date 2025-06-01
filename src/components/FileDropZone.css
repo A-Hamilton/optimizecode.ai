@@ -111,12 +111,35 @@
   margin-top: 1.5rem;
 }
 
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 .files-title {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin: 0;
   color: #646cff;
   text-align: left;
+}
+
+.clear-all-files {
+  background: rgba(255, 100, 100, 0.1);
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  color: #ff6464;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-all-files:hover {
+  background: rgba(255, 100, 100, 0.2);
+  border-color: rgba(255, 100, 100, 0.5);
 }
 
 .files-list {
@@ -231,5 +254,15 @@
 
   .upload-btn:hover {
     background: rgba(100, 108, 255, 0.2);
+  }
+
+  .clear-all-files {
+    background: rgba(255, 100, 100, 0.1);
+    border-color: rgba(255, 100, 100, 0.3);
+  }
+
+  .clear-all-files:hover {
+    background: rgba(255, 100, 100, 0.2);
+    border-color: rgba(255, 100, 100, 0.5);
   }
 }

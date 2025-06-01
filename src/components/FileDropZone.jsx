@@ -110,6 +110,7 @@ function FileDropZone({ onFilesSelected, files }) {
 
   const handleFiles = async (fileList) => {
     if (!fileList || fileList.length === 0) {
+      console.log("No files provided");
       setIsProcessing(false);
       return;
     }
@@ -120,63 +121,85 @@ function FileDropZone({ onFilesSelected, files }) {
     let skippedFiles = 0;
     let oversizedFiles = 0;
 
+    console.log(`Starting to process ${fileList.length} files...`);
+
     try {
-      // Sort files by size (smaller first) and limit to MAX_FILES
-      const sortedFiles = Array.from(fileList)
-        .filter((file) => {
-          if (file.size > MAX_FILE_SIZE) {
-            oversizedFiles++;
-            return false;
-          }
-          return true;
-        })
+      // First, filter out oversized files and sort by size
+      const validSizedFiles = Array.from(fileList).filter((file) => {
+        if (file.size > MAX_FILE_SIZE) {
+          console.log(
+            `File too large: ${file.name} (${formatFileSize(file.size)})`,
+          );
+          oversizedFiles++;
+          return false;
+        }
+        return true;
+      });
+
+      // Sort by size (smaller first) and limit total files
+      const sortedFiles = validSizedFiles
         .sort((a, b) => a.size - b.size)
         .slice(0, MAX_FILES);
 
-      console.log(`Processing ${sortedFiles.length} files...`);
+      console.log(
+        `Processing ${sortedFiles.length} files after size filtering...`,
+      );
 
-      for (const file of sortedFiles) {
+      // Process each file
+      for (let i = 0; i < sortedFiles.length; i++) {
+        const file = sortedFiles[i];
         const filepath = file.webkitRelativePath || file.name;
-        console.log(`Checking file: ${filepath}`);
+
+        console.log(`[${i + 1}/${sortedFiles.length}] Checking: ${filepath}`);
 
         if (isCodeFile(file.name, filepath)) {
           try {
             const content = await readFileContent(file);
-            processedFiles.push({
-              name: file.name,
-              path: filepath,
-              content: content,
-              size: file.size,
-              type: file.type,
-              extension: getFileExtension(file.name),
-            });
-            console.log(`Successfully processed: ${filepath}`);
+            if (content && content.trim()) {
+              processedFiles.push({
+                name: file.name,
+                path: filepath,
+                content: content,
+                size: file.size,
+                type: file.type,
+                extension: getFileExtension(file.name),
+              });
+              console.log(`✓ Successfully processed: ${filepath}`);
+            } else {
+              console.log(`× Empty file skipped: ${filepath}`);
+              skippedFiles++;
+            }
           } catch (error) {
-            console.error(`Error reading file ${file.name}:`, error);
+            console.error(`× Error reading file ${file.name}:`, error);
             skippedFiles++;
           }
         } else {
           skippedFiles++;
-          console.log(`Skipped non-code file: ${filepath}`);
         }
       }
 
-      // Show feedback about filtered files
-      if (skippedFiles > 0 || oversizedFiles > 0) {
-        let message = `Processed ${processedFiles.length} files.`;
-        if (skippedFiles > 0)
-          message += ` Skipped ${skippedFiles} non-code files.`;
-        if (oversizedFiles > 0)
-          message += ` Excluded ${oversizedFiles} files over 500KB.`;
-        console.log(message);
+      // Show detailed feedback
+      console.log(`\n=== PROCESSING SUMMARY ===`);
+      console.log(`Total files submitted: ${fileList.length}`);
+      console.log(`Files processed successfully: ${processedFiles.length}`);
+      console.log(`Files skipped (non-code/empty): ${skippedFiles}`);
+      console.log(`Files excluded (over 500KB): ${oversizedFiles}`);
+      console.log(`========================\n`);
+
+      if (processedFiles.length === 0) {
+        console.warn("No valid code files found!");
+        alert(
+          `No valid code files found in the selected folder. \n\nChecked ${fileList.length} files but found no supported code files.\n\nSupported: JS, TS, Python, HTML, CSS, and more.\nExcluded: node_modules, build folders, config files.`,
+        );
       }
 
-      // Combine with existing files instead of replacing, but respect total limit
+      // Combine with existing files, but respect total limit
       const totalFiles = [...files, ...processedFiles].slice(0, MAX_FILES);
       console.log(`Final file count: ${totalFiles.length}`);
       onFilesSelected(totalFiles);
     } catch (error) {
       console.error("Error processing files:", error);
+      alert(`Error processing files: ${error.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -192,58 +215,76 @@ function FileDropZone({ onFilesSelected, files }) {
   };
 
   const isCodeFile = (filename, filepath = "") => {
-    // File size limit (500KB)
-    const MAX_FILE_SIZE = 500 * 1024;
-
-    // Folders/paths to exclude
+    // Folders/paths to exclude (be more specific about paths)
     const excludedPaths = [
-      "node_modules",
-      ".git",
-      "dist",
-      "build",
-      "coverage",
-      ".next",
-      ".nuxt",
-      "vendor",
-      "target",
-      "bin",
-      "obj",
-      "packages",
-      ".vscode",
-      ".idea",
-      "__pycache__",
-      ".cache",
-      "tmp",
-      "temp",
+      "/node_modules/",
+      "\\node_modules\\",
+      "/.git/",
+      "\\.git\\",
+      "/dist/",
+      "\\dist\\",
+      "/build/",
+      "\\build\\",
+      "/coverage/",
+      "\\coverage\\",
+      "/.next/",
+      "\\.next\\",
+      "/.nuxt/",
+      "\\.nuxt\\",
+      "/vendor/",
+      "\\vendor\\",
+      "/target/",
+      "\\target\\",
+      "/__pycache__/",
+      "\\__pycache__\\",
+      "/.cache/",
+      "\\.cache\\",
+      "/.vscode/",
+      "\\.vscode\\",
+      "/.idea/",
+      "\\.idea\\",
     ];
 
-    // Files to exclude
+    // Files to exclude (exact matches)
     const excludedFiles = [
       "package-lock.json",
       "yarn.lock",
       "pnpm-lock.yaml",
+      "composer.lock",
       ".gitignore",
-      ".eslintrc",
+      ".eslintrc.js",
+      ".eslintrc.cjs",
       ".prettierrc",
       "webpack.config.js",
       "vite.config.js",
       "tsconfig.json",
+      "babel.config.js",
+      ".env",
+      ".env.local",
+      ".env.development",
+      ".env.production",
     ];
 
-    // Check if file is in excluded path
-    const isInExcludedPath = excludedPaths.some((path) =>
-      filepath.toLowerCase().includes(path.toLowerCase()),
-    );
+    // Check if file is in excluded path (more precise matching)
+    const normalizedPath = filepath.replace(/\\/g, "/").toLowerCase();
+    const isInExcludedPath = excludedPaths.some((path) => {
+      const normalizedExcludedPath = path.replace(/\\/g, "/").toLowerCase();
+      return normalizedPath.includes(normalizedExcludedPath);
+    });
 
-    // Check if file is excluded
+    // Check if file is excluded (exact filename match)
     const isExcludedFile = excludedFiles.some(
       (excludedFile) => filename.toLowerCase() === excludedFile.toLowerCase(),
     );
 
     if (isInExcludedPath || isExcludedFile) {
+      console.log(
+        `Excluded file: ${filepath} (${isInExcludedPath ? "path" : "filename"})`,
+      );
       return false;
     }
 
+    // Code file extensions
     const codeExtensions = [
       ".js",
       ".jsx",
@@ -258,27 +299,44 @@ function FileDropZone({ onFilesSelected, files }) {
       ".cs",
       ".go",
       ".rs",
+      ".rust",
       ".php",
       ".rb",
       ".swift",
       ".kt",
       ".scala",
       ".html",
+      ".htm",
       ".css",
       ".scss",
       ".sass",
       ".less",
+      ".styl",
       ".sql",
       ".json",
       ".xml",
       ".yaml",
       ".yml",
       ".md",
+      ".txt",
+      ".sh",
+      ".bash",
+      ".ps1",
+      ".bat",
+      ".cmd",
     ];
 
-    return codeExtensions.some((ext) =>
+    const isCodeFile = codeExtensions.some((ext) =>
       filename.toLowerCase().endsWith(ext.toLowerCase()),
     );
+
+    if (isCodeFile) {
+      console.log(`Accepted code file: ${filepath}`);
+    } else {
+      console.log(`Not a code file: ${filepath}`);
+    }
+
+    return isCodeFile;
   };
 
   const getFileExtension = (filename) => {
@@ -368,7 +426,17 @@ function FileDropZone({ onFilesSelected, files }) {
 
       {files.length > 0 && (
         <div className="selected-files">
-          <h4 className="files-title">Selected Files ({files.length})</h4>
+          <div className="files-header">
+            <h4 className="files-title">Selected Files ({files.length})</h4>
+            <button
+              className="clear-all-files"
+              onClick={() => onFilesSelected([])}
+              type="button"
+              title="Clear all files"
+            >
+              Clear All
+            </button>
+          </div>
           <div className="files-list">
             {files.map((file, index) => (
               <div key={index} className="file-item">
@@ -385,6 +453,7 @@ function FileDropZone({ onFilesSelected, files }) {
                     onFilesSelected(files.filter((_, i) => i !== index));
                   }}
                   type="button"
+                  title="Remove this file"
                 >
                   ×
                 </button>
