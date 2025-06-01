@@ -474,43 +474,39 @@ const OptimizePage: React.FC = () => {
             <FileDropZone files={files} onFilesSelected={handleFilesSelected} />
 
             {/* Enhanced Action Controls with proper styling */}
-            <div className="action-controls flex gap-4 mt-6">
+            <div className="action-controls">
               <button
-                className={`flex-1 px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 ${
+                className={`optimize-btn ${
                   !hasInput || isOptimizing
-                    ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                    : "bg-primary hover:bg-primary-light text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                    ? "optimize-btn-disabled"
+                    : "optimize-btn-primary"
                 }`}
                 onClick={optimizeCode}
                 disabled={!hasInput || isOptimizing}
               >
                 {isOptimizing ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span className="btn-content">
+                    <span className="loading-spinner"></span>
                     Optimizing...
-                  </div>
+                  </span>
                 ) : (
-                  <div className="flex items-center justify-center gap-2">
+                  <span className="btn-content">
                     <span>⚡</span>
                     Optimize Code
-                  </div>
+                  </span>
                 )}
               </button>
 
               {hasInput && (
                 <button
-                  className={`px-6 py-3 rounded-lg font-semibold text-base transition-all duration-300 ${
-                    isOptimizing
-                      ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-                      : "bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 hover:border-red-500/50 hover:scale-105 active:scale-95"
-                  }`}
+                  className={`reset-btn ${isOptimizing ? "reset-btn-disabled" : "reset-btn-secondary"}`}
                   onClick={resetAll}
                   disabled={isOptimizing}
                 >
-                  <div className="flex items-center justify-center gap-2">
+                  <span className="btn-content">
                     <span>🗑️</span>
                     Reset
-                  </div>
+                  </span>
                 </button>
               )}
             </div>
