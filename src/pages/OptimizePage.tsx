@@ -37,18 +37,18 @@ const OptimizePage: React.FC = () => {
 
   const getUsageInfo = () => {
     if (!userProfile)
-      return { used: 0, total: 2, percentage: 0, isUnlimited: false };
+      return { used: 0, total: 10, percentage: 0, isUnlimited: false };
 
-    const { filesOptimizedThisMonth } = userProfile.usage;
-    const { filesPerMonth } = userProfile.limits;
-    const isUnlimited = filesPerMonth === -1;
+    const { optimizationsToday } = userProfile.usage;
+    const { optimizationsPerDay } = userProfile.limits;
+    const isUnlimited = optimizationsPerDay === -1;
 
     return {
-      used: filesOptimizedThisMonth,
-      total: isUnlimited ? "∞" : filesPerMonth,
+      used: optimizationsToday,
+      total: isUnlimited ? "∞" : optimizationsPerDay,
       percentage: isUnlimited
         ? 0
-        : Math.min((filesOptimizedThisMonth / filesPerMonth) * 100, 100),
+        : Math.min((optimizationsToday / optimizationsPerDay) * 100, 100),
       isUnlimited,
     };
   };
@@ -62,13 +62,28 @@ const OptimizePage: React.FC = () => {
       return;
     }
 
-    // Check if user has reached their limit
-    const { filesPerMonth } = userProfile.limits;
-    const { filesOptimizedThisMonth } = userProfile.usage;
+    // Check if user has reached their daily limit
+    const { optimizationsPerDay, maxPasteCharacters } = userProfile.limits;
+    const { optimizationsToday } = userProfile.usage;
 
-    if (filesPerMonth !== -1 && filesOptimizedThisMonth >= filesPerMonth) {
+    if (
+      optimizationsPerDay !== -1 &&
+      optimizationsToday >= optimizationsPerDay
+    ) {
       setUsageError(
-        `You've reached your monthly limit of ${filesPerMonth} files. Upgrade your plan for more files.`,
+        `You've reached your daily limit of ${optimizationsPerDay} optimizations. Upgrade your plan for more optimizations.`,
+      );
+      return;
+    }
+
+    // Check character limit for pasted code
+    if (
+      code.trim() &&
+      maxPasteCharacters !== -1 &&
+      code.length > maxPasteCharacters
+    ) {
+      setUsageError(
+        `Code is too long (${code.length.toLocaleString()} characters). Your plan allows up to ${maxPasteCharacters.toLocaleString()} characters. Please upgrade or use file upload instead.`,
       );
       return;
     }
