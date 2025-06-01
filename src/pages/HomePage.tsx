@@ -479,7 +479,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 9. Final CTA Banner */}
+      {/* 8. Final CTA Banner */}
       <section className="final-cta">
         <div className="container">
           <div className="cta-content">
