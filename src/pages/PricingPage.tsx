@@ -1,5 +1,7 @@
 // Updated for TypeScript migration
 import React, { useState } from "react";
+import StripeCheckout from "../components/StripeCheckout";
+import { useAuth } from "../contexts/AuthContext";
 import "./PricingPage.css";
 
 interface Feature {
@@ -31,6 +33,8 @@ type BillingCycle = "monthly" | "yearly";
 const PricingPage: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [checkoutError, setCheckoutError] = useState<string>("");
+  const { currentUser } = useAuth();
 
   const FeatureTooltip: React.FC<FeatureTooltipProps> = ({
     feature,
