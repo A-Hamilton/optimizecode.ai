@@ -143,7 +143,7 @@ const PricingPage: React.FC = () => {
             "Detailed performance metrics, code quality scores, and optimization history",
         },
       ],
-      cta: "Start 14-Day Free Trial",
+      cta: "Buy Now",
       ctaStyle: "primary",
     },
     {
@@ -225,8 +225,8 @@ const PricingPage: React.FC = () => {
             "Brand OptimizeCode.ai with your company's logo and custom domain",
         },
       ],
-      cta: "Contact Sales",
-      ctaStyle: "secondary",
+      cta: "Buy Now",
+      ctaStyle: "primary",
     },
   ];
 
