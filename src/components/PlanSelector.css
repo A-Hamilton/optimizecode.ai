@@ -1,0 +1,231 @@
+/* Plan Selector Styles */
+.plan-selector {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+}
+
+.plan-selector.compact {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+}
+
+/* Current Plan Info (Compact Mode) */
+.current-plan-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.plan-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.plan-badge.free {
+  background: rgba(107, 114, 128, 0.2);
+  color: #d1d5db;
+}
+
+.plan-badge.pro {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.plan-badge.unleashed {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+}
+
+.usage-info {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.usage-info.limit-reached {
+  color: #fca5a5;
+}
+
+/* Usage Display */
+.usage-display {
+  margin-bottom: 1.5rem;
+}
+
+.usage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.usage-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
+}
+
+.usage-count {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.usage-count.limit-reached {
+  color: #fca5a5;
+}
+
+.usage-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.usage-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.limit-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.warning-icon {
+  flex-shrink: 0;
+  color: #ef4444;
+}
+
+/* Plan Options */
+.plan-options h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 1rem 0;
+}
+
+.plan-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.plan-option {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  text-align: center;
+}
+
+.plan-option:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.plan-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.plan-option.free {
+  border-color: rgba(107, 114, 128, 0.3);
+}
+
+.plan-option.free.active {
+  background: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.5);
+}
+
+.plan-option.pro {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.plan-option.pro.active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.plan-option.unleashed {
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.plan-option.unleashed.active {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.plan-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.plan-price {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.25rem;
+}
+
+.plan-files {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.current-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .plan-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .current-plan-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .usage-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}

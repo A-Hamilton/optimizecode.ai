@@ -1,10 +1,12 @@
 // Updated for TypeScript migration
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { CodeFile } from "../types";
+import { useAuth } from '../contexts/AuthContext';
+import { PLAN_DETAILS } from '../types/user';
 import CodeInput from "../components/CodeInput";
 import FileDropZone from "../components/FileDropZone";
 import ResultsDisplay from "../components/ResultsDisplay";
-import { CodeFile, OptimizationSummary } from "../types";
-import "./OptimizePage.css";
+import './OptimizePage.css';
 
 // User plan types
 type UserPlan = "free" | "pro" | "unleashed";
@@ -22,16 +24,15 @@ interface NotificationProps {
 }
 
 const OptimizePage: React.FC = () => {
-  const [code, setCode] = useState<string>("");
+  const { userProfile, trackUsage, currentUser } = useAuth();
+  const [code, setCode] = useState<string>('');
   const [files, setFiles] = useState<CodeFile[]>([]);
-  const [optimizedCode, setOptimizedCode] = useState<string>("");
+  const [optimizedCode, setOptimizedCode] = useState<string>('');
+  const [optimizedFiles, setOptimizedFiles] = useState<CodeFile[]>([]);
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
-  const [optimizationSummary, setOptimizationSummary] =
-    useState<OptimizationSummary>({});
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "error" | "warning" | "info" | "success";
-  } | null>(null);
+  const [optimizationSummary, setOptimizationSummary] = useState<Record<string, any>>({});
+  const [usageError, setUsageError] = useState<string>('');
+  const [notification, setNotification] = useState<{message: string, type: "error" | "warning" | "info" | "success"} | null>(null);
 
   // Simulate user plan - in a real app, this would come from authentication/subscription service
   const [currentPlan, setCurrentPlan] = useState<UserPlan>("free"); // Default to free for demo
@@ -40,53 +41,42 @@ const OptimizePage: React.FC = () => {
     free: {
       maxFiles: 2,
       name: "Free",
-      upgradeMessage:
-        "Upgrade to Pro to optimize up to 50 files at once, or Unleashed for unlimited files.",
+      upgradeMessage: "Upgrade to Pro to optimize up to 50 files at once, or Unleashed for unlimited files."
     },
     pro: {
       maxFiles: 50,
       name: "Pro",
-      upgradeMessage:
-        "Upgrade to Unleashed for unlimited file optimization and advanced features.",
+      upgradeMessage: "Upgrade to Unleashed for unlimited file optimization and advanced features."
     },
     unleashed: {
       maxFiles: Infinity,
       name: "Unleashed",
-      upgradeMessage: "You're on the Unleashed plan with unlimited everything!",
-    },
+      upgradeMessage: "You're on the Unleashed plan with unlimited everything!"
+    }
   };
 
-  const showNotification = (
-    message: string,
-    type: "error" | "warning" | "info" | "success" = "info",
-  ) => {
+  const showNotification = (message: string, type: "error" | "warning" | "info" | "success" = "info") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 8000); // Auto-hide after 8 seconds
   };
 
-  const InlineNotification: React.FC<NotificationProps> = ({
-    message,
-    type,
-    onClose,
-  }) => {
+  const InlineNotification: React.FC<NotificationProps> = ({ message, type, onClose }) => {
     const typeStyles = {
       error: "bg-red-500/20 border-red-500/30 text-red-200",
       warning: "bg-yellow-500/20 border-yellow-500/30 text-yellow-200",
       info: "bg-blue-500/20 border-blue-500/30 text-blue-200",
-      success: "bg-green-500/20 border-green-500/30 text-green-200",
+      success: "bg-green-500/20 border-green-500/30 text-green-200"
     };
 
     const typeIcons = {
       error: "❌",
       warning: "⚠️",
       info: "ℹ️",
-      success: "✅",
+      success: "✅"
     };
 
     return (
-      <div
-        className={`p-4 rounded-lg border mb-6 flex items-start justify-between ${typeStyles[type]}`}
-      >
+      <div className={`p-4 rounded-lg border mb-6 flex items-start justify-between ${typeStyles[type]}`}>
         <div className="flex items-start space-x-3">
           <span className="text-lg">{typeIcons[type]}</span>
           <div className="flex-1">
@@ -108,8 +98,8 @@ const OptimizePage: React.FC = () => {
 
     if (newFiles.length > currentLimit) {
       showNotification(
-        `File limit exceeded! Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? "unlimited" : currentLimit} files per optimization. ${planLimits[currentPlan].upgradeMessage}`,
-        "warning",
+        `File limit exceeded! Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? 'unlimited' : currentLimit} files per optimization. ${planLimits[currentPlan].upgradeMessage}`,
+        "warning"
       );
 
       // Truncate to the allowed limit
@@ -121,10 +111,7 @@ const OptimizePage: React.FC = () => {
     setFiles(newFiles);
   };
 
-  const simulateOptimization = async (
-    inputCode: string,
-    filename: string = "",
-  ): Promise<string> => {
+  const simulateOptimization = async (inputCode: string, filename: string = ""): Promise<string> => {
     console.log(
       `Starting optimization for ${filename || "code"}, input length: ${inputCode?.length}`,
     );
@@ -153,21 +140,15 @@ const OptimizePage: React.FC = () => {
       // Replace let with const where appropriate (if variable is never reassigned)
       const letMatches = optimized.match(/let\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g);
       if (letMatches) {
-        letMatches.forEach((match) => {
-          const varName = match.replace("let ", "");
+        letMatches.forEach(match => {
+          const varName = match.replace('let ', '');
           // Simple check: if variable name appears only once (not reassigned)
-          const varRegex = new RegExp(`\\b${varName}\\s*=`, "g");
+          const varRegex = new RegExp(`\\b${varName}\\s*=`, 'g');
           const assignments = optimized.match(varRegex);
           if (assignments && assignments.length === 1) {
             optimized = optimized.replace(`let ${varName}`, `const ${varName}`);
-            if (
-              !optimizations.includes(
-                "Replaced let with const where variables are not reassigned",
-              )
-            ) {
-              optimizations.push(
-                "Replaced let with const where variables are not reassigned",
-              );
+            if (!optimizations.includes("Replaced let with const where variables are not reassigned")) {
+              optimizations.push("Replaced let with const where variables are not reassigned");
             }
           }
         });
@@ -178,9 +159,7 @@ const OptimizePage: React.FC = () => {
         const functionRegex = /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
         if (functionRegex.test(optimized)) {
           optimized = optimized.replace(functionRegex, "const $1 = function");
-          optimizations.push(
-            "Modernized function declarations to const assignments",
-          );
+          optimizations.push("Modernized function declarations to const assignments");
         }
       }
 
@@ -198,20 +177,16 @@ const OptimizePage: React.FC = () => {
 
       // Optimize string concatenation to template literals
       if (optimized.includes(" + ") && /['"][^'"]*['"]\s*\+/.test(optimized)) {
-        optimizations.push(
-          "String concatenation can be optimized with template literals",
-        );
+        optimizations.push("String concatenation can be optimized with template literals");
       }
 
       // Check for inefficient loops
       if (optimized.includes("for(") || optimized.includes("for (")) {
-        optimizations.push(
-          "Loop structure can be optimized for better performance",
-        );
+        optimizations.push("Loop structure can be optimized for better performance");
       }
 
       // Clean up formatting
-      const originalLines = optimized.split("\n").length;
+      const originalLines = optimized.split('\n').length;
       optimized = optimized
         .replace(/;\s*\n/g, ";\n")
         .replace(/\{\s*\n\s*return/g, "{\n  return")
@@ -268,10 +243,7 @@ const OptimizePage: React.FC = () => {
     });
 
     if (!hasCodeInput && !hasFileInput) {
-      showNotification(
-        "Please paste some code or upload files to optimize.",
-        "warning",
-      );
+      showNotification("Please paste some code or upload files to optimize.", "warning");
       return;
     }
 
@@ -280,8 +252,8 @@ const OptimizePage: React.FC = () => {
       const currentLimit = planLimits[currentPlan].maxFiles;
       if (files.length > currentLimit) {
         showNotification(
-          `Cannot optimize ${files.length} files. Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? "unlimited" : currentLimit} files. ${planLimits[currentPlan].upgradeMessage}`,
-          "error",
+          `Cannot optimize ${files.length} files. Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? 'unlimited' : currentLimit} files. ${planLimits[currentPlan].upgradeMessage}`,
+          "error"
         );
         return;
       }
@@ -333,8 +305,8 @@ const OptimizePage: React.FC = () => {
       }
 
       showNotification(
-        `Optimization completed successfully! ${hasCodeInput ? "Code" : ""} ${hasCodeInput && hasFileInput ? "and" : ""} ${hasFileInput ? `${files.length} file${files.length > 1 ? "s" : ""}` : ""} optimized with AI improvements.`,
-        "success",
+        `Optimization completed successfully! ${hasCodeInput ? 'Code' : ''} ${hasCodeInput && hasFileInput ? 'and' : ''} ${hasFileInput ? `${files.length} file${files.length > 1 ? 's' : ''}` : ''} optimized with AI improvements.`,
+        "success"
       );
 
       console.log("Optimization completed successfully");
@@ -375,37 +347,30 @@ const OptimizePage: React.FC = () => {
             <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg mb-6">
               <div className="flex items-center space-x-3">
                 <span className="text-sm font-medium text-white/90">
-                  Current Plan:{" "}
-                  <span className="text-primary font-semibold">
-                    {planLimits[currentPlan].name}
-                  </span>
+                  Current Plan: <span className="text-primary font-semibold">{planLimits[currentPlan].name}</span>
                 </span>
                 <span className="text-xs text-white/60">
-                  📁 {files.length}/
-                  {planLimits[currentPlan].maxFiles === Infinity
-                    ? "∞"
-                    : planLimits[currentPlan].maxFiles}{" "}
-                  files
+                  📁 {files.length}/{planLimits[currentPlan].maxFiles === Infinity ? '∞' : planLimits[currentPlan].maxFiles} files
                 </span>
               </div>
 
               {/* Plan switcher for demo purposes */}
               <div className="flex space-x-2">
                 <button
-                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === "free" ? "bg-primary text-white" : "bg-white/10 text-white/70 hover:bg-white/20"}`}
-                  onClick={() => setCurrentPlan("free")}
+                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === 'free' ? 'bg-primary text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
+                  onClick={() => setCurrentPlan('free')}
                 >
                   Free
                 </button>
                 <button
-                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === "pro" ? "bg-primary text-white" : "bg-white/10 text-white/70 hover:bg-white/20"}`}
-                  onClick={() => setCurrentPlan("pro")}
+                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === 'pro' ? 'bg-primary text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
+                  onClick={() => setCurrentPlan('pro')}
                 >
                   Pro
                 </button>
                 <button
-                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === "unleashed" ? "bg-primary text-white" : "bg-white/10 text-white/70 hover:bg-white/20"}`}
-                  onClick={() => setCurrentPlan("unleashed")}
+                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === 'unleashed' ? 'bg-primary text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
+                  onClick={() => setCurrentPlan('unleashed')}
                 >
                   Unleashed
                 </button>
@@ -416,38 +381,12 @@ const OptimizePage: React.FC = () => {
             {isAtFileLimit && planLimits[currentPlan].maxFiles !== Infinity && (
               <div className="p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg mb-6">
                 <p className="text-sm text-yellow-200">
-                  ⚠️ You've reached your file limit of{" "}
-                  {planLimits[currentPlan].maxFiles} files.
-                  {currentPlan === "free" && (
-                    <span>
-                      {" "}
-                      <a
-                        href="/pricing"
-                        className="text-yellow-100 underline hover:text-white"
-                      >
-                        Upgrade to Pro
-                      </a>{" "}
-                      for 50 files or{" "}
-                      <a
-                        href="/pricing"
-                        className="text-yellow-100 underline hover:text-white"
-                      >
-                        Unleashed
-                      </a>{" "}
-                      for unlimited files.
-                    </span>
+                  ⚠️ You've reached your file limit of {planLimits[currentPlan].maxFiles} files.
+                  {currentPlan === 'free' && (
+                    <span> <a href="/pricing" className="text-yellow-100 underline hover:text-white">Upgrade to Pro</a> for 50 files or <a href="/pricing" className="text-yellow-100 underline hover:text-white">Unleashed</a> for unlimited files.</span>
                   )}
-                  {currentPlan === "pro" && (
-                    <span>
-                      {" "}
-                      <a
-                        href="/pricing"
-                        className="text-yellow-100 underline hover:text-white"
-                      >
-                        Upgrade to Unleashed
-                      </a>{" "}
-                      for unlimited files.
-                    </span>
+                  {currentPlan === 'pro' && (
+                    <span> <a href="/pricing" className="text-yellow-100 underline hover:text-white">Upgrade to Unleashed</a> for unlimited files.</span>
                   )}
                 </p>
               </div>
@@ -465,12 +404,26 @@ const OptimizePage: React.FC = () => {
         </header>
 
         <main className="optimize-main">
-          <div className="input-section">
-            <CodeInput code={code} onCodeChange={setCode} />
-
-            <div className="section-divider">
-              <span>OR</span>
+        <div className="input-section">
+          {usageError && (
+            <div className="usage-error">
+              <svg className="error-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>{usageError}</span>
+              <button
+                className="upgrade-btn"
+                onClick={() => window.location.href = '/pricing'}
+              >
+                Upgrade Plan
+              </button>
             </div>
+          )}
+          <CodeInput
+            code={code}
+            onCodeChange={setCode}
+          />
+        </div>
 
             <FileDropZone files={files} onFilesSelected={handleFilesSelected} />
 
@@ -478,9 +431,7 @@ const OptimizePage: React.FC = () => {
             <div className="action-controls">
               <button
                 className={`optimize-btn ${
-                  !hasInput || isOptimizing
-                    ? "optimize-btn-disabled"
-                    : "optimize-btn-primary"
+                  !hasInput || isOptimizing ? "optimize-btn-disabled" : "optimize-btn-primary"
                 }`}
                 onClick={optimizeCode}
                 disabled={!hasInput || isOptimizing}
