@@ -1,17 +1,32 @@
 // Updated for TypeScript migration
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, isDemoMode } from '../services/firebase';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { User, onAuthStateChanged } from "firebase/auth";
+import { auth, isDemoMode } from "../services/firebase";
 
 interface AuthContextType {
   currentUser: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>;
-  signup: (email: string, password: string, displayName: string) => Promise<{ user: User | null; error: string | null }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ user: User | null; error: string | null }>;
+  signup: (
+    email: string,
+    password: string,
+    displayName: string,
+  ) => Promise<{ user: User | null; error: string | null }>;
   loginWithGoogle: () => Promise<{ user: User | null; error: string | null }>;
   loginWithGithub: () => Promise<{ user: User | null; error: string | null }>;
   logout: () => Promise<{ success: boolean; error: string | null }>;
-  resetPassword: (email: string) => Promise<{ success: boolean; error: string | null }>;
+  resetPassword: (
+    email: string,
+  ) => Promise<{ success: boolean; error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,7 +34,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -41,13 +56,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Listen to Firebase auth state changes (only in production mode)
   useEffect(() => {
     if (!isDemoMode() && auth) {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        setUser(user);
-        setLoading(false);
-      }, (error) => {
-        console.error('Auth state error:', error);
-        setLoading(false);
-      });
+      const unsubscribe = onAuthStateChanged(
+        auth,
+        (user) => {
+          setUser(user);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Auth state error:", error);
+          setLoading(false);
+        },
+      );
 
       return () => unsubscribe();
     } else {
@@ -59,34 +78,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string) => {
     if (isDemoMode()) {
       setDemoLoading(true);
-      const { demoAuth } = await import('../services/firebase');
+      const { demoAuth } = await import("../services/firebase");
       const result = await demoAuth.signInWithEmail(email, password);
-      if (result.error) {
-        setErrors({ general: result.error });
-      } else {
-        navigate('/optimize');
-      }
-      }
-      setDemoLoading(false);
-      return result;
-    } else {
-      const { signInWithEmail } = await import('../services/firebase');
-      return await signInWithEmail(email, password);
-    }
-  };
-
-  const signup = async (email: string, password: string, displayName: string) => {
-    if (isDemoMode()) {
-      setDemoLoading(true);
-      const { demoAuth } = await import('../services/firebase');
-      const result = await demoAuth.signUpWithEmail(email, password, displayName);
       if (result.user) {
         setDemoUser(result.user);
       }
       setDemoLoading(false);
       return result;
     } else {
-      const { signUpWithEmail } = await import('../services/firebase');
+      const { signInWithEmail } = await import("../services/firebase");
+      return await signInWithEmail(email, password);
+    }
+  };
+
+  const signup = async (
+    email: string,
+    password: string,
+    displayName: string,
+  ) => {
+    if (isDemoMode()) {
+      setDemoLoading(true);
+      const { demoAuth } = await import("../services/firebase");
+      const result = await demoAuth.signUpWithEmail(
+        email,
+        password,
+        displayName,
+      );
+      if (result.user) {
+        setDemoUser(result.user);
+      }
+      setDemoLoading(false);
+      return result;
+    } else {
+      const { signUpWithEmail } = await import("../services/firebase");
       return await signUpWithEmail(email, password, displayName);
     }
   };
@@ -94,7 +118,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loginWithGoogle = async () => {
     if (isDemoMode()) {
       setDemoLoading(true);
-      const { demoAuth } = await import('../services/firebase');
+      const { demoAuth } = await import("../services/firebase");
       const result = await demoAuth.signInWithGoogle();
       if (result.user) {
         setDemoUser(result.user);
@@ -102,7 +126,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setDemoLoading(false);
       return result;
     } else {
-      const { signInWithGoogle } = await import('../services/firebase');
+      const { signInWithGoogle } = await import("../services/firebase");
       return await signInWithGoogle();
     }
   };
@@ -110,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const loginWithGithub = async () => {
     if (isDemoMode()) {
       setDemoLoading(true);
-      const { demoAuth } = await import('../services/firebase');
+      const { demoAuth } = await import("../services/firebase");
       const result = await demoAuth.signInWithGithub();
       if (result.user) {
         setDemoUser(result.user);
@@ -118,7 +142,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setDemoLoading(false);
       return result;
     } else {
-      const { signInWithGithub } = await import('../services/firebase');
+      const { signInWithGithub } = await import("../services/firebase");
       return await signInWithGithub();
     }
   };
@@ -128,7 +152,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setDemoUser(null);
       return { success: true, error: null };
     } else {
-      const { logout: firebaseLogout } = await import('../services/firebase');
+      const { logout: firebaseLogout } = await import("../services/firebase");
       return await firebaseLogout();
     }
   };
@@ -136,10 +160,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const resetPassword = async (email: string) => {
     if (isDemoMode()) {
       // Simulate password reset in demo mode
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       return { success: true, error: null };
     } else {
-      const { resetPassword: firebaseResetPassword } = await import('../services/firebase');
+      const { resetPassword: firebaseResetPassword } = await import(
+        "../services/firebase"
+      );
       return await firebaseResetPassword(email);
     }
   };
@@ -152,7 +178,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loginWithGoogle,
     loginWithGithub,
     logout,
-    resetPassword
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
