@@ -6,9 +6,8 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { User } from "firebase/auth";
+import { User, onAuthStateChanged } from "firebase/auth";
 import { auth, isDemoMode } from "../services/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
 
 interface AuthContextType {
   currentUser: User | null;
@@ -45,7 +44,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, loading, error] = useAuthState(auth);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [demoUser, setDemoUser] = useState<User | null>(null);
   const [demoLoading, setDemoLoading] = useState(false);
 
@@ -53,11 +53,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const currentUser = isDemoMode() ? demoUser : user;
   const isLoading = isDemoMode() ? demoLoading : loading;
 
+  // Listen to Firebase auth state changes (only in production mode)
   useEffect(() => {
-    if (error) {
-      console.error("Auth state error:", error);
+    if (!isDemoMode()) {
+      const unsubscribe = onAuthStateChanged(
+        auth,
+        (user) => {
+          setUser(user);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Auth state error:", error);
+          setLoading(false);
+        },
+      );
+
+      return () => unsubscribe();
+    } else {
+      // In demo mode, we manage loading state manually
+      setLoading(false);
     }
-  }, [error]);
+  }, []);
 
   const login = async (email: string, password: string) => {
     if (isDemoMode()) {
