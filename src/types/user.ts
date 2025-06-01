@@ -22,37 +22,54 @@ export interface UserProfile {
 
   // Usage Tracking
   usage: {
-    filesOptimizedThisMonth: number;
-    totalFilesOptimized: number;
+    optimizationsToday: number;
+    totalOptimizations: number;
     lastOptimizationDate?: Date;
-    currentPeriodStart: Date;
+    currentDayStart: Date;
   };
 
   // Plan Limits
   limits: {
-    filesPerMonth: number;
+    optimizationsPerDay: number;
+    maxFileUploads: number;
+    maxPasteCharacters: number;
     maxFileSize: number; // in MB
     prioritySupport: boolean;
     advancedFeatures: boolean;
   };
 }
 
+// Get configuration from environment variables
+const getEnvNumber = (key: string, defaultValue: number): number => {
+  const value = import.meta.env[key];
+  return value ? parseInt(value, 10) : defaultValue;
+};
+
 export const PLAN_LIMITS: Record<SubscriptionPlan, UserProfile["limits"]> = {
   free: {
-    filesPerMonth: 2,
-    maxFileSize: 1, // 1MB
+    optimizationsPerDay: getEnvNumber("VITE_FREE_OPTIMIZATIONS_PER_DAY", 10),
+    maxFileUploads: getEnvNumber("VITE_FREE_MAX_FILE_UPLOADS", 2),
+    maxPasteCharacters: getEnvNumber("VITE_FREE_MAX_PASTE_CHARACTERS", 10000),
+    maxFileSize: getEnvNumber("VITE_FREE_MAX_FILE_SIZE_MB", 1),
     prioritySupport: false,
     advancedFeatures: false,
   },
   pro: {
-    filesPerMonth: 50,
-    maxFileSize: 10, // 10MB
+    optimizationsPerDay: getEnvNumber("VITE_PRO_OPTIMIZATIONS_PER_DAY", 300),
+    maxFileUploads: getEnvNumber("VITE_PRO_MAX_FILE_UPLOADS", 50),
+    maxPasteCharacters: getEnvNumber("VITE_PRO_MAX_PASTE_CHARACTERS", 100000),
+    maxFileSize: getEnvNumber("VITE_PRO_MAX_FILE_SIZE_MB", 10),
     prioritySupport: true,
     advancedFeatures: true,
   },
   unleashed: {
-    filesPerMonth: -1, // unlimited
-    maxFileSize: 100, // 100MB
+    optimizationsPerDay: getEnvNumber(
+      "VITE_UNLEASHED_OPTIMIZATIONS_PER_DAY",
+      -1,
+    ), // unlimited
+    maxFileUploads: getEnvNumber("VITE_UNLEASHED_MAX_FILE_UPLOADS", -1), // unlimited
+    maxPasteCharacters: getEnvNumber("VITE_UNLEASHED_MAX_PASTE_CHARACTERS", -1), // unlimited
+    maxFileSize: getEnvNumber("VITE_UNLEASHED_MAX_FILE_SIZE_MB", 100),
     prioritySupport: true,
     advancedFeatures: true,
   },
