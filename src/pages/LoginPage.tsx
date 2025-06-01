@@ -107,6 +107,7 @@ const LoginPage: React.FC = () => {
         }
 
         // Redirect to optimization page on successful login
+        console.log("Redirecting to /optimize after login");
         navigate("/optimize");
       }
     } catch (error) {
@@ -129,6 +130,7 @@ const LoginPage: React.FC = () => {
       if (result.error) {
         setErrors({ general: result.error });
       } else {
+        console.log("Redirecting to /optimize after social login");
         navigate("/optimize");
       }
     } catch (error) {
