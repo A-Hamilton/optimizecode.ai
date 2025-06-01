@@ -35,29 +35,11 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Clean approach - remove browser default spacing */
+  /* Clean default spacing */
   html,
   body {
     margin: 0;
     padding: 0;
-  }
-
-  /* Target the main app wrapper to remove any framework spacing */
-  #root > div {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Force the footer container itself to have no spacing */
-  .footer-container {
-    margin-top: 0 !important;
-    padding-top: 3rem !important;
-  }
-
-  /* Remove any spacing from the footer wrapper */
-  .footer {
-    margin-top: 0 !important;
-    position: relative;
   }
 }
 
