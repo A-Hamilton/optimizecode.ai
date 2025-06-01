@@ -14,32 +14,73 @@ function ResultsDisplay({ originalCode, optimizedCode, files, isOptimizing }) {
     }
   };
 
-  const downloadOptimizedCode = () => {
-    if (activeTab === "code" && optimizedCode) {
-      const blob = new Blob([optimizedCode], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
+  const downloadFile = (content, filename) => {
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadAllAsZip = async () => {
+    try {
+      // Import JSZip dynamically
+      const JSZip = await import("jszip");
+      const zip = new JSZip.default();
+
+      // Add pasted code if exists
+      if (optimizedCode) {
+        zip.file("optimized-pasted-code.js", optimizedCode);
+      }
+
+      // Add all optimized files
+      files.forEach((file) => {
+        if (file.optimizedContent) {
+          const filename = `optimized-${file.name}`;
+          zip.file(filename, file.optimizedContent);
+        }
+      });
+
+      // Generate and download zip
+      const content = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(content);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "optimized-code.txt";
+      a.download = "optimized-code-files.zip";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error creating zip:", error);
+      alert("Error creating zip file. Downloading individual files instead.");
+
+      // Fallback: download files individually
+      if (optimizedCode) {
+        downloadFile(optimizedCode, "optimized-pasted-code.js");
+      }
+      files.forEach((file) => {
+        if (file.optimizedContent) {
+          downloadFile(file.optimizedContent, `optimized-${file.name}`);
+        }
+      });
+    }
+  };
+
+  const downloadOptimizedCode = () => {
+    if (activeTab === "code" && optimizedCode) {
+      downloadFile(optimizedCode, "optimized-code.js");
     } else if (activeTab === "files" && files.length > 0) {
-      // For now, download the selected file
       const selectedFile = files[selectedFileIndex];
       if (selectedFile?.optimizedContent) {
-        const blob = new Blob([selectedFile.optimizedContent], {
-          type: "text/plain",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `optimized-${selectedFile.name}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        downloadFile(
+          selectedFile.optimizedContent,
+          `optimized-${selectedFile.name}`,
+        );
       }
     }
   };
@@ -92,15 +133,23 @@ function ResultsDisplay({ originalCode, optimizedCode, files, isOptimizing }) {
             }}
             disabled={!hasResults}
           >
-            Copy
+            Copy Current
           </button>
           <button
             className="action-button download-button"
             onClick={downloadOptimizedCode}
             disabled={!hasResults}
           >
-            Download
+            Download Current
           </button>
+          {(files.some((f) => f.optimizedContent) || optimizedCode) && (
+            <button
+              className="action-button download-all-button"
+              onClick={downloadAllAsZip}
+            >
+              Download All (.zip)
+            </button>
+          )}
         </div>
       </div>
 
@@ -153,26 +202,60 @@ function ResultsDisplay({ originalCode, optimizedCode, files, isOptimizing }) {
               >
                 {files.map((file, index) => (
                   <option key={index} value={index}>
-                    {file.path || file.name}
+                    {file.path || file.name}{" "}
+                    {file.optimizedContent ? "✓" : "⏳"}
                   </option>
                 ))}
               </select>
+
+              {files[selectedFileIndex]?.optimizedContent && (
+                <div className="file-actions">
+                  <button
+                    className="file-action-button"
+                    onClick={() =>
+                      copyToClipboard(files[selectedFileIndex].optimizedContent)
+                    }
+                    title="Copy this file's optimized code"
+                  >
+                    Copy
+                  </button>
+                  <button
+                    className="file-action-button"
+                    onClick={() =>
+                      downloadFile(
+                        files[selectedFileIndex].optimizedContent,
+                        `optimized-${files[selectedFileIndex].name}`,
+                      )
+                    }
+                    title="Download this file"
+                  >
+                    Download
+                  </button>
+                </div>
+              )}
             </div>
 
             {files[selectedFileIndex] && (
               <div className="code-comparison">
                 <div className="code-section">
-                  <h4 className="code-section-title">Original</h4>
+                  <h4 className="code-section-title">
+                    Original - {files[selectedFileIndex].name}
+                  </h4>
                   <pre className="code-display original">
                     <code>{files[selectedFileIndex].content}</code>
                   </pre>
                 </div>
                 <div className="code-section">
-                  <h4 className="code-section-title">Optimized</h4>
+                  <h4 className="code-section-title">
+                    Optimized - {files[selectedFileIndex].name}
+                    {files[selectedFileIndex].optimizedContent && (
+                      <span className="optimization-status"> ✓ Optimized</span>
+                    )}
+                  </h4>
                   <pre className="code-display optimized">
                     <code>
                       {files[selectedFileIndex].optimizedContent ||
-                        "Not yet optimized"}
+                        "Processing optimization..."}
                     </code>
                   </pre>
                 </div>

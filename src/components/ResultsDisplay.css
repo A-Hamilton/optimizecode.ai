@@ -129,6 +129,10 @@
 
 .file-selector {
   margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .file-select {
@@ -138,7 +142,46 @@
   background: rgba(255, 255, 255, 0.05);
   color: inherit;
   font-size: 0.9rem;
-  min-width: 200px;
+  min-width: 250px;
+  flex: 1;
+}
+
+.file-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.file-action-button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.file-action-button:hover {
+  background: rgba(100, 108, 255, 0.2);
+  border-color: #646cff;
+}
+
+.download-all-button {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.download-all-button:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.3);
+  border-color: #22c55e;
+}
+
+.optimization-status {
+  color: #22c55e;
+  font-size: 0.8rem;
+  font-weight: normal;
 }
 
 .code-comparison {

@@ -213,10 +213,55 @@ function FileDropZone({ onFilesSelected, files }) {
         return true;
       });
 
-      // Sort by size (smaller first) and limit total files
-      const sortedFiles = validSizedFiles
-        .sort((a, b) => a.size - b.size)
-        .slice(0, MAX_FILES * 3); // Check 3x as many to find the best files
+      // Prioritize code folders over config/public folders
+      const prioritizedFiles = validSizedFiles.sort((a, b) => {
+        const aPath = (a.webkitRelativePath || a.name).toLowerCase();
+        const bPath = (b.webkitRelativePath || b.name).toLowerCase();
+
+        // High priority paths (src, components, etc.)
+        const highPriorityPaths = [
+          "/src/",
+          "/components/",
+          "/lib/",
+          "/utils/",
+          "/hooks/",
+          "/pages/",
+          "/app/",
+        ];
+        const lowPriorityPaths = [
+          "/public/",
+          "/assets/",
+          "/static/",
+          "/docs/",
+          "/config/",
+        ];
+
+        const aHighPriority = highPriorityPaths.some((path) =>
+          aPath.includes(path),
+        );
+        const bHighPriority = highPriorityPaths.some((path) =>
+          bPath.includes(path),
+        );
+        const aLowPriority = lowPriorityPaths.some((path) =>
+          aPath.includes(path),
+        );
+        const bLowPriority = lowPriorityPaths.some((path) =>
+          bPath.includes(path),
+        );
+
+        // Prioritize high priority paths
+        if (aHighPriority && !bHighPriority) return -1;
+        if (!aHighPriority && bHighPriority) return 1;
+
+        // Deprioritize low priority paths
+        if (aLowPriority && !bLowPriority) return 1;
+        if (!aLowPriority && bLowPriority) return -1;
+
+        // Then sort by size (smaller first)
+        return a.size - b.size;
+      });
+
+      const sortedFiles = prioritizedFiles.slice(0, MAX_FILES * 3); // Check 3x as many to find the best files
 
       console.log(
         `Processing ${sortedFiles.length} files after size filtering...`,
@@ -375,7 +420,7 @@ function FileDropZone({ onFilesSelected, files }) {
       return false;
     }
 
-    // Code file extensions
+    // Code file extensions (removed .txt as it's not typically code)
     const codeExtensions = [
       ".js",
       ".jsx",
@@ -409,7 +454,6 @@ function FileDropZone({ onFilesSelected, files }) {
       ".yaml",
       ".yml",
       ".md",
-      ".txt",
       ".sh",
       ".bash",
       ".ps1",
@@ -501,7 +545,7 @@ function FileDropZone({ onFilesSelected, files }) {
           ref={fileInputRef}
           type="file"
           multiple
-          accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.cs,.php,.rb,.go,.rust,.swift,.kt,.scala,.r,.html,.css,.scss,.sass,.less,.sql,.json,.xml,.yaml,.yml,.md,.txt,.sh,.bash,.ps1,.vue"
+          accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.cs,.php,.rb,.go,.rust,.swift,.kt,.scala,.r,.html,.css,.scss,.sass,.less,.sql,.json,.xml,.yaml,.yml,.md,.sh,.bash,.ps1,.vue"
           onChange={handleFileSelect}
           className="file-input-hidden"
         />
