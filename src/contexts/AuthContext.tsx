@@ -245,12 +245,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Track file optimization usage
+  // Track optimization usage
   const trackUsage = async () => {
     if (!currentUser) {
       return {
         success: false,
-        remainingFiles: 0,
+        remainingOptimizations: 0,
         error: "User not authenticated",
       };
     }
@@ -267,7 +267,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        remainingFiles: 0,
+        remainingOptimizations: 0,
         error: "Failed to track usage",
       };
     }
