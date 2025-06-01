@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import CodeInput from "../components/CodeInput";
 import FileDropZone from "../components/FileDropZone";
 import ResultsDisplay from "../components/ResultsDisplay";
-// import './OptimizePage.css'
+import "./OptimizePage.css";
 
 function OptimizePage() {
   const [code, setCode] = useState("");
