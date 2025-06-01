@@ -29,6 +29,15 @@ export default {
       animation: {
         "spin-slow": "spin 1s linear infinite",
       },
+      backgroundOpacity: {
+        5: "0.05",
+        8: "0.08",
+        10: "0.1",
+      },
+      borderOpacity: {
+        10: "0.1",
+        30: "0.3",
+      },
     },
   },
   plugins: [],
