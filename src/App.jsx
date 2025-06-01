@@ -9,6 +9,7 @@ function App() {
   const [files, setFiles] = useState([]);
   const [optimizedCode, setOptimizedCode] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizationSummary, setOptimizationSummary] = useState({});
 
   const simulateOptimization = async (inputCode, filename = "") => {
     console.log(
@@ -26,30 +27,66 @@ function App() {
     }
 
     try {
-      // Mock optimization improvements
-      let optimized = inputCode
-        .replace(/var /g, "const ")
-        .replace(/let /g, "const ")
-        .replace(/function\s+(\w+)/g, "const $1 = ")
+      // Track what optimizations were made
+      const optimizations = [];
+      let optimized = inputCode;
+
+      // Replace var with const
+      if (optimized.includes("var ")) {
+        optimized = optimized.replace(/var /g, "const ");
+        optimizations.push("Replaced var with const");
+      }
+
+      // Replace let with const where appropriate
+      if (optimized.includes("let ")) {
+        optimized = optimized.replace(/let /g, "const ");
+        optimizations.push("Replaced let with const");
+      }
+
+      // Modernize function syntax
+      if (/function\s+\w+/.test(optimized)) {
+        optimized = optimized.replace(/function\s+(\w+)/g, "const $1 = ");
+        optimizations.push("Modernized function syntax");
+      }
+
+      // Remove console.log statements
+      if (optimized.includes("console.log")) {
+        optimized = optimized.replace(/console\.log\([^)]*\);?\s*\n?/g, "");
+        optimizations.push("Removed console.log statements");
+      }
+
+      // Remove TODO comments
+      if (optimized.includes("TODO")) {
+        optimized = optimized.replace(/\/\/\s*TODO.*/g, "");
+        optimizations.push("Removed TODO comments");
+      }
+
+      // Clean up formatting
+      optimized = optimized
         .replace(/;\s*\n/g, "\n")
         .replace(/\{\s*\n\s*return/g, "{ return")
-        .replace(/console\.log\([^)]*\);?\s*\n?/g, "")
         .replace(/\s+\n/g, "\n")
         .replace(/\n{3,}/g, "\n\n")
-        .replace(/\/\/\s*TODO.*/g, "") // Remove TODO comments
-        .replace(/\s+$/gm, ""); // Remove trailing whitespace
+        .replace(/\s+$/gm, "") // Remove trailing whitespace
+        .trim();
 
-      // Add some optimization comments
-      const fileComment = filename ? `// File: ${filename}\n` : "";
-      optimized = `${fileComment}// Optimized by OptimizeCode.ai\n// Improvements made:\n// ✓ Replaced var/let with const where possible\n// ✓ Modernized function syntax\n// ✓ Removed console.log statements\n// ✓ Cleaned up formatting and removed TODO comments\n// ✓ Optimized whitespace\n\n${optimized.trim()}`;
+      if (optimizations.length > 0) {
+        optimizations.push("Cleaned up formatting");
+      }
+
+      // Store optimizations for display
+      setOptimizationSummary((prev) => ({
+        ...prev,
+        [filename || "pasted-code"]: optimizations,
+      }));
 
       console.log(
-        `Optimization completed for ${filename || "code"}, output length: ${optimized.length}`,
+        `Optimization completed for ${filename || "code"}, optimizations: ${optimizations.join(", ")}`,
       );
       return optimized;
     } catch (error) {
       console.error("Error during optimization:", error);
-      return `// Error during optimization: ${error.message}\n\n${inputCode}`;
+      return inputCode; // Return original code on error
     }
   };
 
@@ -124,6 +161,7 @@ function App() {
     setFiles([]);
     setOptimizedCode("");
     setIsOptimizing(false);
+    setOptimizationSummary({});
   };
 
   const hasInput =
@@ -183,6 +221,7 @@ function App() {
           optimizedCode={optimizedCode}
           files={files}
           isOptimizing={isOptimizing}
+          optimizationSummary={optimizationSummary}
         />
       </main>
 

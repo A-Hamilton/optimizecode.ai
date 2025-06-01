@@ -1,7 +1,13 @@
 import { useState } from "react";
 import "./ResultsDisplay.css";
 
-function ResultsDisplay({ originalCode, optimizedCode, files, isOptimizing }) {
+function ResultsDisplay({
+  originalCode,
+  optimizedCode,
+  files,
+  isOptimizing,
+  optimizationSummary,
+}) {
   const [activeTab, setActiveTab] = useState("code");
   const [selectedFileIndex, setSelectedFileIndex] = useState(0);
 
@@ -122,26 +128,6 @@ function ResultsDisplay({ originalCode, optimizedCode, files, isOptimizing }) {
       <div className="results-header">
         <h3 className="section-title">Optimized Results</h3>
         <div className="results-actions">
-          <button
-            className="action-button copy-button"
-            onClick={() => {
-              const textToCopy =
-                activeTab === "code"
-                  ? optimizedCode
-                  : files[selectedFileIndex]?.optimizedContent || "";
-              copyToClipboard(textToCopy);
-            }}
-            disabled={!hasResults}
-          >
-            Copy Current
-          </button>
-          <button
-            className="action-button download-button"
-            onClick={downloadOptimizedCode}
-            disabled={!hasResults}
-          >
-            Download Current
-          </button>
           {(files.some((f) => f.optimizedContent) || optimizedCode) && (
             <button
               className="action-button download-all-button"
@@ -152,6 +138,31 @@ function ResultsDisplay({ originalCode, optimizedCode, files, isOptimizing }) {
           )}
         </div>
       </div>
+
+      {/* Optimization Summary */}
+      {optimizationSummary && Object.keys(optimizationSummary).length > 0 && (
+        <div className="optimization-summary">
+          <h4 className="summary-title">Optimizations Applied:</h4>
+          <div className="summary-content">
+            {Object.entries(optimizationSummary).map(
+              ([filename, optimizations]) => (
+                <div key={filename} className="file-summary">
+                  <span className="file-summary-name">
+                    {filename === "pasted-code" ? "Pasted Code" : filename}:
+                  </span>
+                  <ul className="optimizations-list">
+                    {optimizations.map((opt, index) => (
+                      <li key={index} className="optimization-item">
+                        ✓ {opt}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ),
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="results-tabs">
         {optimizedCode && (

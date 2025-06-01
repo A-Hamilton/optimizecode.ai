@@ -66,7 +66,7 @@ function FileDropZone({ onFilesSelected, files }) {
     const files = [];
     const MAX_FILES = 15;
     const MAX_FILE_SIZE = 500 * 1024; // 500KB
-    const MAX_TOTAL_FILES_TO_CHECK = 1000; // Stop checking after 1000 files
+    const MAX_TOTAL_FILES_TO_CHECK = 5000; // Stop checking after 5000 files
 
     // Early exit if we've found enough files or checked too many
     if (
@@ -197,11 +197,11 @@ function FileDropZone({ onFilesSelected, files }) {
 
     try {
       // If too many files, show warning and limit processing
-      if (fileList.length > 5000) {
+      if (fileList.length > 10000) {
         console.warn(
-          `Large folder detected (${fileList.length} files). Processing first 1000 files only.`,
+          `Large folder detected (${fileList.length} files). Processing first 5000 files only.`,
         );
-        fileList = Array.from(fileList).slice(0, 1000);
+        fileList = Array.from(fileList).slice(0, 5000);
       }
 
       // First, filter out oversized files and sort by size
