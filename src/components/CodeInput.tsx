@@ -1,8 +1,10 @@
 // Updated for TypeScript migration
 import React, { useState, useRef } from "react";
 import { CodeInputProps } from "../types";
+import { useAuth } from "../contexts/AuthContext";
 
 const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
+  const { userProfile } = useAuth();
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
@@ -11,14 +13,34 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
   const handleCodeChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>,
   ): void => {
-    onCodeChange(e.target.value);
+    const newValue = e.target.value;
+    const characterLimit = userProfile?.limits.maxPasteCharacters || 10000;
+
+    // Allow unlimited for unlimited plans
+    if (characterLimit === -1 || newValue.length <= characterLimit) {
+      onCodeChange(newValue);
+    } else {
+      // Show feedback that limit was reached
+      showFeedback(
+        `Character limit reached (${characterLimit.toLocaleString()} max)`,
+      );
+    }
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>): void => {
     const pastedData = e.clipboardData.getData("text");
+    const characterLimit = userProfile?.limits.maxPasteCharacters || 10000;
+
     if (pastedData) {
-      onCodeChange(pastedData);
-      showFeedback("Code pasted successfully!");
+      if (characterLimit === -1 || pastedData.length <= characterLimit) {
+        onCodeChange(pastedData);
+        showFeedback("Code pasted successfully!");
+      } else {
+        e.preventDefault();
+        showFeedback(
+          `Paste too large! Limit: ${characterLimit.toLocaleString()} characters, tried to paste: ${pastedData.length.toLocaleString()}`,
+        );
+      }
     }
   };
 
