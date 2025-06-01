@@ -3,6 +3,7 @@ import "./FileDropZone.css";
 
 function FileDropZone({ onFilesSelected, files }) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef(null);
   const folderInputRef = useRef(null);
 
@@ -44,44 +45,81 @@ function FileDropZone({ onFilesSelected, files }) {
 
   const getAllFiles = async (entry, path = "") => {
     const files = [];
+    const MAX_FILES = 15;
+    const MAX_FILE_SIZE = 500 * 1024; // 500KB
 
     if (entry.isFile) {
       const file = await new Promise((resolve) => entry.file(resolve));
-      if (isCodeFile(file.name)) {
+      const fullPath = path + file.name;
+
+      if (isCodeFile(file.name, fullPath) && file.size <= MAX_FILE_SIZE) {
         Object.defineProperty(file, "webkitRelativePath", {
-          value: path + file.name,
+          value: fullPath,
           writable: false,
         });
         files.push(file);
       }
     } else if (entry.isDirectory) {
+      // Skip excluded directories
+      const excludedDirs = [
+        "node_modules",
+        ".git",
+        "dist",
+        "build",
+        "coverage",
+        ".next",
+        ".nuxt",
+      ];
+      if (
+        excludedDirs.some((dir) =>
+          entry.name.toLowerCase().includes(dir.toLowerCase()),
+        )
+      ) {
+        return files;
+      }
+
       const dirReader = entry.createReader();
       const entries = await new Promise((resolve) => {
         dirReader.readEntries(resolve);
       });
 
       for (const childEntry of entries) {
+        if (files.length >= MAX_FILES) break;
         const childFiles = await getAllFiles(
           childEntry,
           path + entry.name + "/",
         );
-        files.push(...childFiles);
+        files.push(...childFiles.slice(0, MAX_FILES - files.length));
       }
     }
 
-    return files;
+    return files.slice(0, MAX_FILES);
   };
 
   const handleFiles = async (fileList) => {
+    setIsProcessing(true);
+    const MAX_FILES = 15;
+    const MAX_FILE_SIZE = 500 * 1024; // 500KB
     const processedFiles = [];
+    let skippedFiles = 0;
+    let oversizedFiles = 0;
 
-    for (const file of fileList) {
-      if (isCodeFile(file.name)) {
+    // Sort files by size (smaller first) and limit to MAX_FILES
+    const sortedFiles = Array.from(fileList)
+      .filter((file) => file.size <= MAX_FILE_SIZE)
+      .sort((a, b) => a.size - b.size)
+      .slice(0, MAX_FILES);
+
+    oversizedFiles = fileList.length - sortedFiles.length;
+
+    for (const file of sortedFiles) {
+      const filepath = file.webkitRelativePath || file.name;
+      if (isCodeFile(file.name, filepath)) {
         try {
           const content = await readFileContent(file);
           processedFiles.push({
             name: file.name,
-            path: file.webkitRelativePath || file.name,
+            path: filepath,
             content: content,
             size: file.size,
             type: file.type,
@@ -89,12 +127,28 @@ function FileDropZone({ onFilesSelected, files }) {
           });
         } catch (error) {
           console.error(`Error reading file ${file.name}:`, error);
+          skippedFiles++;
         }
+      } else {
+        skippedFiles++;
       }
     }
 
-    // Combine with existing files instead of replacing
-    onFilesSelected([...files, ...processedFiles]);
+    // Show feedback about filtered files
+    if (skippedFiles > 0 || oversizedFiles > 0) {
+      let message = `Processed ${processedFiles.length} files.`;
+      if (skippedFiles > 0)
+        message += ` Skipped ${skippedFiles} non-code files.`;
+      if (oversizedFiles > 0)
+        message += ` Excluded ${oversizedFiles} files over 500KB.`;
+      console.log(message);
+      // You could show this in a toast notification
+    }
+
+    // Combine with existing files instead of replacing, but respect total limit
+    const totalFiles = [...files, ...processedFiles].slice(0, MAX_FILES);
+    onFilesSelected(totalFiles);
+    setIsProcessing(false);
   };
 
   const readFileContent = (file) => {
@@ -106,25 +160,78 @@ function FileDropZone({ onFilesSelected, files }) {
     });
   };
 
-  const isCodeFile = (filename) => {
+  const isCodeFile = (filename, filepath = "") => {
+    // File size limit (500KB)
+    const MAX_FILE_SIZE = 500 * 1024;
+
+    // Folders/paths to exclude
+    const excludedPaths = [
+      "node_modules",
+      ".git",
+      "dist",
+      "build",
+      "coverage",
+      ".next",
+      ".nuxt",
+      "vendor",
+      "target",
+      "bin",
+      "obj",
+      "packages",
+      ".vscode",
+      ".idea",
+      "__pycache__",
+      ".cache",
+      "tmp",
+      "temp",
+    ];
+
+    // Files to exclude
+    const excludedFiles = [
+      "package-lock.json",
+      "yarn.lock",
+      "pnpm-lock.yaml",
+      ".gitignore",
+      ".eslintrc",
+      ".prettierrc",
+      "webpack.config.js",
+      "vite.config.js",
+      "tsconfig.json",
+    ];
+
+    // Check if file is in excluded path
+    const isInExcludedPath = excludedPaths.some((path) =>
+      filepath.toLowerCase().includes(path.toLowerCase()),
+    );
+
+    // Check if file is excluded
+    const isExcludedFile = excludedFiles.some(
+      (excludedFile) => filename.toLowerCase() === excludedFile.toLowerCase(),
+    );
+
+    if (isInExcludedPath || isExcludedFile) {
+      return false;
+    }
+
     const codeExtensions = [
       ".js",
       ".jsx",
       ".ts",
       ".tsx",
+      ".vue",
+      ".svelte",
       ".py",
       ".java",
       ".cpp",
       ".c",
       ".cs",
+      ".go",
+      ".rs",
       ".php",
       ".rb",
-      ".go",
-      ".rust",
       ".swift",
       ".kt",
       ".scala",
-      ".r",
       ".html",
       ".css",
       ".scss",
@@ -136,11 +243,6 @@ function FileDropZone({ onFilesSelected, files }) {
       ".yaml",
       ".yml",
       ".md",
-      ".txt",
-      ".sh",
-      ".bash",
-      ".ps1",
-      ".vue",
     ];
 
     return codeExtensions.some((ext) =>
@@ -171,12 +273,18 @@ function FileDropZone({ onFilesSelected, files }) {
         onDrop={handleDrop}
       >
         <div className="drop-content">
-          <div className="drop-icon">📁</div>
+          <div className="drop-icon">{isProcessing ? "⏳" : "📁"}</div>
           <p className="drop-text">
-            Drag and drop files/folders here, or click to select
+            {isProcessing
+              ? "Processing files..."
+              : "Drag and drop files/folders here, or click to select"}
           </p>
           <p className="drop-subtext">
             Supports: JS, TS, Python, Java, C++, HTML, CSS, and more
+            <br />
+            <small>
+              Max 15 files, 500KB each. Excludes node_modules, build folders.
+            </small>
           </p>
           <div className="upload-buttons">
             <button
