@@ -742,8 +742,7 @@
     max-width: 300px;
   }
 
-  .features-grid,
-  .testimonials-grid {
+  .features-grid {
     grid-template-columns: 1fr;
   }
 
