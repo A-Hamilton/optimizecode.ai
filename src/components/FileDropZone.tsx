@@ -1,6 +1,7 @@
 // Updated for TypeScript migration
 import React, { useState, useCallback, useRef } from "react";
 import { FileDropZoneProps, CodeFile } from "../types";
+import { useAuth } from "../contexts/AuthContext";
 
 interface NotificationProps {
   message: string;
@@ -12,6 +13,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   onFilesSelected,
   files,
 }) => {
+  const { userProfile } = useAuth();
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [notification, setNotification] = useState<{
@@ -20,6 +22,11 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+
+  // Get user plan limits
+  const maxFiles = userProfile?.limits?.maxFileUploads || 2;
+  const maxFileSize = (userProfile?.limits?.maxFileSize || 1) * 1024 * 1024; // Convert MB to bytes
+  const planName = userProfile?.subscription?.plan || "free";
 
   const showNotification = (
     message: string,
@@ -111,14 +118,14 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
     }, 10);
   };
 
-  // COMPLETELY REWRITTEN - Foolproof exclusion logic
+  // COMPLETELY REWRITTEN - Foolproof exclusion logic with user plan limits
   const getAllFiles = async (
     entry: any,
     currentPath: string = "",
   ): Promise<File[]> => {
     const files: File[] = [];
-    const MAX_FILES = 15;
-    const MAX_FILE_SIZE = 200 * 1024; // 200KB max
+    const MAX_FILES = maxFiles === -1 ? 100 : maxFiles; // Use user limit or reasonable cap for unlimited
+    const MAX_FILE_SIZE = maxFileSize;
 
     if (entry.isFile) {
       try {
@@ -126,12 +133,19 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         const fullPath = currentPath + file.name;
 
         // STRICT path checking - if any part of the path contains forbidden terms, REJECT
-        if (
-          isPathBlocked(fullPath) ||
-          file.size > MAX_FILE_SIZE ||
-          !isValidSourceFile(file.name)
-        ) {
-          return files; // Skip this file
+        if (isPathBlocked(fullPath)) {
+          return files; // Skip this file - blocked path
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+          console.warn(
+            `File ${file.name} exceeds size limit (${(file.size / (1024 * 1024)).toFixed(1)}MB > ${(MAX_FILE_SIZE / (1024 * 1024)).toFixed(1)}MB)`,
+          );
+          return files; // Skip this file - too large
+        }
+
+        if (!isValidSourceFile(file.name)) {
+          return files; // Skip this file - invalid type
         }
 
         Object.defineProperty(file, "webkitRelativePath", {
