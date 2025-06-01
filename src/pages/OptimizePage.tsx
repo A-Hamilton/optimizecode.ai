@@ -213,65 +213,61 @@ const OptimizePage: React.FC = () => {
               </p>
             </div>
 
-            {/* Compact Plan Status */}
-            {currentUser ? (
-              <div className="plan-status-compact">
-                <div className="plan-info-inline">
-                  <span className="plan-label">Current Plan:</span>
-                  <span
-                    className={`plan-badge ${userProfile?.subscription.plan || "free"}`}
-                  >
-                    {userProfile?.subscription.plan
-                      ? PLAN_DETAILS[userProfile.subscription.plan].name
-                      : "Free"}
-                  </span>
-                  <span className="usage-separator">•</span>
-                  <span className="usage-display">
-                    Files Used:{" "}
-                    <span
-                      className={`usage-count ${isLimitReached ? "limit-reached" : ""}`}
-                    >
-                      {usageInfo.used} / {usageInfo.total}
+            {/* Ultra-Compact Plan Status Bar */}
+            <div className="plan-status-bar">
+              {currentUser ? (
+                <>
+                  <div className="plan-info-mini">
+                    <span className="plan-text">
+                      <span
+                        className={`plan-name ${userProfile?.subscription.plan || "free"}`}
+                      >
+                        {userProfile?.subscription.plan
+                          ? PLAN_DETAILS[userProfile.subscription.plan].name
+                          : "Free"}
+                      </span>
+                      Plan • Files:
+                      <span
+                        className={`usage-mini ${isLimitReached ? "limit-reached" : ""}`}
+                      >
+                        {usageInfo.used}/{usageInfo.total}
+                      </span>
                     </span>
-                  </span>
-
-                  {!usageInfo.isUnlimited && (
-                    <div className="progress-mini">
-                      <div
-                        className={`progress-fill-mini ${isLimitReached ? "limit-reached" : ""}`}
-                        style={{ width: `${usageInfo.percentage}%` }}
-                      />
-                    </div>
+                    {!usageInfo.isUnlimited && (
+                      <div className="usage-bar-mini">
+                        <div
+                          className={`usage-fill-mini ${isLimitReached ? "limit-reached" : ""}`}
+                          style={{ width: `${usageInfo.percentage}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {(userProfile?.subscription.plan === "free" ||
+                    isLimitReached) && (
+                    <button
+                      className="upgrade-btn-mini"
+                      onClick={() => (window.location.href = "/pricing")}
+                    >
+                      {isLimitReached ? "Upgrade Now" : "Upgrade to Pro"}
+                    </button>
                   )}
-                </div>
-
-                {(userProfile?.subscription.plan === "free" ||
-                  isLimitReached) && (
+                </>
+              ) : (
+                <>
+                  <div className="plan-info-mini">
+                    <span className="plan-text guest-text">
+                      Get unlimited AI code optimization
+                    </span>
+                  </div>
                   <button
-                    className="upgrade-btn-compact"
+                    className="upgrade-btn-mini"
                     onClick={() => (window.location.href = "/pricing")}
                   >
-                    {isLimitReached
-                      ? "Upgrade for More Files"
-                      : "Upgrade to Pro"}
+                    Upgrade to Pro
                   </button>
-                )}
-              </div>
-            ) : (
-              <div className="plan-status-compact">
-                <div className="plan-info-inline">
-                  <span className="guest-message">
-                    Start optimizing your code with AI
-                  </span>
-                </div>
-                <button
-                  className="upgrade-btn-compact"
-                  onClick={() => (window.location.href = "/pricing")}
-                >
-                  Upgrade to Pro
-                </button>
-              </div>
-            )}
+                </>
+              )}
+            </div>
 
             {notification && (
               <InlineNotification

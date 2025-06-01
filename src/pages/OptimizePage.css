@@ -46,121 +46,102 @@
   margin: 0 auto;
 }
 
-/* Compact Plan Status */
-.plan-status-compact {
+/* Ultra-Compact Plan Status Bar */
+.plan-status-bar {
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-.plan-info-inline {
+.plan-info-mini {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex: 1;
 }
 
-.plan-label {
+.plan-text {
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.plan-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
+.plan-name {
   font-weight: 600;
   text-transform: capitalize;
 }
 
-.plan-badge.free {
-  background: rgba(107, 114, 128, 0.2);
+.plan-name.free {
   color: #d1d5db;
-  border: 1px solid rgba(107, 114, 128, 0.3);
 }
 
-.plan-badge.pro {
-  background: rgba(59, 130, 246, 0.2);
+.plan-name.pro {
   color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-.plan-badge.unleashed {
-  background: rgba(139, 92, 246, 0.2);
+.plan-name.unleashed {
   color: #c4b5fd;
-  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
-.usage-separator {
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 300;
-}
-
-.usage-display {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-}
-
-.usage-count {
+.usage-mini {
   font-weight: 700;
   color: white;
 }
 
-.usage-count.limit-reached {
+.usage-mini.limit-reached {
   color: #f87171;
 }
 
-.progress-mini {
-  width: 60px;
-  height: 4px;
+.usage-bar-mini {
+  width: 40px;
+  height: 3px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;
 }
 
-.progress-fill-mini {
+.usage-fill-mini {
   height: 100%;
   background: linear-gradient(90deg, #3b82f6, #8b5cf6);
   border-radius: 2px;
   transition: width 0.3s ease;
 }
 
-.progress-fill-mini.limit-reached {
+.usage-fill-mini.limit-reached {
   background: linear-gradient(90deg, #ef4444, #f87171);
 }
 
-.guest-message {
-  font-size: 0.875rem;
+.guest-text {
   color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
 }
 
-.upgrade-btn-compact {
+.upgrade-btn-mini {
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
-.upgrade-btn-compact:hover {
+.upgrade-btn-mini:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 3px 12px rgba(59, 130, 246, 0.4);
 }
 
 /* Global Usage Error Banner */
@@ -566,16 +547,16 @@
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
 
-  .plan-status-compact {
+  .plan-status-bar {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
-    gap: 1rem;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
   }
 
-  .plan-info-inline {
-    flex-direction: column;
-    gap: 0.5rem;
+  .plan-info-mini {
+    justify-content: center;
   }
 }
 
@@ -592,20 +573,19 @@
     font-size: 1.125rem;
   }
 
-  .plan-status-compact {
-    padding: 0.75rem 1rem;
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
-    gap: 0.75rem;
-  }
-
-  .plan-info-inline {
+  .plan-status-bar {
+    padding: 0.5rem;
     flex-direction: column;
     gap: 0.5rem;
   }
 
-  .progress-mini {
+  .plan-text {
+    font-size: 0.8rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .usage-bar-mini {
     align-self: center;
   }
 
@@ -649,13 +629,15 @@
     font-size: 1.875rem;
   }
 
-  .plan-info-inline {
+  .plan-info-mini {
     flex-wrap: wrap;
     justify-content: center;
   }
 
-  .upgrade-btn-compact {
+  .upgrade-btn-mini {
     width: 100%;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.5rem;
   }
 
   .supported-files {
