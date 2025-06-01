@@ -94,9 +94,9 @@ const Navbar: React.FC = () => {
             <span className="absolute inset-0 bg-gradient-to-r from-primary-light to-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
           </Link>
           <Link
-            to="/dashboard"
+            to="/login"
             className={`text-white/80 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium ${
-              isActive("/dashboard") ? "bg-white/10 text-white" : ""
+              isActive("/login") ? "bg-white/10 text-white" : ""
             }`}
           >
             Login

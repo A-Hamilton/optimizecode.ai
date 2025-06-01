@@ -13,6 +13,7 @@ import AboutPage from "./pages/AboutPage";
 import SecurityPage from "./pages/SecurityPage";
 import SupportPage from "./pages/SupportPage";
 import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
 import Footer from "./components/Footer";
 
 function App(): JSX.Element {
@@ -31,6 +32,7 @@ function App(): JSX.Element {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/security" element={<SecurityPage />} />
           <Route path="/support" element={<SupportPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
         <Footer />
