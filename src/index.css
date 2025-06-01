@@ -32,9 +32,20 @@
     margin-bottom: 0;
   }
 
-  /* Ensure all pages end cleanly without excessive bottom padding */
-  .page-content:last-child {
-    padding-bottom: 2rem;
+  /* Force no spacing between content and footer */
+  .pricing-teaser + * {
+    margin-top: 0 !important;
+  }
+
+  /* Eliminate any gap before footer */
+  .footer {
+    margin-top: 0 !important;
+  }
+
+  /* Remove any default spacing from sections */
+  section:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 }
 
