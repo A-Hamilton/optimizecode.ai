@@ -104,22 +104,31 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         console.error(`Error processing file ${path}${entry.name}:`, error);
       }
     } else if (entry.isDirectory) {
-      // Very aggressive directory exclusion for performance
+      // Enhanced directory exclusion for better performance and relevance
       const excludedDirs = [
         "node_modules",
         ".git",
+        ".svn",
+        ".hg",
         "dist",
         "build",
-        "__pycache__",
-        "coverage",
-        ".next",
-        ".vscode",
-        ".idea",
-        "vendor",
+        "out",
         "target",
         "bin",
         "obj",
+        "__pycache__",
+        ".pytest_cache",
+        "coverage",
+        ".coverage",
+        ".nyc_output",
+        ".next",
+        ".nuxt",
+        ".vscode",
+        ".idea",
+        ".eclipse",
+        "vendor",
         "logs",
+        "log",
         "tmp",
         "temp",
         "cache",
@@ -127,13 +136,46 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         "public",
         "static",
         "assets",
+        "images",
+        "img",
+        "fonts",
+        "media",
+        "uploads",
+        ".sass-cache",
+        ".parcel-cache",
+        ".webpack",
+        "bower_components",
+        "jspm_packages",
+        ".meteor",
+        ".venv",
+        "venv",
+        "env",
+        ".env",
+        "virtualenv",
+        "__env__",
+        ".tox",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".DS_Store",
+        "Thumbs.db",
       ];
 
-      // Skip if it's an excluded directory
+      // Skip if it's an excluded directory (case-insensitive and contains check)
+      const dirName = entry.name.toLowerCase();
       if (
-        excludedDirs.some((dir) =>
-          entry.name.toLowerCase().includes(dir.toLowerCase()),
+        excludedDirs.some(
+          (dir) =>
+            dirName === dir.toLowerCase() ||
+            dirName.includes(dir.toLowerCase()),
         )
+      ) {
+        return files;
+      }
+
+      // Skip hidden directories (starting with .)
+      if (
+        dirName.startsWith(".") &&
+        !["src", "lib", "app"].some((allowed) => dirName.includes(allowed))
       ) {
         return files;
       }
@@ -169,7 +211,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   };
 
   const isCodeFile = (filename: string, fullPath: string): boolean => {
-    // Exclude test files and config files for readability
+    // Enhanced exclusion patterns for better filtering
     const excludePatterns = [
       ".test.",
       ".spec.",
@@ -177,62 +219,148 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       ".min.",
       ".bundle.",
       ".lock",
+      ".map",
+      ".d.ts",
       "package-lock.json",
       "yarn.lock",
+      "pnpm-lock.yaml",
       ".gitignore",
+      ".gitattributes",
       ".env",
+      ".env.local",
+      ".env.production",
+      ".env.development",
       "README",
+      "CHANGELOG",
+      "LICENSE",
+      "CONTRIBUTING",
+      ".eslintrc",
+      ".prettierrc",
+      "tsconfig.json",
+      "jsconfig.json",
+      "webpack.config",
+      "vite.config",
+      "rollup.config",
+      "babel.config",
+      ".babelrc",
+      "jest.config",
+      "cypress.config",
+      "tailwind.config",
+      "postcss.config",
+      "docker",
+      "dockerfile",
+      ".dockerignore",
+      "makefile",
+      "procfile",
+      ".DS_Store",
+      "thumbs.db",
     ];
 
+    const lowerFilename = filename.toLowerCase();
     if (
       excludePatterns.some((pattern) =>
-        filename.toLowerCase().includes(pattern.toLowerCase()),
+        lowerFilename.includes(pattern.toLowerCase()),
       )
     ) {
       return false;
     }
 
+    // Enhanced code extensions with better categorization
     const codeExtensions = [
+      // JavaScript/TypeScript
       ".js",
       ".jsx",
       ".ts",
       ".tsx",
+      ".mjs",
+      ".cjs",
+      // Python
       ".py",
+      ".pyw",
+      ".pyx",
+      ".pyi",
+      // Java/JVM
       ".java",
-      ".cpp",
-      ".c",
-      ".cs",
-      ".php",
-      ".rb",
-      ".go",
-      ".rs",
-      ".swift",
       ".kt",
       ".scala",
+      ".groovy",
+      ".clj",
+      // C/C++
+      ".c",
+      ".cpp",
+      ".cc",
+      ".cxx",
+      ".h",
+      ".hpp",
+      ".hxx",
+      // C#/.NET
+      ".cs",
+      ".vb",
+      ".fs",
+      // Web
       ".html",
+      ".htm",
       ".css",
       ".scss",
       ".sass",
       ".less",
+      ".stylus",
       ".vue",
       ".svelte",
+      ".astro",
+      // PHP
+      ".php",
+      ".phtml",
+      ".php3",
+      ".php4",
+      ".php5",
+      // Ruby
+      ".rb",
+      ".rbw",
+      ".rake",
+      ".gemspec",
+      // Go
+      ".go",
+      // Rust
+      ".rs",
+      // Swift
+      ".swift",
+      // Dart
+      ".dart",
+      // Other languages
+      ".lua",
+      ".pl",
+      ".pm",
+      ".r",
+      ".m",
+      ".matlab",
+      ".sh",
+      ".bash",
+      ".zsh",
+      ".fish",
+      ".ps1",
+      ".bat",
+      ".cmd",
+      // Data/Config (relevant to coding)
       ".json",
       ".xml",
       ".yaml",
       ".yml",
+      ".toml",
+      ".ini",
       ".sql",
-      ".sh",
-      ".bash",
-      ".ps1",
-      ".r",
-      ".m",
-      ".dart",
-      ".lua",
-      ".pl",
-      ".groovy",
+      ".graphql",
+      ".gql",
+      // Templates
+      ".mustache",
+      ".handlebars",
+      ".hbs",
+      ".ejs",
+      ".pug",
+      ".jade",
     ];
 
-    return codeExtensions.some((ext) => filename.toLowerCase().endsWith(ext));
+    return codeExtensions.some((ext) => lowerFilename.endsWith(ext));
   };
 
   const handleFiles = async (selectedFiles: File[]): Promise<void> => {
@@ -248,14 +376,21 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         const content = await readFileAsText(file);
         const relativePath = file.webkitRelativePath || file.name;
 
-        codeFiles.push({
-          name: file.name,
-          path: relativePath,
-          content,
-          size: file.size,
-          type: file.type || "text/plain",
-          extension: file.name.split(".").pop() || "",
-        });
+        // Check for duplicates in existing files
+        const isDuplicate = files.some(
+          (existingFile) => existingFile.path === relativePath,
+        );
+
+        if (!isDuplicate) {
+          codeFiles.push({
+            name: file.name,
+            path: relativePath,
+            content,
+            size: file.size,
+            type: file.type || "text/plain",
+            extension: file.name.split(".").pop() || "",
+          });
+        }
       } catch (error) {
         console.error(`Error reading file ${file.name}:`, error);
       }
@@ -275,7 +410,9 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       );
     }
 
-    onFilesSelected(codeFiles);
+    // FIXED: Append new files to existing files instead of replacing
+    const updatedFiles = [...files, ...codeFiles];
+    onFilesSelected(updatedFiles);
     setIsProcessing(false);
   };
 
@@ -326,6 +463,11 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
             </p>
             <p className="text-sm text-white/60 mb-6">
               Supports JavaScript, TypeScript, Python, Java, HTML, CSS, and more
+              <br />
+              <span className="text-xs opacity-75">
+                Automatically filters out node_modules, build folders, and
+                config files
+              </span>
             </p>
             <div className="flex gap-4 justify-center">
               <input
