@@ -134,8 +134,8 @@ const SignUpPage: React.FC = () => {
       if (result.error) {
         setErrors({ general: result.error });
       } else {
-        // Redirect to dashboard on successful signup
-        navigate("/dashboard");
+        // Redirect to optimization page on successful signup
+        navigate("/optimize");
       }
     } catch (error) {
       setErrors({ general: "Sign up failed. Please try again." });
@@ -157,7 +157,7 @@ const SignUpPage: React.FC = () => {
       if (result.error) {
         setErrors({ general: result.error });
       } else {
-        navigate("/dashboard");
+        navigate("/optimize");
       }
     } catch (error) {
       setErrors({ general: `${provider} sign up failed. Please try again.` });

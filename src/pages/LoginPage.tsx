@@ -106,8 +106,8 @@ const LoginPage: React.FC = () => {
           localStorage.setItem("rememberLogin", "true");
         }
 
-        // Redirect to dashboard on successful login
-        navigate("/dashboard");
+        // Redirect to optimization page on successful login
+        navigate("/optimize");
       }
     } catch (error) {
       setErrors({ general: "Login failed. Please try again." });
