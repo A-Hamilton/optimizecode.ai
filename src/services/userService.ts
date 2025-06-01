@@ -40,10 +40,10 @@ export class UserService {
       },
 
       usage: {
-        filesOptimizedThisMonth: 0,
-        totalFilesOptimized: 0,
+        optimizationsToday: 0,
+        totalOptimizations: 0,
         lastOptimizationDate: undefined,
-        currentPeriodStart: now,
+        currentDayStart: now,
       },
 
       limits: PLAN_LIMITS[plan],
@@ -75,9 +75,7 @@ export class UserService {
           profile.subscription.trialEndsAt,
         );
       }
-      profile.usage.currentPeriodStart = new Date(
-        profile.usage.currentPeriodStart,
-      );
+      profile.usage.currentDayStart = new Date(profile.usage.currentDayStart);
       if (profile.usage.lastOptimizationDate) {
         profile.usage.lastOptimizationDate = new Date(
           profile.usage.lastOptimizationDate,
@@ -147,86 +145,88 @@ export class UserService {
     return profile;
   }
 
-  // Track file optimization usage
+  // Track optimization usage
   static async trackUsage(
     uid: string,
-  ): Promise<{ success: boolean; remainingFiles: number; error?: string }> {
+  ): Promise<{
+    success: boolean;
+    remainingOptimizations: number;
+    error?: string;
+  }> {
     const profile = await this.getUserProfile(uid);
     if (!profile) {
       return {
         success: false,
-        remainingFiles: 0,
+        remainingOptimizations: 0,
         error: "User profile not found",
       };
     }
 
-    // Check if user has reached their monthly limit
-    const { filesPerMonth } = profile.limits;
+    // Check if user has reached their daily limit
+    const { optimizationsPerDay } = profile.limits;
     if (
-      filesPerMonth !== -1 &&
-      profile.usage.filesOptimizedThisMonth >= filesPerMonth
+      optimizationsPerDay !== -1 &&
+      profile.usage.optimizationsToday >= optimizationsPerDay
     ) {
       return {
         success: false,
-        remainingFiles: 0,
-        error: `You've reached your monthly limit of ${filesPerMonth} files. Upgrade your plan for more files.`,
+        remainingOptimizations: 0,
+        error: `You've reached your daily limit of ${optimizationsPerDay} optimizations. Upgrade your plan for more optimizations.`,
       };
     }
 
-    // Reset monthly usage if we're in a new month
+    // Reset daily usage if we're in a new day
     const now = new Date();
-    const lastPeriodStart = profile.usage.currentPeriodStart;
-    const isNewMonth =
-      now.getMonth() !== lastPeriodStart.getMonth() ||
-      now.getFullYear() !== lastPeriodStart.getFullYear();
+    const lastDayStart = profile.usage.currentDayStart;
+    const isNewDay = now.toDateString() !== lastDayStart.toDateString();
 
-    if (isNewMonth) {
-      profile.usage.filesOptimizedThisMonth = 0;
-      profile.usage.currentPeriodStart = new Date(
+    if (isNewDay) {
+      profile.usage.optimizationsToday = 0;
+      profile.usage.currentDayStart = new Date(
         now.getFullYear(),
         now.getMonth(),
-        1,
+        now.getDate(),
       );
     }
 
     // Increment usage
-    profile.usage.filesOptimizedThisMonth += 1;
-    profile.usage.totalFilesOptimized += 1;
+    profile.usage.optimizationsToday += 1;
+    profile.usage.totalOptimizations += 1;
     profile.usage.lastOptimizationDate = now;
 
     await this.saveUserProfile(profile);
 
-    const remainingFiles =
-      filesPerMonth === -1
+    const remainingOptimizations =
+      optimizationsPerDay === -1
         ? -1 // unlimited
-        : filesPerMonth - profile.usage.filesOptimizedThisMonth;
+        : optimizationsPerDay - profile.usage.optimizationsToday;
 
-    return { success: true, remainingFiles };
+    return { success: true, remainingOptimizations };
   }
 
   // Get user's current usage and limits
   static async getUsageInfo(uid: string): Promise<{
-    filesUsed: number;
-    filesRemaining: number;
-    totalFiles: number;
+    optimizationsUsed: number;
+    optimizationsRemaining: number;
+    totalOptimizations: number;
     planName: string;
     isUnlimited: boolean;
   } | null> {
     const profile = await this.getUserProfile(uid);
     if (!profile) return null;
 
-    const { filesPerMonth } = profile.limits;
-    const { filesOptimizedThisMonth } = profile.usage;
+    const { optimizationsPerDay } = profile.limits;
+    const { optimizationsToday } = profile.usage;
 
     return {
-      filesUsed: filesOptimizedThisMonth,
-      filesRemaining:
-        filesPerMonth === -1
+      optimizationsUsed: optimizationsToday,
+      optimizationsRemaining:
+        optimizationsPerDay === -1
           ? -1
-          : Math.max(0, filesPerMonth - filesOptimizedThisMonth),
-      totalFiles: profile.usage.totalFilesOptimized,
+          : Math.max(0, optimizationsPerDay - optimizationsToday),
+      totalOptimizations: profile.usage.totalOptimizations,
       planName: profile.subscription.plan,
-      isUnlimited: filesPerMonth === -1,
+      isUnlimited: optimizationsPerDay === -1,
     };
   }
 
@@ -240,10 +240,10 @@ export class UserService {
 
     switch (action) {
       case "optimize":
-        const { filesPerMonth } = profile.limits;
+        const { optimizationsPerDay } = profile.limits;
         return (
-          filesPerMonth === -1 ||
-          profile.usage.filesOptimizedThisMonth < filesPerMonth
+          optimizationsPerDay === -1 ||
+          profile.usage.optimizationsToday < optimizationsPerDay
         );
 
       case "download":
