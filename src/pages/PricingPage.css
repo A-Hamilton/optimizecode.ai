@@ -47,6 +47,19 @@
   margin-top: 2rem;
 }
 
+/* File Limit Badge */
+.file-limit-badge {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 1rem;
+  text-align: center;
+  font-weight: 500;
+}
+
 .billing-toggle span {
   font-size: 1rem;
   font-weight: 600;
