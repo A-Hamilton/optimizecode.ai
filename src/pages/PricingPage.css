@@ -598,6 +598,38 @@
   }
 }
 
+/* Stripe Checkout Error Styling */
+.checkout-error-banner {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  padding: 16px;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fecaca;
+  font-size: 14px;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  color: #fecaca;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 0;
+  margin-left: 16px;
+}
+
+.error-close:hover {
+  color: #ffffff;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .pricing-page {
