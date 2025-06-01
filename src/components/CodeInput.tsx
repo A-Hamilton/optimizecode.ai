@@ -22,7 +22,8 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     e: React.ChangeEvent<HTMLTextAreaElement>,
   ): void => {
     const newValue = e.target.value;
-    const characterLimit = userProfile?.limits.maxPasteCharacters || 10000;
+    // Default to free plan limits if no user profile available
+    const characterLimit = userProfile?.limits?.maxPasteCharacters ?? 10000;
 
     // Allow unlimited for unlimited plans
     if (characterLimit === -1 || newValue.length <= characterLimit) {
@@ -37,7 +38,8 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>): void => {
     const pastedData = e.clipboardData.getData("text");
-    const characterLimit = userProfile?.limits.maxPasteCharacters || 10000;
+    // Default to free plan limits if no user profile available
+    const characterLimit = userProfile?.limits?.maxPasteCharacters ?? 10000;
 
     if (pastedData) {
       if (characterLimit === -1 || pastedData.length <= characterLimit) {
