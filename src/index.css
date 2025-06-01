@@ -37,8 +37,14 @@
   }
 
   .card {
-    @apply bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-6
-           transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:bg-opacity-10 hover:border-primary hover:border-opacity-30;
+    @apply rounded-xl p-6 transition-all duration-300 hover:-translate-y-1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(100, 108, 255, 0.3);
   }
 }
 
