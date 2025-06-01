@@ -427,9 +427,9 @@ echo "🚀 Starting code optimization..."
 
 # Optimize JavaScript/TypeScript files
 find ./src -name "*.js" -o -name "*.ts" | while read file; do
-  echo "Optimizing $file..."
-  optimize-code "$file" --output "$file.optimized"
-  mv "$file.optimized" "$file"
+  echo "Optimizing ${"$"}file..."
+  optimize-code "${"$"}file" --output "${"$"}file.optimized"
+  mv "${"$"}file.optimized" "${"$"}file"
 done
 
 echo "✅ Code optimization complete!"
