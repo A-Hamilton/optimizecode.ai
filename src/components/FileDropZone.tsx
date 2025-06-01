@@ -5,14 +5,58 @@ interface ProcessingStats {
   count: number;
 }
 
+interface NotificationProps {
+  message: string;
+  type: "error" | "warning" | "info";
+  onClose: () => void;
+}
+
 const FileDropZone: React.FC<FileDropZoneProps> = ({
   onFilesSelected,
   files,
 }) => {
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "error" | "warning" | "info";
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+
+  const showNotification = (
+    message: string,
+    type: "error" | "warning" | "info" = "info",
+  ) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000); // Auto-hide after 5 seconds
+  };
+
+  const InlineNotification: React.FC<NotificationProps> = ({
+    message,
+    type,
+    onClose,
+  }) => {
+    const typeStyles = {
+      error: "bg-red-500/20 border-red-500/30 text-red-200",
+      warning: "bg-yellow-500/20 border-yellow-500/30 text-yellow-200",
+      info: "bg-blue-500/20 border-blue-500/30 text-blue-200",
+    };
+
+    return (
+      <div
+        className={`p-3 rounded-lg border mb-4 flex items-center justify-between ${typeStyles[type]}`}
+      >
+        <span className="text-sm">{message}</span>
+        <button
+          onClick={onClose}
+          className="ml-2 text-lg leading-none hover:opacity-70 transition-opacity"
+        >
+          ×
+        </button>
+      </div>
+    );
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
@@ -211,93 +255,159 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   };
 
   const isCodeFile = (filename: string, fullPath: string): boolean => {
-    // Enhanced exclusion patterns for better filtering
+    // STRICT exclusion patterns - exclude config, data, and non-source files
     const excludePatterns = [
+      // Test files
       ".test.",
       ".spec.",
+      ".e2e.",
+      // Config files
       ".config.",
+      ".conf.",
+      "config.",
+      "webpack.",
+      "vite.",
+      "rollup.",
+      "babel.",
+      "jest.",
+      "cypress.",
+      "tailwind.",
+      "postcss.",
+      "eslint",
+      "prettier",
+      // Minified/built files
       ".min.",
       ".bundle.",
+      ".chunk.",
+      ".compiled.",
+      // Lock files
       ".lock",
-      ".map",
-      ".d.ts",
       "package-lock.json",
       "yarn.lock",
       "pnpm-lock.yaml",
+      "poetry.lock",
+      // Version control
       ".gitignore",
       ".gitattributes",
+      ".gitmodules",
+      // Environment
       ".env",
       ".env.local",
       ".env.production",
       ".env.development",
+      ".env.staging",
+      // Documentation
       "README",
       "CHANGELOG",
       "LICENSE",
       "CONTRIBUTING",
-      ".eslintrc",
-      ".prettierrc",
-      "tsconfig.json",
-      "jsconfig.json",
-      "webpack.config",
-      "vite.config",
-      "rollup.config",
-      "babel.config",
-      ".babelrc",
-      "jest.config",
-      "cypress.config",
-      "tailwind.config",
-      "postcss.config",
+      "ROADMAP",
+      "AUTHORS",
+      "CREDITS",
+      "NOTICE",
+      "SECURITY",
+      // Data/Config formats (these are NOT source code)
+      ".json",
+      ".yml",
+      ".yaml",
+      ".toml",
+      ".ini",
+      ".cfg",
+      ".conf",
+      ".properties",
+      ".xml",
+      ".csv",
+      ".tsv",
+      ".md",
+      ".txt",
+      ".log",
+      // TypeScript declaration files
+      ".d.ts",
+      // Source maps
+      ".map",
+      // Docker
       "docker",
       "dockerfile",
       ".dockerignore",
+      // Build tools
       "makefile",
       "procfile",
+      "gruntfile",
+      "gulpfile",
+      // OS files
       ".DS_Store",
       "thumbs.db",
+      "desktop.ini",
+      // IDE files
+      ".vscode",
+      ".idea",
+      ".sublime",
     ];
 
     const lowerFilename = filename.toLowerCase();
+    const lowerFullPath = fullPath.toLowerCase();
+
+    // Check exclusion patterns
     if (
-      excludePatterns.some((pattern) =>
-        lowerFilename.includes(pattern.toLowerCase()),
+      excludePatterns.some(
+        (pattern) =>
+          lowerFilename.includes(pattern.toLowerCase()) ||
+          lowerFullPath.includes(pattern.toLowerCase()),
       )
     ) {
       return false;
     }
 
-    // Enhanced code extensions with better categorization
-    const codeExtensions = [
-      // JavaScript/TypeScript
+    // STRICT: Only allow actual source code extensions
+    const sourceCodeExtensions = [
+      // Core programming languages
       ".js",
       ".jsx",
       ".ts",
       ".tsx",
       ".mjs",
-      ".cjs",
-      // Python
+      ".cjs", // JavaScript/TypeScript
       ".py",
       ".pyw",
-      ".pyx",
-      ".pyi",
-      // Java/JVM
+      ".pyx", // Python (excluding .pyi)
       ".java",
       ".kt",
       ".scala",
       ".groovy",
-      ".clj",
-      // C/C++
+      ".clj", // JVM languages
       ".c",
       ".cpp",
       ".cc",
       ".cxx",
       ".h",
       ".hpp",
-      ".hxx",
-      // C#/.NET
+      ".hxx", // C/C++
       ".cs",
       ".vb",
-      ".fs",
-      // Web
+      ".fs", // .NET languages
+      ".php",
+      ".phtml", // PHP (excluding .php3, .php4, .php5)
+      ".rb",
+      ".rbw",
+      ".rake", // Ruby (excluding .gemspec)
+      ".go", // Go
+      ".rs", // Rust
+      ".swift", // Swift
+      ".dart", // Dart
+      ".lua", // Lua
+      ".pl",
+      ".pm", // Perl
+      ".r",
+      ".R", // R
+      ".m", // MATLAB/Objective-C
+      ".sh",
+      ".bash",
+      ".zsh",
+      ".fish", // Shell scripts
+      ".ps1",
+      ".bat",
+      ".cmd", // Windows scripts
+      // Web source files (actual code, not data)
       ".html",
       ".htm",
       ".css",
@@ -308,50 +418,11 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       ".vue",
       ".svelte",
       ".astro",
-      // PHP
-      ".php",
-      ".phtml",
-      ".php3",
-      ".php4",
-      ".php5",
-      // Ruby
-      ".rb",
-      ".rbw",
-      ".rake",
-      ".gemspec",
-      // Go
-      ".go",
-      // Rust
-      ".rs",
-      // Swift
-      ".swift",
-      // Dart
-      ".dart",
-      // Other languages
-      ".lua",
-      ".pl",
-      ".pm",
-      ".r",
-      ".m",
-      ".matlab",
-      ".sh",
-      ".bash",
-      ".zsh",
-      ".fish",
-      ".ps1",
-      ".bat",
-      ".cmd",
-      // Data/Config (relevant to coding)
-      ".json",
-      ".xml",
-      ".yaml",
-      ".yml",
-      ".toml",
-      ".ini",
+      // Query languages
       ".sql",
       ".graphql",
       ".gql",
-      // Templates
+      // Template files (actual code templates)
       ".mustache",
       ".handlebars",
       ".hbs",
@@ -360,17 +431,24 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       ".jade",
     ];
 
-    return codeExtensions.some((ext) => lowerFilename.endsWith(ext));
+    return sourceCodeExtensions.some((ext) => lowerFilename.endsWith(ext));
   };
 
   const handleFiles = async (selectedFiles: File[]): Promise<void> => {
     const codeFiles: CodeFile[] = [];
+    let filteredCount = 0;
 
     for (const file of selectedFiles) {
       // Enhanced filtering: skip very large files, non-code files
-      if (file.size > 500 * 1024) continue; // Skip files larger than 500KB
-      if (!isCodeFile(file.name, file.webkitRelativePath || file.name))
+      if (file.size > 500 * 1024) {
+        filteredCount++;
+        continue; // Skip files larger than 500KB
+      }
+
+      if (!isCodeFile(file.name, file.webkitRelativePath || file.name)) {
+        filteredCount++;
         continue;
+      }
 
       try {
         const content = await readFileAsText(file);
@@ -396,17 +474,24 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       }
     }
 
-    // Alert if no valid files found
+    // Show notification instead of alert if no valid files found
     if (codeFiles.length === 0) {
-      alert(
-        "No valid code files found. Please select files with supported extensions (.js, .py, .java, .html, .css, etc.)",
+      showNotification(
+        "No valid source code files found. Only programming language files (.js, .py, .java, .cpp, .html, .css, etc.) are supported. Config files, JSON, and documentation are excluded.",
+        "warning",
+      );
+    } else if (filteredCount > 0) {
+      showNotification(
+        `Found ${codeFiles.length} source code files. ${filteredCount} files were filtered out (config files, JSON, documentation, etc.).`,
+        "info",
       );
     }
 
-    // Alert if project seems massive
+    // Show notification for large projects
     if (selectedFiles.length > 200 && codeFiles.length < 10) {
-      alert(
-        "Large project detected. Only the most relevant code files have been processed for better performance.",
+      showNotification(
+        "Large project detected. Only the most relevant source code files have been processed for better performance.",
+        "info",
       );
     }
 
@@ -440,6 +525,15 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         Upload Code Files
       </h3>
 
+      {/* Inline Notification */}
+      {notification && (
+        <InlineNotification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
       <div
         className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
           isDragOver
@@ -462,11 +556,12 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
               Drop files or folders here
             </p>
             <p className="text-sm text-white/60 mb-6">
-              Supports JavaScript, TypeScript, Python, Java, HTML, CSS, and more
+              Only source code files: JavaScript, TypeScript, Python, Java, C++,
+              HTML, CSS, etc.
               <br />
               <span className="text-xs opacity-75">
-                Automatically filters out node_modules, build folders, and
-                config files
+                Automatically excludes config files, JSON, documentation,
+                node_modules, and build folders
               </span>
             </p>
             <div className="flex gap-4 justify-center">
@@ -476,7 +571,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
                 ref={fileInputRef}
                 onChange={handleFileSelect}
                 className="hidden"
-                accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.cs,.php,.rb,.go,.rs,.swift,.kt,.scala,.html,.css,.scss,.sass,.less,.vue,.svelte,.json,.xml,.yaml,.yml,.sql,.sh,.bash,.ps1,.r,.m,.dart,.lua,.pl,.groovy"
+                accept=".js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.cs,.php,.rb,.go,.rs,.swift,.kt,.scala,.html,.css,.scss,.sass,.less,.vue,.svelte,.sql,.sh,.bash,.ps1,.r,.m,.dart,.lua,.pl,.groovy"
               />
               <input
                 type="file"
