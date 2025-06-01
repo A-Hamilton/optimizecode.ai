@@ -297,15 +297,13 @@ const PricingPage: React.FC = () => {
                 </div>
 
                 {/* File Limit Display */}
-                <div className="file-limit-badge">
-                  {plan.fileLimit && (
-                    <div className="file-limit-badge">
-                      {plan.fileLimit === "Unlimited"
-                        ? "Unlimited files"
-                        : `Up to ${plan.fileLimit} files`}
-                    </div>
-                  )}
-              </div>
+                {plan.fileLimit && (
+                  <div className="file-limit-badge">
+                    {plan.fileLimit === "Unlimited"
+                      ? "Unlimited files"
+                      : `Up to ${plan.fileLimit} files`}
+                  </div>
+                )}
 
               <ul className="features-list">
                 {plan.features.map((feature, index) => (
