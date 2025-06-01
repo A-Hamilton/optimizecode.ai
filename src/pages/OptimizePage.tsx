@@ -14,6 +14,12 @@ interface PlanLimits {
   upgradeMessage: string;
 }
 
+interface NotificationProps {
+  message: string;
+  type: "error" | "warning" | "info" | "success";
+  onClose: () => void;
+}
+
 const OptimizePage: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [files, setFiles] = useState<CodeFile[]>([]);
@@ -21,6 +27,10 @@ const OptimizePage: React.FC = () => {
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [optimizationSummary, setOptimizationSummary] =
     useState<OptimizationSummary>({});
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "error" | "warning" | "info" | "success";
+  } | null>(null);
 
   // Simulate user plan - in a real app, this would come from authentication/subscription service
   const [currentPlan, setCurrentPlan] = useState<UserPlan>("free"); // Default to free for demo
@@ -45,12 +55,60 @@ const OptimizePage: React.FC = () => {
     },
   };
 
+  const showNotification = (
+    message: string,
+    type: "error" | "warning" | "info" | "success" = "info",
+  ) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 8000); // Auto-hide after 8 seconds
+  };
+
+  const InlineNotification: React.FC<NotificationProps> = ({
+    message,
+    type,
+    onClose,
+  }) => {
+    const typeStyles = {
+      error: "bg-red-500/20 border-red-500/30 text-red-200",
+      warning: "bg-yellow-500/20 border-yellow-500/30 text-yellow-200",
+      info: "bg-blue-500/20 border-blue-500/30 text-blue-200",
+      success: "bg-green-500/20 border-green-500/30 text-green-200",
+    };
+
+    const typeIcons = {
+      error: "❌",
+      warning: "⚠️",
+      info: "ℹ️",
+      success: "✅",
+    };
+
+    return (
+      <div
+        className={`p-4 rounded-lg border mb-6 flex items-start justify-between ${typeStyles[type]}`}
+      >
+        <div className="flex items-start space-x-3">
+          <span className="text-lg">{typeIcons[type]}</span>
+          <div className="flex-1">
+            <p className="text-sm leading-relaxed">{message}</p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="ml-3 text-xl leading-none hover:opacity-70 transition-opacity flex-shrink-0"
+        >
+          ×
+        </button>
+      </div>
+    );
+  };
+
   const handleFilesSelected = (newFiles: CodeFile[]): void => {
     const currentLimit = planLimits[currentPlan].maxFiles;
 
     if (newFiles.length > currentLimit) {
-      alert(
-        `File limit exceeded! Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? "unlimited" : currentLimit} files per optimization.\n\n${planLimits[currentPlan].upgradeMessage}`,
+      showNotification(
+        `File limit exceeded! Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? "unlimited" : currentLimit} files per optimization. ${planLimits[currentPlan].upgradeMessage}`,
+        "warning",
       );
 
       // Truncate to the allowed limit
@@ -156,7 +214,10 @@ const OptimizePage: React.FC = () => {
     });
 
     if (!hasCodeInput && !hasFileInput) {
-      alert("Please paste some code or upload files to optimize.");
+      showNotification(
+        "Please paste some code or upload files to optimize.",
+        "warning",
+      );
       return;
     }
 
@@ -164,8 +225,9 @@ const OptimizePage: React.FC = () => {
     if (hasFileInput) {
       const currentLimit = planLimits[currentPlan].maxFiles;
       if (files.length > currentLimit) {
-        alert(
-          `Cannot optimize ${files.length} files. Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? "unlimited" : currentLimit} files.\n\n${planLimits[currentPlan].upgradeMessage}`,
+        showNotification(
+          `Cannot optimize ${files.length} files. Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? "unlimited" : currentLimit} files. ${planLimits[currentPlan].upgradeMessage}`,
+          "error",
         );
         return;
       }
@@ -212,10 +274,15 @@ const OptimizePage: React.FC = () => {
         setFiles(optimizedFiles);
       }
 
+      showNotification(
+        `Optimization completed successfully! ${hasCodeInput ? "Code" : ""} ${hasCodeInput && hasFileInput ? "and" : ""} ${hasFileInput ? `${files.length} file${files.length > 1 ? "s" : ""}` : ""} optimized.`,
+        "success",
+      );
+
       console.log("Optimization completed successfully");
     } catch (error) {
       console.error("Optimization failed:", error);
-      alert("Optimization failed. Please try again.");
+      showNotification("Optimization failed. Please try again.", "error");
     } finally {
       setIsOptimizing(false);
     }
@@ -227,6 +294,7 @@ const OptimizePage: React.FC = () => {
     setOptimizedCode("");
     setIsOptimizing(false);
     setOptimizationSummary({});
+    setNotification(null);
   };
 
   const hasInput =
@@ -325,6 +393,15 @@ const OptimizePage: React.FC = () => {
                   )}
                 </p>
               </div>
+            )}
+
+            {/* Inline Notification */}
+            {notification && (
+              <InlineNotification
+                message={notification.message}
+                type={notification.type}
+                onClose={() => setNotification(null)}
+              />
             )}
           </div>
         </header>
