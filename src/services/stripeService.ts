@@ -8,15 +8,15 @@ export const getStripe = async (): Promise<Stripe | null> => {
   return await stripePromise;
 };
 
-// Stripe Price IDs (you'll create these in Stripe Dashboard)
+// Stripe Price IDs (replace with actual IDs from Stripe Dashboard)
 export const STRIPE_PRICE_IDS = {
   pro: {
-    monthly: "price_pro_monthly_id",
-    yearly: "price_pro_yearly_id",
+    monthly: "price_1234567890", // Replace with actual Stripe price ID
+    yearly: "price_1234567891", // Replace with actual Stripe price ID
   },
   unleashed: {
-    monthly: "price_unleashed_monthly_id",
-    yearly: "price_unleashed_yearly_id",
+    monthly: "price_1234567892", // Replace with actual Stripe price ID
+    yearly: "price_1234567893", // Replace with actual Stripe price ID
   },
 } as const;
 
