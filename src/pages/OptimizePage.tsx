@@ -5,6 +5,15 @@ import ResultsDisplay from "../components/ResultsDisplay";
 import { CodeFile, OptimizationSummary } from "../types";
 import "./OptimizePage.css";
 
+// User plan types
+type UserPlan = "free" | "pro" | "unleashed";
+
+interface PlanLimits {
+  maxFiles: number;
+  name: string;
+  upgradeMessage: string;
+}
+
 const OptimizePage: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [files, setFiles] = useState<CodeFile[]>([]);
@@ -12,6 +21,46 @@ const OptimizePage: React.FC = () => {
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [optimizationSummary, setOptimizationSummary] =
     useState<OptimizationSummary>({});
+
+  // Simulate user plan - in a real app, this would come from authentication/subscription service
+  const [currentPlan, setCurrentPlan] = useState<UserPlan>("free"); // Default to free for demo
+
+  const planLimits: Record<UserPlan, PlanLimits> = {
+    free: {
+      maxFiles: 2,
+      name: "Free",
+      upgradeMessage:
+        "Upgrade to Pro to optimize up to 50 files at once, or Unleashed for unlimited files.",
+    },
+    pro: {
+      maxFiles: 50,
+      name: "Pro",
+      upgradeMessage:
+        "Upgrade to Unleashed for unlimited file optimization and advanced features.",
+    },
+    unleashed: {
+      maxFiles: Infinity,
+      name: "Unleashed",
+      upgradeMessage: "You're on the Unleashed plan with unlimited everything!",
+    },
+  };
+
+  const handleFilesSelected = (newFiles: CodeFile[]): void => {
+    const currentLimit = planLimits[currentPlan].maxFiles;
+
+    if (newFiles.length > currentLimit) {
+      alert(
+        `File limit exceeded! Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? "unlimited" : currentLimit} files per optimization.\n\n${planLimits[currentPlan].upgradeMessage}`,
+      );
+
+      // Truncate to the allowed limit
+      const limitedFiles = newFiles.slice(0, currentLimit);
+      setFiles(limitedFiles);
+      return;
+    }
+
+    setFiles(newFiles);
+  };
 
   const simulateOptimization = async (
     inputCode: string,
@@ -111,6 +160,17 @@ const OptimizePage: React.FC = () => {
       return;
     }
 
+    // Check file limits before optimization
+    if (hasFileInput) {
+      const currentLimit = planLimits[currentPlan].maxFiles;
+      if (files.length > currentLimit) {
+        alert(
+          `Cannot optimize ${files.length} files. Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? "unlimited" : currentLimit} files.\n\n${planLimits[currentPlan].upgradeMessage}`,
+        );
+        return;
+      }
+    }
+
     setIsOptimizing(true);
     console.log("Starting optimization...");
 
@@ -172,6 +232,8 @@ const OptimizePage: React.FC = () => {
   const hasInput =
     (code && code.trim().length > 0) || (files && files.length > 0);
 
+  const isAtFileLimit = files.length >= planLimits[currentPlan].maxFiles;
+
   return (
     <div className="optimize-page">
       <div className="optimize-container">
@@ -181,6 +243,90 @@ const OptimizePage: React.FC = () => {
             AI-powered code optimization for better performance, readability,
             and maintainability
           </p>
+
+          {/* Plan indicator and file limit display */}
+          <div className="plan-indicator">
+            <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg mb-6">
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-medium text-white/90">
+                  Current Plan:{" "}
+                  <span className="text-primary font-semibold">
+                    {planLimits[currentPlan].name}
+                  </span>
+                </span>
+                <span className="text-xs text-white/60">
+                  📁 {files.length}/
+                  {planLimits[currentPlan].maxFiles === Infinity
+                    ? "∞"
+                    : planLimits[currentPlan].maxFiles}{" "}
+                  files
+                </span>
+              </div>
+
+              {/* Plan switcher for demo purposes */}
+              <div className="flex space-x-2">
+                <button
+                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === "free" ? "bg-primary text-white" : "bg-white/10 text-white/70 hover:bg-white/20"}`}
+                  onClick={() => setCurrentPlan("free")}
+                >
+                  Free
+                </button>
+                <button
+                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === "pro" ? "bg-primary text-white" : "bg-white/10 text-white/70 hover:bg-white/20"}`}
+                  onClick={() => setCurrentPlan("pro")}
+                >
+                  Pro
+                </button>
+                <button
+                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === "unleashed" ? "bg-primary text-white" : "bg-white/10 text-white/70 hover:bg-white/20"}`}
+                  onClick={() => setCurrentPlan("unleashed")}
+                >
+                  Unleashed
+                </button>
+              </div>
+            </div>
+
+            {/* File limit warning */}
+            {isAtFileLimit && planLimits[currentPlan].maxFiles !== Infinity && (
+              <div className="p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg mb-6">
+                <p className="text-sm text-yellow-200">
+                  ⚠️ You've reached your file limit of{" "}
+                  {planLimits[currentPlan].maxFiles} files.
+                  {currentPlan === "free" && (
+                    <span>
+                      {" "}
+                      <a
+                        href="/pricing"
+                        className="text-yellow-100 underline hover:text-white"
+                      >
+                        Upgrade to Pro
+                      </a>{" "}
+                      for 50 files or{" "}
+                      <a
+                        href="/pricing"
+                        className="text-yellow-100 underline hover:text-white"
+                      >
+                        Unleashed
+                      </a>{" "}
+                      for unlimited files.
+                    </span>
+                  )}
+                  {currentPlan === "pro" && (
+                    <span>
+                      {" "}
+                      <a
+                        href="/pricing"
+                        className="text-yellow-100 underline hover:text-white"
+                      >
+                        Upgrade to Unleashed
+                      </a>{" "}
+                      for unlimited files.
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
         </header>
 
         <main className="optimize-main">
@@ -191,7 +337,7 @@ const OptimizePage: React.FC = () => {
               <span>OR</span>
             </div>
 
-            <FileDropZone files={files} onFilesSelected={setFiles} />
+            <FileDropZone files={files} onFilesSelected={handleFilesSelected} />
 
             <div className="action-controls">
               <button
