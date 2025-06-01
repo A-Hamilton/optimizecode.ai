@@ -19,35 +19,38 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import ProfilePage from "./pages/ProfilePage";
 import { AuthProvider } from "./contexts/AuthContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import Footer from "./components/Footer";
 
 function App(): JSX.Element {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen flex flex-col">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/optimize" element={<OptimizePage />} />
-            <Route path="/product" element={<ProductPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/docs" element={<DocsPage />} />
-            <Route path="/solutions" element={<SolutionsPage />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/security" element={<SecurityPage />} />
-            <Route path="/support" element={<SupportPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/subscription" element={<SubscriptionPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-          </Routes>
-          <Footer />
-        </div>
-      </Router>
+      <NotificationProvider>
+        <Router>
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/optimize" element={<OptimizePage />} />
+              <Route path="/product" element={<ProductPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/docs" element={<DocsPage />} />
+              <Route path="/solutions" element={<SolutionsPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/security" element={<SecurityPage />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/subscription" element={<SubscriptionPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+            </Routes>
+            <Footer />
+          </div>
+        </Router>
+      </NotificationProvider>
     </AuthProvider>
   );
 }
