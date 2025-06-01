@@ -27,34 +27,35 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Completely reset body and html spacing */
+  /* EXTREME measure to eliminate persistent gap */
+  .footer {
+    margin-top: -200px !important;
+    padding-top: 200px !important;
+    position: relative;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.8) !important;
+  }
+
+  /* Override ALL possible spacing sources */
   html,
-  body {
+  body,
+  #root,
+  #root > *,
+  #root > * > * {
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* Target element immediately before footer */
-  .footer::before {
-    content: "";
-    display: block;
-    margin-top: -50px;
-    height: 50px;
-    position: relative;
-    z-index: -1;
-  }
-
-  /* Use sibling selector to target element before footer */
-  * + .footer {
-    margin-top: -50px !important;
-  }
-
-  /* Adjust footer padding to compensate */
-  .footer {
-    padding-top: 50px !important;
-    margin-top: 0 !important;
-    position: relative;
-    z-index: 1;
+  /* Force all page containers to have zero bottom spacing */
+  .homepage,
+  .solutions-page,
+  .product-page,
+  .pricing-page,
+  [class*="page"],
+  section:last-child,
+  div:last-child {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 }
 
