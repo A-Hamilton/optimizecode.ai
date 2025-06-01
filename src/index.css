@@ -27,25 +27,22 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Prevent excessive spacing before footer */
-  main {
-    margin-bottom: 0;
-  }
-
-  /* Force no spacing between content and footer */
-  .pricing-teaser + * {
+  /* Completely eliminate gap between any page content and footer */
+  body > div > div:last-child,
+  #root > div > div:last-child {
     margin-top: 0 !important;
   }
 
-  /* Eliminate any gap before footer */
+  /* Force footer to stick directly to content */
   .footer {
     margin-top: 0 !important;
+    position: relative;
+    top: -1px;
   }
 
-  /* Remove any default spacing from sections */
-  section:last-child {
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
+  /* Remove any default spacing that might create gaps */
+  * + .footer {
+    margin-top: 0 !important;
   }
 }
 
