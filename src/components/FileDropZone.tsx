@@ -458,9 +458,21 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
 
   return (
     <div className="mb-8">
-      <h3 className="text-lg font-semibold text-primary mb-4 text-left">
-        Upload Code Files
-      </h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-primary">
+          Upload Code Files
+        </h3>
+        <div className="text-sm text-white/60">
+          {maxFiles === -1 ? (
+            <span className="text-green-400">✨ Unlimited files</span>
+          ) : (
+            <span>
+              {files.length}/{maxFiles} files • Max{" "}
+              {(maxFileSize / (1024 * 1024)).toFixed(0)}MB each
+            </span>
+          )}
+        </div>
+      </div>
 
       {/* Inline Notification */}
       {notification && (
@@ -498,6 +510,12 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
             <p className="text-sm text-white/60 mb-6">
               <strong>Source code only:</strong> .js, .py, .java, .cpp, .html,
               .css, etc.
+              <br />
+              <span className="text-xs opacity-75">
+                <strong>Plan limits:</strong>{" "}
+                {maxFiles === -1 ? "Unlimited files" : `${maxFiles} files max`}{" "}
+                • {(maxFileSize / (1024 * 1024)).toFixed(0)}MB per file
+              </span>
               <br />
               <span className="text-xs opacity-75">
                 <strong>⚠️ Automatically blocks:</strong> node_modules, build
