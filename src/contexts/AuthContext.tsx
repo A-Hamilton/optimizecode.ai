@@ -8,9 +8,12 @@ import React, {
 } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth, isDemoMode } from "../services/firebase";
+import { UserProfile, SubscriptionPlan } from "../types/user";
+import { UserService } from "../services/userService";
 
 interface AuthContextType {
   currentUser: User | null;
+  userProfile: UserProfile | null;
   loading: boolean;
   login: (
     email: string,
@@ -27,6 +30,15 @@ interface AuthContextType {
   resetPassword: (
     email: string,
   ) => Promise<{ success: boolean; error: string | null }>;
+  changePlan: (
+    newPlan: SubscriptionPlan,
+  ) => Promise<{ success: boolean; error: string | null }>;
+  trackUsage: () => Promise<{
+    success: boolean;
+    remainingFiles: number;
+    error?: string;
+  }>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,6 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [demoUser, setDemoUser] = useState<User | null>(null);
   const [demoLoading, setDemoLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Use Firebase auth in production, demo auth in development
   const currentUser = isDemoMode() ? demoUser : user;
@@ -58,8 +71,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!isDemoMode() && auth) {
       const unsubscribe = onAuthStateChanged(
         auth,
-        (user) => {
+        async (user) => {
           setUser(user);
+          if (user) {
+            await loadUserProfile(user.uid);
+          } else {
+            setUserProfile(null);
+          }
           setLoading(false);
         },
         (error) => {
@@ -75,6 +93,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  // Load or create user profile
+  const loadUserProfile = async (uid: string) => {
+    try {
+      let profile = await UserService.getUserProfile(uid);
+
+      // If no profile exists, create one (new user)
+      if (!profile && currentUser) {
+        profile = await UserService.createUserProfile(currentUser, "free");
+      }
+
+      if (profile) {
+        // Update last login time
+        await UserService.updateLastLogin(uid);
+        profile.lastLoginAt = new Date();
+        setUserProfile(profile);
+      }
+    } catch (error) {
+      console.error("Error loading user profile:", error);
+    }
+  };
+
+  // Refresh user profile
+  const refreshProfile = async () => {
+    if (currentUser) {
+      await loadUserProfile(currentUser.uid);
+    }
+  };
+
   const login = async (email: string, password: string) => {
     if (isDemoMode()) {
       setDemoLoading(true);
@@ -82,6 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await demoAuth.signInWithEmail(email, password);
       if (result.user) {
         setDemoUser(result.user);
+        await loadUserProfile(result.user.uid);
       }
       setDemoLoading(false);
       return result;
@@ -106,6 +153,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
       if (result.user) {
         setDemoUser(result.user);
+        await UserService.createUserProfile(result.user, "free");
+        await loadUserProfile(result.user.uid);
       }
       setDemoLoading(false);
       return result;
@@ -122,6 +171,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await demoAuth.signInWithGoogle();
       if (result.user) {
         setDemoUser(result.user);
+        // Check if profile exists, create if new user
+        let profile = await UserService.getUserProfile(result.user.uid);
+        if (!profile) {
+          await UserService.createUserProfile(result.user, "free");
+        }
+        await loadUserProfile(result.user.uid);
       }
       setDemoLoading(false);
       return result;
@@ -138,6 +193,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await demoAuth.signInWithGithub();
       if (result.user) {
         setDemoUser(result.user);
+        // Check if profile exists, create if new user
+        let profile = await UserService.getUserProfile(result.user.uid);
+        if (!profile) {
+          await UserService.createUserProfile(result.user, "free");
+        }
+        await loadUserProfile(result.user.uid);
       }
       setDemoLoading(false);
       return result;
@@ -150,10 +211,65 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     if (isDemoMode()) {
       setDemoUser(null);
+      setUserProfile(null);
       return { success: true, error: null };
     } else {
       const { logout: firebaseLogout } = await import("../services/firebase");
-      return await firebaseLogout();
+      const result = await firebaseLogout();
+      if (result.success) {
+        setUserProfile(null);
+      }
+      return result;
+    }
+  };
+
+  // Change user's subscription plan
+  const changePlan = async (newPlan: SubscriptionPlan) => {
+    if (!currentUser) {
+      return { success: false, error: "User not authenticated" };
+    }
+
+    try {
+      const updatedProfile = await UserService.changePlan(
+        currentUser.uid,
+        newPlan,
+      );
+      if (updatedProfile) {
+        setUserProfile(updatedProfile);
+        return { success: true, error: null };
+      } else {
+        return { success: false, error: "Failed to update plan" };
+      }
+    } catch (error) {
+      return { success: false, error: "Failed to update plan" };
+    }
+  };
+
+  // Track file optimization usage
+  const trackUsage = async () => {
+    if (!currentUser) {
+      return {
+        success: false,
+        remainingFiles: 0,
+        error: "User not authenticated",
+      };
+    }
+
+    try {
+      const result = await UserService.trackUsage(currentUser.uid);
+
+      // Refresh user profile to get updated usage
+      if (result.success) {
+        await refreshProfile();
+      }
+
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        remainingFiles: 0,
+        error: "Failed to track usage",
+      };
     }
   };
 
@@ -172,6 +288,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     currentUser,
+    userProfile,
     loading: isLoading,
     login,
     signup,
@@ -179,6 +296,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loginWithGithub,
     logout,
     resetPassword,
+    changePlan,
+    trackUsage,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
