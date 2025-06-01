@@ -241,7 +241,7 @@ const OptimizePage: React.FC = () => {
                           ? PLAN_DETAILS[userProfile.subscription.plan].name
                           : "Free"}
                       </span>
-                      Plan • Files:
+                      Plan • Optimizations:
                       <span
                         className={`usage-mini ${isLimitReached ? "limit-reached" : ""}`}
                       >
