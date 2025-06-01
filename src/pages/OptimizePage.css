@@ -35,14 +35,18 @@
   line-height: 1.6;
 }
 
+/* FIXED: Grid layout with proper constraints */
 .optimize-main {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 3rem;
   margin-bottom: 3rem;
-  align-items: start; /* Prevent stretching */
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
 }
 
+/* FIXED: Input section with proper containment */
 .input-section {
   display: flex;
   flex-direction: column;
@@ -51,10 +55,13 @@
   padding: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
-  /* IMPORTANT: Prevent overflow */
+  /* CRITICAL: Proper containment */
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow: hidden;
-  min-width: 0; /* Allow flex item to shrink */
   box-sizing: border-box;
+  position: relative;
 }
 
 /* Section Divider Styling */
@@ -64,6 +71,7 @@
   justify-content: center;
   margin: 2rem 0;
   position: relative;
+  width: 100%;
 }
 
 .section-divider::before {
@@ -86,102 +94,99 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
 }
 
-/* Action Controls Styling - FIXED LAYOUT */
+/* FIXED: Action Controls with strict containment */
 .action-controls {
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  /* CRITICAL: Prevent button overflow */
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
-}
 
-/* Button Container Fix */
-.action-controls {
+  /* CRITICAL: Strict containment */
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap; /* Allow wrapping on small screens */
+  flex-wrap: nowrap;
+  overflow: hidden;
+
+  /* Ensure it stays within parent */
+  position: relative;
+  left: 0;
+  right: 0;
 }
 
-/* Button Base Styles - FIXED SIZING */
+/* FIXED: Button sizing and constraints */
 .action-controls button {
+  /* CRITICAL: Prevent overflow */
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: calc(50% - 0.5rem);
+
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   background-clip: padding-box;
-  /* IMPORTANT: Prevent button from growing beyond container */
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: 100%;
   box-sizing: border-box;
+
+  /* Prevent text overflow */
   white-space: nowrap;
   text-overflow: ellipsis;
+
+  /* Remove any positioning that could cause overflow */
+  transform: none;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
 }
 
-/* Optimize Button - Main CTA */
+/* Primary button (Optimize) */
 .action-controls button:first-child {
-  flex: 2; /* Take more space but not overflow */
-  min-width: 140px; /* Minimum readable width */
-}
-
-/* Reset Button */
-.action-controls button:last-child {
-  flex: 1;
-  min-width: 100px;
-  max-width: 150px; /* Prevent it from getting too wide */
-}
-
-.action-controls button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.05)
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.action-controls button:hover::before {
-  opacity: 1;
-}
-
-/* Optimize Button Specific Styles */
-.action-controls button:first-child:not(:disabled) {
   background: linear-gradient(135deg, #646cff, #747bff);
-  position: relative;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
 }
 
-.action-controls button:first-child:not(:disabled)::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.1)
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.action-controls button:first-child:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(100, 108, 255, 0.4);
 }
 
-.action-controls button:first-child:not(:disabled):hover::after {
-  opacity: 1;
+.action-controls button:first-child:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Secondary button (Reset) */
+.action-controls button:last-child {
+  background: rgba(239, 68, 68, 0.2);
+  color: rgb(252, 165, 165);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.action-controls button:last-child:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
 }
 
 /* Loading Animation */
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(100, 108, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(100, 108, 255, 0.6);
+    box-shadow: 0 6px 20px rgba(100, 108, 255, 0.5);
   }
 }
 
@@ -189,21 +194,19 @@
   animation: pulse-glow 2s infinite;
 }
 
-/* Results Section - Also prevent overflow */
+/* Results section */
 .optimize-main > div:last-child {
-  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
+  overflow: hidden;
 }
 
-/* Responsive Design - IMPROVED */
+/* Responsive Design */
 @media (max-width: 1200px) {
   .optimize-main {
     grid-template-columns: 1fr;
     gap: 2rem;
-  }
-
-  .input-section {
-    max-width: 100%;
   }
 }
 
@@ -222,9 +225,8 @@
   }
 
   .action-controls button {
-    flex: none;
-    width: 100%;
     max-width: 100%;
+    flex: none;
   }
 
   .input-section {
@@ -246,7 +248,7 @@
   }
 
   .action-controls button {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem;
     font-size: 0.875rem;
   }
 }
@@ -280,24 +282,22 @@
   z-index: -1;
 }
 
-/* Additional overflow prevention for all containers */
-* {
+/* Global containment rules */
+.optimize-main * {
   box-sizing: border-box;
 }
 
-.optimize-main * {
+/* Prevent any absolute positioning issues */
+.input-section * {
+  position: relative;
   max-width: 100%;
 }
 
-/* Ensure grid doesn't create overflow */
-.optimize-main {
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
+/* Additional safety measures */
+.action-controls {
+  contain: layout style;
 }
 
-/* File drop zone container fix */
-.input-section > * {
-  max-width: 100%;
-  overflow-wrap: break-word;
+.action-controls button {
+  contain: layout style;
 }
