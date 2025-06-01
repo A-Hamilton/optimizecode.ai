@@ -60,15 +60,24 @@ const PricingPage: React.FC = () => {
       fileLimit: 2,
       features: [
         {
-          text: "100 optimizations per month",
+          text: "10 optimizations per day",
           hasTooltip: true,
-          tooltip:
-            "Code optimization requests including both individual files and batch operations",
+          tooltip: "You can perform up to 10 code optimizations each day",
         },
         {
-          text: "Max 2 files per optimization",
+          text: "Upload up to 2 files",
           hasTooltip: true,
-          tooltip: "You can upload up to 2 code files at once for optimization",
+          tooltip: "You can upload up to 2 code files for each optimization",
+        },
+        {
+          text: "Copy & paste up to 10,000 characters",
+          hasTooltip: true,
+          tooltip: "Paste code directly with a 10,000 character limit",
+        },
+        {
+          text: "1MB file size limit",
+          hasTooltip: true,
+          tooltip: "Each uploaded file can be up to 1MB in size",
         },
         {
           text: "Basic language support",
@@ -80,8 +89,6 @@ const PricingPage: React.FC = () => {
           hasTooltip: true,
           tooltip: "Access to community forums and documentation",
         },
-        { text: "Basic analytics", hasTooltip: false },
-        { text: "Standard optimization speed", hasTooltip: false },
       ],
       cta: "Get Started Free",
       ctaStyle: "secondary",
@@ -95,12 +102,12 @@ const PricingPage: React.FC = () => {
       fileLimit: 50,
       features: [
         {
-          text: "Unlimited optimizations",
+          text: "300 optimizations per day",
           hasTooltip: true,
-          tooltip: "No limits on the number of code optimization requests",
+          tooltip: "You can perform up to 300 code optimizations each day",
         },
         {
-          text: "Max 50 files per optimization",
+          text: "Upload up to 50 files",
           hasTooltip: true,
           tooltip: "Upload up to 50 code files at once for batch optimization",
         },
