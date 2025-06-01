@@ -4,7 +4,15 @@ import { CodeInputProps } from "../types";
 import { useAuth } from "../contexts/AuthContext";
 
 const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
-  const { userProfile } = useAuth();
+  // Make useAuth safe by handling potential provider issues
+  let userProfile = null;
+  try {
+    const auth = useAuth();
+    userProfile = auth?.userProfile;
+  } catch (error) {
+    // If AuthProvider is not available, use default limits
+    console.warn("AuthProvider not available, using default limits");
+  }
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
