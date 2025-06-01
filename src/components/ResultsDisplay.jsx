@@ -367,16 +367,16 @@ function ResultsDisplay({
         )}
 
         {/* Show optimizations for pasted code only when on code tab */}
-        {activeTab === "code" &&
-          optimizedCode &&
-          optimizationSummary &&
-          optimizationSummary["pasted-code"] && (
-            <div className="optimization-summary">
-              <h4 className="summary-title">
-                ⚡ Optimizations Applied to Pasted Code
-              </h4>
-              <div className="summary-content">
-                <div className="file-summary">
+        {activeTab === "code" && optimizedCode && (
+          <div className="optimization-summary">
+            <h4 className="summary-title">
+              ⚡ Optimizations Applied to Pasted Code
+            </h4>
+            <div className="summary-content">
+              <div className="file-summary">
+                {optimizationSummary &&
+                optimizationSummary["pasted-code"] &&
+                optimizationSummary["pasted-code"].length > 0 ? (
                   <div className="optimizations-grid">
                     {optimizationSummary["pasted-code"].map((opt, index) => (
                       <div key={index} className="optimization-tag">
@@ -384,10 +384,19 @@ function ResultsDisplay({
                       </div>
                     ))}
                   </div>
-                </div>
+                ) : (
+                  <div className="no-optimizations-message">
+                    <span className="no-opt-icon">ℹ️</span>
+                    <span>
+                      No optimizations were needed - your code is already
+                      well-optimized!
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
+        )}
       </div>
     </div>
   );
