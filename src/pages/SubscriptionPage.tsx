@@ -1,5 +1,6 @@
 // Updated for TypeScript migration
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
   UserSubscription,
@@ -8,16 +9,32 @@ import {
   SUBSCRIPTION_PLANS,
   SubscriptionPlan,
 } from "../types/subscription";
+import { useNotificationHelpers } from "../contexts/NotificationContext";
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Badge,
+  EmptyState,
+  LoadingSpinner,
+} from "../components/ui";
+import { PageLoading } from "../components/ui/LoadingStates";
 import "./SubscriptionPage.css";
 
 const SubscriptionPage: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
+  const navigate = useNavigate();
+  const { showSuccess, showError, showWarning } = useNotificationHelpers();
+
   const [subscription, setSubscription] = useState<UserSubscription | null>(
     null,
   );
   const [usage, setUsage] = useState<UsageStats | null>(null);
   const [billingHistory, setBillingHistory] = useState<BillingHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
@@ -25,156 +42,207 @@ const SubscriptionPage: React.FC = () => {
   );
 
   useEffect(() => {
-    loadSubscriptionData();
+    // Check authentication status first
+    const checkAuthAndLoadData = async () => {
+      try {
+        setLoading(true);
+
+        // Wait a moment for auth to initialize
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        if (!currentUser) {
+          // User is not logged in
+          setAuthChecked(true);
+          setLoading(false);
+          return;
+        }
+
+        // User is logged in, load subscription data
+        await loadSubscriptionData();
+        setAuthChecked(true);
+      } catch (error) {
+        console.error("Error checking auth or loading data:", error);
+        showError("Failed to load subscription information");
+        setAuthChecked(true);
+        setLoading(false);
+      }
+    };
+
+    checkAuthAndLoadData();
   }, [currentUser]);
 
   const loadSubscriptionData = async () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
 
-    setLoading(true);
-
-    // Simulate API calls - In real app, these would be actual API calls
     try {
-      // Mock subscription data
+      // Mock subscription data - In real app, these would be actual API calls
       const mockSubscription: UserSubscription = {
         id: "sub_demo_123",
         userId: currentUser.uid,
-        planId: "pro-monthly",
+        planId:
+          userProfile?.subscription?.plan === "pro" ? "pro-monthly" : "free",
         status: "active",
         currentPeriodStart: new Date(2024, 0, 1),
         currentPeriodEnd: new Date(2024, 1, 1),
         cancelAtPeriodEnd: false,
         createdAt: new Date(2024, 0, 1),
         updatedAt: new Date(),
-        plan: SUBSCRIPTION_PLANS.find((p) => p.id === "pro-monthly")!,
+        plan:
+          SUBSCRIPTION_PLANS.find(
+            (p) =>
+              p.id ===
+              (userProfile?.subscription?.plan === "pro"
+                ? "pro-monthly"
+                : "free"),
+          ) || SUBSCRIPTION_PLANS[0],
       };
 
       const mockUsage: UsageStats = {
-        filesOptimized: 23,
-        filesRemaining: 27,
-        totalOptimizations: 156,
-        lastOptimization: new Date(2024, 0, 15),
+        filesOptimized: userProfile?.usage?.optimizationsToday || 0,
+        filesRemaining:
+          userProfile?.limits?.optimizationsPerDay === -1
+            ? 999
+            : (userProfile?.limits?.optimizationsPerDay || 10) -
+              (userProfile?.usage?.optimizationsToday || 0),
+        totalOptimizations: userProfile?.usage?.totalOptimizations || 0,
+        lastOptimization: userProfile?.usage?.lastOptimizationDate
+          ? new Date(userProfile.usage.lastOptimizationDate)
+          : undefined,
       };
 
       const mockBilling: BillingHistory[] = [
         {
-          id: "inv_001",
-          amount: 29.0,
-          currency: "USD",
+          id: "inv_demo_001",
+          subscriptionId: "sub_demo_123",
+          amount: 2900,
+          currency: "usd",
           status: "paid",
           date: new Date(2024, 0, 1),
-          description: "Pro Plan - Monthly",
           downloadUrl: "#",
+          description: "Pro Plan - Monthly",
         },
         {
-          id: "inv_002",
-          amount: 29.0,
-          currency: "USD",
+          id: "inv_demo_002",
+          subscriptionId: "sub_demo_123",
+          amount: 2900,
+          currency: "usd",
           status: "paid",
           date: new Date(2023, 11, 1),
-          description: "Pro Plan - Monthly",
           downloadUrl: "#",
+          description: "Pro Plan - Monthly",
         },
       ];
 
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       setSubscription(mockSubscription);
       setUsage(mockUsage);
       setBillingHistory(mockBilling);
     } catch (error) {
-      console.error("Failed to load subscription data:", error);
+      console.error("Error loading subscription data:", error);
+      showError("Failed to load subscription data");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancelSubscription = async () => {
-    if (!subscription) return;
-
-    try {
-      // Simulate API call to cancel subscription
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setSubscription({
-        ...subscription,
-        cancelAtPeriodEnd: true,
-        updatedAt: new Date(),
-      });
-
-      setShowCancelModal(false);
-    } catch (error) {
-      console.error("Failed to cancel subscription:", error);
+  const handleUpgrade = (planId: string) => {
+    const plan = SUBSCRIPTION_PLANS.find((p) => p.id === planId);
+    if (plan) {
+      setSelectedPlan(plan);
+      setShowUpgradeModal(true);
     }
   };
 
-  const handleUpgrade = async (plan: SubscriptionPlan) => {
+  const handleCancelSubscription = async () => {
     try {
-      // Simulate API call to upgrade subscription
+      // In real app, this would call the cancellation API
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      showWarning(
+        "Subscription will be cancelled at the end of your current billing period",
+      );
+      setShowCancelModal(false);
+
+      // Update subscription state
       if (subscription) {
         setSubscription({
           ...subscription,
-          planId: plan.id,
-          plan: plan,
-          updatedAt: new Date(),
+          cancelAtPeriodEnd: true,
         });
       }
-
-      setShowUpgradeModal(false);
-      setSelectedPlan(null);
     } catch (error) {
-      console.error("Failed to upgrade subscription:", error);
+      showError("Failed to cancel subscription");
     }
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  const handleGoToLogin = () => {
+    navigate("/login");
   };
 
-  const formatCurrency = (amount: number, currency: string = "USD") => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
+  const handleGoToPricing = () => {
+    navigate("/pricing");
   };
 
-  if (loading) {
+  // Show loading while checking authentication
+  if (!authChecked || (currentUser && loading)) {
+    return (
+      <PageLoading message="Loading your subscription details..." size="lg" />
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!currentUser) {
     return (
       <div className="subscription-page">
-        <div className="subscription-container">
-          <div className="loading-state">
-            <div className="spinner-large"></div>
-            <p>Loading your subscription details...</p>
-          </div>
+        <div className="container">
+          <EmptyState
+            icon={<div className="text-6xl mb-4">🔐</div>}
+            title="Login Required"
+            description="You need to be logged in to view your subscription details"
+            action={
+              <div className="flex gap-4 justify-center">
+                <Button variant="primary" onClick={handleGoToLogin}>
+                  Log In
+                </Button>
+                <Button variant="outline" onClick={handleGoToPricing}>
+                  View Pricing
+                </Button>
+              </div>
+            }
+          />
         </div>
       </div>
     );
   }
 
-  if (!subscription) {
+  // Show error state if data failed to load
+  if (!loading && !subscription) {
     return (
       <div className="subscription-page">
-        <div className="subscription-container">
-          <div className="no-subscription">
-            <h1>No Active Subscription</h1>
-            <p>
-              You don't have an active subscription. Choose a plan to get
-              started!
-            </p>
-            <button
-              className="btn-primary"
-              onClick={() => setShowUpgradeModal(true)}
-            >
-              View Plans
-            </button>
-          </div>
+        <div className="container">
+          <EmptyState
+            icon={<div className="text-6xl mb-4">⚠️</div>}
+            title="Failed to Load Subscription"
+            description="We couldn't load your subscription information. Please try again."
+            action={
+              <div className="flex gap-4 justify-center">
+                <Button
+                  variant="primary"
+                  onClick={() => window.location.reload()}
+                >
+                  Retry
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/profile")}>
+                  Go to Profile
+                </Button>
+              </div>
+            }
+          />
         </div>
       </div>
     );
@@ -182,165 +250,207 @@ const SubscriptionPage: React.FC = () => {
 
   return (
     <div className="subscription-page">
-      <div className="subscription-container">
+      <div className="container">
+        {/* Header */}
         <div className="subscription-header">
-          <h1>Manage Subscription</h1>
-          <p>View and manage your OptimizeCode.ai subscription</p>
+          <div>
+            <h1 className="page-title">Subscription Management</h1>
+            <p className="page-subtitle">
+              Manage your plan, usage, and billing information
+            </p>
+          </div>
+
+          {subscription && subscription.plan.id !== "free" && (
+            <div className="subscription-status">
+              <Badge
+                variant={
+                  subscription.status === "active" ? "success" : "warning"
+                }
+              >
+                {subscription.status.charAt(0).toUpperCase() +
+                  subscription.status.slice(1)}
+              </Badge>
+              {subscription.cancelAtPeriodEnd && (
+                <Badge variant="warning">
+                  Cancels {subscription.currentPeriodEnd.toLocaleDateString()}
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Current Plan */}
-        <div className="current-plan-section">
-          <div className="plan-card current">
-            <div className="plan-header">
-              <div className="plan-info">
-                <h2>{subscription.plan.name} Plan</h2>
-                <div className="plan-price">
-                  {formatCurrency(subscription.plan.price)}
-                  <span className="interval">
-                    /{subscription.plan.interval}
-                  </span>
-                </div>
-                <div className={`plan-status ${subscription.status}`}>
-                  {subscription.cancelAtPeriodEnd
-                    ? "Cancelling"
-                    : subscription.status}
-                </div>
-              </div>
-              <div className="plan-actions">
-                {!subscription.cancelAtPeriodEnd && (
-                  <>
-                    <button
-                      className="btn-secondary"
-                      onClick={() => setShowUpgradeModal(true)}
-                    >
-                      Change Plan
-                    </button>
-                    <button
-                      className="btn-danger"
-                      onClick={() => setShowCancelModal(true)}
-                    >
-                      Cancel Subscription
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
+        <div className="subscription-grid">
+          {/* Current Plan */}
+          <Card>
+            <CardHeader>
+              <h2>Current Plan</h2>
+              <p>Your active subscription details</p>
+            </CardHeader>
+            <CardBody>
+              {subscription && (
+                <div className="current-plan">
+                  <div className="plan-info">
+                    <h3 className="plan-name">{subscription.plan.name}</h3>
+                    <div className="plan-price">
+                      ${subscription.plan.price.monthly}/month
+                    </div>
+                    <p className="plan-description">
+                      {subscription.plan.description}
+                    </p>
+                  </div>
 
-            <div className="plan-details">
-              <div className="billing-cycle">
-                <h3>Billing Cycle</h3>
-                <p>
-                  Current period: {formatDate(subscription.currentPeriodStart)}{" "}
-                  - {formatDate(subscription.currentPeriodEnd)}
-                </p>
-                {subscription.cancelAtPeriodEnd && (
-                  <p className="cancel-notice">
-                    Your subscription will end on{" "}
-                    {formatDate(subscription.currentPeriodEnd)}
-                  </p>
-                )}
-              </div>
+                  <div className="plan-features">
+                    <h4>Plan Features</h4>
+                    <ul>
+                      {subscription.plan.features.map((feature, index) => (
+                        <li key={index} className="feature-item">
+                          <span className="feature-icon">✓</span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-              <div className="plan-features">
-                <h3>Plan Features</h3>
-                <ul>
-                  {subscription.plan.features.map((feature, index) => (
-                    <li key={index}>
-                      <svg
-                        className="check-icon"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                          stroke="#22c55e"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Usage Statistics */}
-        {usage && (
-          <div className="usage-section">
-            <h2>Usage This Month</h2>
-            <div className="usage-grid">
-              <div className="usage-card">
-                <div className="usage-number">{usage.filesOptimized}</div>
-                <div className="usage-label">Files Optimized</div>
-              </div>
-              <div className="usage-card">
-                <div className="usage-number">
-                  {subscription.plan.fileLimit === -1
-                    ? "∞"
-                    : usage.filesRemaining}
-                </div>
-                <div className="usage-label">Files Remaining</div>
-              </div>
-              <div className="usage-card">
-                <div className="usage-number">{usage.totalOptimizations}</div>
-                <div className="usage-label">Total Optimizations</div>
-              </div>
-            </div>
-
-            {subscription.plan.fileLimit !== -1 && (
-              <div className="usage-progress">
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{
-                      width: `${(usage.filesOptimized / subscription.plan.fileLimit) * 100}%`,
-                    }}
-                  ></div>
-                </div>
-                <p>
-                  {usage.filesOptimized} of {subscription.plan.fileLimit} files
-                  used this month
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Billing History */}
-        <div className="billing-section">
-          <h2>Billing History</h2>
-          <div className="billing-table">
-            <div className="table-header">
-              <div>Date</div>
-              <div>Description</div>
-              <div>Amount</div>
-              <div>Status</div>
-              <div>Action</div>
-            </div>
-            {billingHistory.map((invoice) => (
-              <div key={invoice.id} className="table-row">
-                <div>{formatDate(invoice.date)}</div>
-                <div>{invoice.description}</div>
-                <div>{formatCurrency(invoice.amount, invoice.currency)}</div>
-                <div>
-                  <span className={`status-badge ${invoice.status}`}>
-                    {invoice.status}
-                  </span>
-                </div>
-                <div>
-                  {invoice.downloadUrl && (
-                    <button className="btn-link">Download</button>
+                  {subscription.plan.id !== "free" && (
+                    <div className="billing-info">
+                      <div className="billing-item">
+                        <span>Next billing date:</span>
+                        <span>
+                          {subscription.currentPeriodEnd.toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="billing-item">
+                        <span>Billing cycle:</span>
+                        <span>Monthly</span>
+                      </div>
+                    </div>
                   )}
                 </div>
+              )}
+            </CardBody>
+            <CardFooter>
+              <div className="plan-actions">
+                {subscription?.plan.id === "free" ? (
+                  <Button
+                    variant="primary"
+                    onClick={() => navigate("/pricing")}
+                  >
+                    Upgrade Plan
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/pricing")}
+                    >
+                      Change Plan
+                    </Button>
+                    {!subscription.cancelAtPeriodEnd && (
+                      <Button
+                        variant="danger"
+                        onClick={() => setShowCancelModal(true)}
+                      >
+                        Cancel Subscription
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            </CardFooter>
+          </Card>
+
+          {/* Usage Statistics */}
+          <Card>
+            <CardHeader>
+              <h2>Usage This Month</h2>
+              <p>Track your optimization usage</p>
+            </CardHeader>
+            <CardBody>
+              {usage && (
+                <div className="usage-stats">
+                  <div className="usage-item">
+                    <div className="usage-number">{usage.filesOptimized}</div>
+                    <div className="usage-label">Optimizations Used</div>
+                  </div>
+                  <div className="usage-item">
+                    <div className="usage-number">
+                      {usage.filesRemaining === 999
+                        ? "∞"
+                        : usage.filesRemaining}
+                    </div>
+                    <div className="usage-label">Remaining</div>
+                  </div>
+                  <div className="usage-item">
+                    <div className="usage-number">
+                      {usage.totalOptimizations}
+                    </div>
+                    <div className="usage-label">Total Optimizations</div>
+                  </div>
+                  {usage.lastOptimization && (
+                    <div className="usage-item">
+                      <div className="usage-number">
+                        {usage.lastOptimization.toLocaleDateString()}
+                      </div>
+                      <div className="usage-label">Last Optimization</div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardBody>
+          </Card>
+
+          {/* Billing History */}
+          <Card className="billing-history-card">
+            <CardHeader>
+              <h2>Billing History</h2>
+              <p>Your payment history and invoices</p>
+            </CardHeader>
+            <CardBody>
+              {billingHistory.length > 0 ? (
+                <div className="billing-history">
+                  {billingHistory.map((invoice) => (
+                    <div key={invoice.id} className="billing-item">
+                      <div className="billing-details">
+                        <div className="billing-date">
+                          {invoice.date.toLocaleDateString()}
+                        </div>
+                        <div className="billing-description">
+                          {invoice.description}
+                        </div>
+                      </div>
+                      <div className="billing-amount">
+                        ${(invoice.amount / 100).toFixed(2)}
+                      </div>
+                      <div className="billing-actions">
+                        <Badge
+                          variant={
+                            invoice.status === "paid" ? "success" : "warning"
+                          }
+                        >
+                          {invoice.status}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            window.open(invoice.downloadUrl, "_blank")
+                          }
+                        >
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<div className="text-4xl">📄</div>}
+                  title="No Billing History"
+                  description="Your billing history will appear here"
+                />
+              )}
+            </CardBody>
+          </Card>
         </div>
 
         {/* Cancel Modal */}
@@ -349,105 +459,22 @@ const SubscriptionPage: React.FC = () => {
             className="modal-overlay"
             onClick={() => setShowCancelModal(false)}
           >
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>Cancel Subscription</h3>
-                <button
-                  className="modal-close"
-                  onClick={() => setShowCancelModal(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="modal-body">
-                <p>
-                  Are you sure you want to cancel your subscription? Your
-                  subscription will remain active until{" "}
-                  {formatDate(subscription.currentPeriodEnd)}, and you won't be
-                  charged again.
-                </p>
-                <div className="cancel-benefits">
-                  <h4>You'll lose access to:</h4>
-                  <ul>
-                    {subscription.plan.features.map((feature, index) => (
-                      <li key={index}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Cancel Subscription</h3>
+              <p>
+                Are you sure you want to cancel your subscription? You'll still
+                have access until the end of your current billing period.
+              </p>
               <div className="modal-actions">
-                <button
-                  className="btn-secondary"
+                <Button
+                  variant="ghost"
                   onClick={() => setShowCancelModal(false)}
                 >
                   Keep Subscription
-                </button>
-                <button
-                  className="btn-danger"
-                  onClick={handleCancelSubscription}
-                >
-                  Yes, Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Upgrade Modal */}
-        {showUpgradeModal && (
-          <div
-            className="modal-overlay"
-            onClick={() => setShowUpgradeModal(false)}
-          >
-            <div className="modal large" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>Change Plan</h3>
-                <button
-                  className="modal-close"
-                  onClick={() => setShowUpgradeModal(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="plans-grid">
-                  {SUBSCRIPTION_PLANS.filter((plan) => plan.id !== "free").map(
-                    (plan) => (
-                      <div
-                        key={plan.id}
-                        className={`plan-option ${plan.id === subscription.planId ? "current" : ""} ${plan.isPopular ? "popular" : ""}`}
-                      >
-                        {plan.isPopular && (
-                          <div className="popular-badge">Most Popular</div>
-                        )}
-                        <div className="plan-name">{plan.name}</div>
-                        <div className="plan-price">
-                          {formatCurrency(plan.price)}
-                          <span>/{plan.interval}</span>
-                        </div>
-                        <ul className="plan-features">
-                          {plan.features.slice(0, 4).map((feature, index) => (
-                            <li key={index}>{feature}</li>
-                          ))}
-                        </ul>
-                        {plan.id === subscription.planId ? (
-                          <button className="btn-current" disabled>
-                            Current Plan
-                          </button>
-                        ) : (
-                          <button
-                            className="btn-primary"
-                            onClick={() => handleUpgrade(plan)}
-                          >
-                            {plan.price > subscription.plan.price
-                              ? "Upgrade"
-                              : "Downgrade"}
-                          </button>
-                        )}
-                      </div>
-                    ),
-                  )}
-                </div>
+                </Button>
+                <Button variant="danger" onClick={handleCancelSubscription}>
+                  Cancel Subscription
+                </Button>
               </div>
             </div>
           </div>
