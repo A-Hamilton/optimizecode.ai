@@ -328,11 +328,30 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   const handleFiles = async (selectedFiles: File[]): Promise<void> => {
     console.log(`📁 Processing ${selectedFiles.length} files...`);
 
+    // Check file count limit first
+    const totalFilesAfterUpload = files.length + selectedFiles.length;
+    if (maxFiles !== -1 && totalFilesAfterUpload > maxFiles) {
+      showNotification(
+        `File limit exceeded! Your ${planName} plan allows up to ${maxFiles} files per optimization. You currently have ${files.length} files and are trying to add ${selectedFiles.length} more.`,
+        "error",
+      );
+      setIsProcessing(false);
+      return;
+    }
+
     const codeFiles: CodeFile[] = [];
     let blockedCount = 0;
+    let oversizedCount = 0;
+    let invalidTypeCount = 0;
 
     for (const file of selectedFiles) {
       const filePath = file.webkitRelativePath || file.name;
+
+      // Check if we've reached the file limit
+      if (maxFiles !== -1 && files.length + codeFiles.length >= maxFiles) {
+        blockedCount += selectedFiles.length - selectedFiles.indexOf(file);
+        break;
+      }
 
       // Double-check: Block any file that somehow got through with blocked paths
       if (isPathBlocked(filePath)) {
@@ -341,13 +360,17 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         continue;
       }
 
-      if (file.size > 200 * 1024) {
-        blockedCount++;
+      // Check file size against user plan limits
+      if (file.size > maxFileSize) {
+        console.log(
+          `🚫 File ${file.name} too large: ${(file.size / (1024 * 1024)).toFixed(1)}MB > ${(maxFileSize / (1024 * 1024)).toFixed(1)}MB`,
+        );
+        oversizedCount++;
         continue;
       }
 
       if (!isValidSourceFile(file.name)) {
-        blockedCount++;
+        invalidTypeCount++;
         continue;
       }
 
@@ -377,19 +400,35 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
     }
 
     console.log(
-      `📊 Results: ${codeFiles.length} source files, ${blockedCount} blocked`,
+      `📊 Results: ${codeFiles.length} source files, ${blockedCount} blocked, ${oversizedCount} oversized, ${invalidTypeCount} invalid type`,
     );
 
+    // Show appropriate messages
     if (codeFiles.length === 0) {
-      showNotification(
-        `No source code files found in the selected ${selectedFiles.length} files. Make sure you're selecting a source code directory (like 'src/') rather than the entire project.`,
-        "warning",
-      );
-    } else {
-      let message = `✅ Found ${codeFiles.length} source code files.`;
-      if (blockedCount > 0) {
-        message += ` Filtered out ${blockedCount} non-source files (including any node_modules, config files, etc.).`;
+      let errorMessage = `No source code files could be processed.`;
+      if (oversizedCount > 0) {
+        errorMessage += ` ${oversizedCount} files exceeded the ${(maxFileSize / (1024 * 1024)).toFixed(1)}MB size limit for your ${planName} plan.`;
       }
+      if (invalidTypeCount > 0) {
+        errorMessage += ` ${invalidTypeCount} files were not recognized as source code.`;
+      }
+      if (blockedCount > 0) {
+        errorMessage += ` ${blockedCount} files were filtered out.`;
+      }
+      showNotification(errorMessage, "error");
+    } else {
+      let message = `✅ Added ${codeFiles.length} source code files.`;
+
+      const issueCount = oversizedCount + invalidTypeCount + blockedCount;
+      if (issueCount > 0) {
+        message += ` (${issueCount} files skipped:`;
+        if (oversizedCount > 0) message += ` ${oversizedCount} too large,`;
+        if (invalidTypeCount > 0)
+          message += ` ${invalidTypeCount} invalid type,`;
+        if (blockedCount > 0) message += ` ${blockedCount} filtered out,`;
+        message = message.slice(0, -1) + ")"; // Remove last comma and add closing parenthesis
+      }
+
       showNotification(message, "info");
     }
 
