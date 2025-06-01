@@ -1,3 +1,4 @@
+// Updated for TypeScript migration
 export interface CodeFile {
   name: string;
   path: string;

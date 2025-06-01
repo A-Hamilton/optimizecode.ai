@@ -1,4 +1,5 @@
 {
+  "_comment": "Updated for TypeScript migration",
   "compilerOptions": {
     "composite": true,
     "skipLibCheck": true,

@@ -308,7 +308,7 @@
 
 /* Industries Section */
 .industries-section {
-  margin: 6rem 0;
+  margin: 4rem 0 3rem 0;
   text-align: center;
 }
 
@@ -359,8 +359,8 @@
 /* Final CTA Section */
 .solutions-cta {
   text-align: center;
-  margin: 6rem 0 4rem 0;
-  padding: 4rem 2rem;
+  margin: 4rem 0 1rem 0;
+  padding: 3rem 2rem;
   background: rgba(100, 108, 255, 0.05);
   border: 1px solid rgba(100, 108, 255, 0.2);
   border-radius: 20px;

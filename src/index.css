@@ -1,6 +1,17 @@
+/* Import Design System */
+@import "./components/ui/DesignSystem.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Override Tailwind base styles that might cause gaps */
+@layer utilities {
+  .no-gap-footer {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
 
 @layer base {
   :root {
@@ -22,6 +33,13 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
+  }
+
+  /* Clean default spacing */
+  html,
+  body {
+    margin: 0;
+    padding: 0;
   }
 }
 

@@ -1,3 +1,4 @@
+// TypeScript migration completed - all .jsx files removed
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -12,29 +13,47 @@ import AboutPage from "./pages/AboutPage";
 import SecurityPage from "./pages/SecurityPage";
 import SupportPage from "./pages/SupportPage";
 import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
+import ProfilePage from "./pages/ProfilePage";
+import TestPage from "./pages/TestPage";
+import { AuthProvider } from "./contexts/AuthContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import Footer from "./components/Footer";
 
 function App(): JSX.Element {
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/optimize" element={<OptimizePage />} />
-          <Route path="/product" element={<ProductPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/docs" element={<DocsPage />} />
-          <Route path="/solutions" element={<SolutionsPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/security" element={<SecurityPage />} />
-          <Route path="/support" element={<SupportPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
+    <AuthProvider>
+      <NotificationProvider>
+        <Router>
+          <div>
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/optimize" element={<OptimizePage />} />
+              <Route path="/product" element={<ProductPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/docs" element={<DocsPage />} />
+              <Route path="/solutions" element={<SolutionsPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/security" element={<SecurityPage />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/subscription" element={<SubscriptionPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/test" element={<TestPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+            </Routes>
+            <Footer />
+          </div>
+        </Router>
+      </NotificationProvider>
+    </AuthProvider>
   );
 }
 
