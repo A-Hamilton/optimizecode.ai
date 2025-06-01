@@ -99,8 +99,9 @@
 .results-tabs {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
 }
 
 .tab-button {
@@ -125,37 +126,58 @@
 
 .results-content {
   min-height: 400px;
+  padding: 1rem 0;
 }
 
 .file-selector {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   display: flex;
   gap: 1rem;
   align-items: center;
   flex-wrap: wrap;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .file-select {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: inherit;
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
   font-size: 0.9rem;
-  min-width: 250px;
+  min-width: 280px;
   flex: 1;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23ffffff' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   background-size: 0.65rem auto;
-  padding-right: 2rem;
+  padding-right: 2.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .file-select:focus {
   outline: none;
   border-color: #646cff;
-  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.file-select:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Fix dropdown options */
+.file-select option {
+  background: #1a1a1a;
+  color: white;
+  padding: 0.5rem;
+  border: none;
 }
 
 .current-file-optimizations {
@@ -195,19 +217,22 @@
 }
 
 .file-action-button {
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.1);
   color: inherit;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .file-action-button:hover {
-  background: rgba(100, 108, 255, 0.2);
+  background: rgba(100, 108, 255, 0.3);
   border-color: #646cff;
+  transform: translateY(-1px);
 }
 
 .download-all-button {
@@ -232,7 +257,7 @@
   border: 1px solid rgba(100, 108, 255, 0.3);
   border-radius: 12px;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   box-shadow: 0 2px 8px rgba(100, 108, 255, 0.1);
 }
 
@@ -300,8 +325,9 @@
 .code-comparison {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
   height: 500px;
+  margin-top: 1rem;
 }
 
 .code-section {
@@ -405,12 +431,29 @@
 
   .file-select {
     border-color: rgba(0, 0, 0, 0.2);
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(255, 255, 255, 0.9);
+    color: #1a1a1a;
     background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23333' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
   }
 
   .file-select:focus {
     border-color: #646cff;
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .file-select:hover {
+    border-color: rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .file-select option {
+    background: white;
+    color: #1a1a1a;
+  }
+
+  .file-selector {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
   }
 
   .current-file-optimizations {
