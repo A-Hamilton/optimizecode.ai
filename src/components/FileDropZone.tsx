@@ -1,12 +1,6 @@
 import React, { useState, useRef } from "react";
 import { FileDropZoneProps, CodeFile } from "../types";
 
-interface ProcessingStats {
-  count: number;
-  processed: number;
-  skipped: number;
-}
-
 interface NotificationProps {
   message: string;
   type: "error" | "warning" | "info";
@@ -116,199 +110,44 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
     }, 10);
   };
 
-  // MUCH more aggressive directory exclusion
-  const isExcludedDirectory = (dirName: string, fullPath: string): boolean => {
-    const lower = dirName.toLowerCase();
-    const lowerPath = fullPath.toLowerCase();
-
-    // Absolute exclusions - these directories are NEVER processed
-    const absoluteExclusions = [
-      // Package managers
-      "node_modules",
-      "bower_components",
-      "jspm_packages",
-      "vendor",
-      // Version control
-      ".git",
-      ".svn",
-      ".hg",
-      ".bzr",
-      // Build outputs
-      "dist",
-      "build",
-      "out",
-      "target",
-      "bin",
-      "obj",
-      "release",
-      "debug",
-      // Caches
-      ".cache",
-      "cache",
-      ".sass-cache",
-      ".parcel-cache",
-      ".webpack",
-      ".next",
-      ".nuxt",
-      ".vuepress",
-      ".docusaurus",
-      // Test coverage
-      "coverage",
-      ".coverage",
-      ".nyc_output",
-      "htmlcov",
-      // Python
-      "__pycache__",
-      ".pytest_cache",
-      ".mypy_cache",
-      ".tox",
-      "venv",
-      ".venv",
-      "env",
-      ".env",
-      "virtualenv",
-      "__env__",
-      ".conda",
-      "miniconda3",
-      "anaconda3",
-      // IDEs
-      ".vscode",
-      ".idea",
-      ".eclipse",
-      ".vs",
-      ".vscode-test",
-      // Logs
-      "logs",
-      "log",
-      ".log",
-      // Temp
-      "tmp",
-      "temp",
-      ".tmp",
-      ".temp",
-      // OS
-      ".ds_store",
-      "thumbs.db",
-      "$recycle.bin",
-      "desktop.ini",
-      // Static assets (usually not code)
-      "public",
-      "static",
-      "assets",
-      "uploads",
-      "media",
-      "images",
-      "img",
-      "pics",
-      "photos",
-      "videos",
-      "audio",
-      "fonts",
-      "icons",
-      "favicons",
-      // Documentation (usually not source code)
-      "docs",
-      "doc",
-      "documentation",
-      "wiki",
-      "man",
-      "help",
-    ];
-
-    // Check if directory name exactly matches or contains excluded terms
-    if (
-      absoluteExclusions.some(
-        (excluded) =>
-          lower === excluded ||
-          lower.includes(excluded) ||
-          lowerPath.includes(`/${excluded}/`) ||
-          lowerPath.endsWith(`/${excluded}`),
-      )
-    ) {
-      return true;
-    }
-
-    // Exclude hidden directories (starting with .) except for special source directories
-    if (lower.startsWith(".")) {
-      const allowedHiddenDirs = [
-        "src",
-        "lib",
-        "app",
-        "components",
-        "pages",
-        "utils",
-        "helpers",
-      ];
-      if (!allowedHiddenDirs.some((allowed) => lower.includes(allowed))) {
-        return true;
-      }
-    }
-
-    // Exclude very deep nesting (performance optimization)
-    const pathDepth = fullPath.split("/").length;
-    if (pathDepth > 8) {
-      return true;
-    }
-
-    return false;
-  };
-
+  // COMPLETELY REWRITTEN - Foolproof exclusion logic
   const getAllFiles = async (
     entry: any,
-    path: string = "",
-    collected: ProcessingStats = { count: 0, processed: 0, skipped: 0 },
-    depth: number = 0,
+    currentPath: string = "",
   ): Promise<File[]> => {
     const files: File[] = [];
-    const MAX_FILES = 20; // Reduced from 15
-    const MAX_FILE_SIZE = 300 * 1024; // Reduced to 300KB
-    const MAX_DEPTH = 6; // Limit directory depth
-    const MAX_TOTAL_PROCESSED = 500; // Stop after processing 500 items
-
-    // Early termination conditions
-    if (
-      depth > MAX_DEPTH ||
-      collected.count >= MAX_TOTAL_PROCESSED ||
-      files.length >= MAX_FILES ||
-      collected.processed >= 100 // Don't process more than 100 files
-    ) {
-      return files;
-    }
+    const MAX_FILES = 15;
+    const MAX_FILE_SIZE = 200 * 1024; // 200KB max
 
     if (entry.isFile) {
-      collected.count++;
-
       try {
         const file: File = await new Promise((resolve) => entry.file(resolve));
-        const fullPath = path + file.name;
+        const fullPath = currentPath + file.name;
 
-        // Quick size and extension check first (fastest)
-        if (file.size > MAX_FILE_SIZE) {
-          collected.skipped++;
-          return files;
+        // STRICT path checking - if any part of the path contains forbidden terms, REJECT
+        if (
+          isPathBlocked(fullPath) ||
+          file.size > MAX_FILE_SIZE ||
+          !isValidSourceFile(file.name)
+        ) {
+          return files; // Skip this file
         }
 
-        if (isSourceCodeFile(file.name)) {
-          collected.processed++;
-          Object.defineProperty(file, "webkitRelativePath", {
-            value: fullPath,
-            writable: false,
-          });
-          files.push(file);
-        } else {
-          collected.skipped++;
-        }
+        Object.defineProperty(file, "webkitRelativePath", {
+          value: fullPath,
+          writable: false,
+        });
+        files.push(file);
       } catch (error) {
-        console.error(`Error processing file ${path}${entry.name}:`, error);
-        collected.skipped++;
+        console.error(`Error processing file:`, error);
       }
     } else if (entry.isDirectory) {
-      const fullDirPath = path + entry.name;
+      const dirPath = currentPath + entry.name + "/";
 
-      // AGGRESSIVE directory filtering - check BEFORE entering directory
-      if (isExcludedDirectory(entry.name, fullDirPath)) {
-        collected.skipped++;
-        return files; // Skip entire directory tree
+      // CRITICAL: Check if this directory or any parent directory is blocked
+      if (isPathBlocked(dirPath)) {
+        console.log(`🚫 BLOCKED DIRECTORY: ${dirPath}`);
+        return files; // Skip entire directory and all contents
       }
 
       try {
@@ -317,45 +156,87 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
           directoryReader.readEntries(resolve, reject);
         });
 
-        // Process subdirectories and files
         for (const subEntry of entries) {
-          if (files.length >= MAX_FILES) break; // Stop early if we have enough files
+          if (files.length >= MAX_FILES) break;
 
-          const subFiles = await getAllFiles(
-            subEntry,
-            fullDirPath + "/",
-            collected,
-            depth + 1,
-          );
+          const subFiles = await getAllFiles(subEntry, dirPath);
           files.push(...subFiles);
         }
       } catch (error) {
-        console.error(`Error processing directory ${fullDirPath}:`, error);
-        collected.skipped++;
+        console.error(`Error processing directory ${dirPath}:`, error);
       }
     }
 
     return files;
   };
 
-  // Simplified and stricter file extension check
-  const isSourceCodeFile = (filename: string): boolean => {
+  // FOOLPROOF path blocking - checks EVERY part of the path
+  const isPathBlocked = (path: string): boolean => {
+    const lowerPath = path.toLowerCase();
+
+    // These terms ANYWHERE in the path will block the file/directory
+    const blockedTerms = [
+      "node_modules",
+      "bower_components",
+      "vendor",
+      "/.git/",
+      ".git/",
+      "/dist/",
+      "/build/",
+      "/out/",
+      "/target/",
+      "/bin/",
+      "/obj/",
+      "/.cache/",
+      "/cache/",
+      "/.next/",
+      "/.nuxt/",
+      "/coverage/",
+      "/__pycache__/",
+      "/.vscode/",
+      "/.idea/",
+      "/logs/",
+      "/log/",
+      "/tmp/",
+      "/temp/",
+      "/public/",
+      "/static/",
+      "/assets/",
+      "/uploads/",
+      "/media/",
+      "/images/",
+      "/img/",
+      "/fonts/",
+      "/docs/",
+      "/doc/",
+      "/documentation/",
+    ];
+
+    // Check if path contains any blocked terms
+    const isBlocked = blockedTerms.some((term) => lowerPath.includes(term));
+
+    if (isBlocked) {
+      console.log(`🚫 Path blocked: ${path}`);
+    }
+
+    return isBlocked;
+  };
+
+  // Ultra-strict file validation - only accept actual source code
+  const isValidSourceFile = (filename: string): boolean => {
     const lower = filename.toLowerCase();
 
-    // Quick exclusions first
-    const quickExclusions = [
+    // Immediate rejections
+    const rejected = [
       ".min.",
       ".bundle.",
       ".chunk.",
-      ".compiled.",
       ".map",
       ".lock",
       ".test.",
       ".spec.",
       ".config.",
       ".conf.",
-      "config.",
-      ".d.ts",
       ".json",
       ".xml",
       ".yml",
@@ -368,138 +249,131 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       ".env",
       "readme",
       "license",
-      "changelog",
       ".jpg",
       ".jpeg",
       ".png",
       ".gif",
       ".svg",
       ".ico",
-      ".webp",
       ".mp4",
-      ".avi",
-      ".mov",
       ".mp3",
-      ".wav",
       ".zip",
       ".tar",
       ".gz",
+      ".pdf",
     ];
 
-    if (quickExclusions.some((exc) => lower.includes(exc))) {
+    if (rejected.some((term) => lower.includes(term))) {
       return false;
     }
 
-    // Only allow specific source code extensions
-    const sourceExtensions = [
+    // Only allow these exact extensions
+    const allowed = [
       ".js",
       ".jsx",
       ".ts",
       ".tsx",
       ".mjs",
-      ".cjs", // JavaScript/TypeScript
+      ".cjs",
       ".py",
-      ".pyw", // Python
+      ".pyw",
       ".java",
       ".kt",
-      ".scala", // JVM languages
+      ".scala",
       ".c",
       ".cpp",
       ".cc",
       ".h",
-      ".hpp", // C/C++
+      ".hpp",
       ".cs",
-      ".vb", // .NET
-      ".php", // PHP
-      ".rb", // Ruby
-      ".go", // Go
-      ".rs", // Rust
-      ".swift", // Swift
-      ".dart", // Dart
+      ".vb",
+      ".php",
+      ".rb",
+      ".go",
+      ".rs",
+      ".swift",
+      ".dart",
       ".html",
       ".htm",
       ".css",
       ".scss",
-      ".sass", // Web
+      ".sass",
+      ".less",
       ".vue",
-      ".svelte", // Frameworks
-      ".sql", // SQL
+      ".svelte",
+      ".sql",
       ".sh",
       ".bash",
       ".ps1",
-      ".bat", // Scripts
     ];
 
-    return sourceExtensions.some((ext) => lower.endsWith(ext));
+    return allowed.some((ext) => lower.endsWith(ext));
   };
 
   const handleFiles = async (selectedFiles: File[]): Promise<void> => {
+    console.log(`📁 Processing ${selectedFiles.length} files...`);
+
     const codeFiles: CodeFile[] = [];
-    let filteredCount = 0;
-    let oversizedCount = 0;
+    let blockedCount = 0;
 
-    // Process files with stricter limits
-    const MAX_PROCESS = 50; // Don't even attempt to process more than 50 files
-    const filesToProcess = selectedFiles.slice(0, MAX_PROCESS);
+    for (const file of selectedFiles) {
+      const filePath = file.webkitRelativePath || file.name;
 
-    if (selectedFiles.length > MAX_PROCESS) {
-      showNotification(
-        `Too many files selected. Processing first ${MAX_PROCESS} files only. Consider uploading specific source directories instead of entire projects.`,
-        "warning",
-      );
-    }
-
-    for (const file of filesToProcess) {
-      // Size check
-      if (file.size > 300 * 1024) {
-        oversizedCount++;
+      // Double-check: Block any file that somehow got through with blocked paths
+      if (isPathBlocked(filePath)) {
+        console.log(`🚫 File blocked by path: ${filePath}`);
+        blockedCount++;
         continue;
       }
 
-      // File type check
-      if (!isSourceCodeFile(file.name)) {
-        filteredCount++;
+      if (file.size > 200 * 1024) {
+        blockedCount++;
+        continue;
+      }
+
+      if (!isValidSourceFile(file.name)) {
+        blockedCount++;
         continue;
       }
 
       try {
         const content = await readFileAsText(file);
-        const relativePath = file.webkitRelativePath || file.name;
 
         // Check for duplicates
         const isDuplicate = files.some(
-          (existingFile) => existingFile.path === relativePath,
+          (existingFile) => existingFile.path === filePath,
         );
 
         if (!isDuplicate) {
           codeFiles.push({
             name: file.name,
-            path: relativePath,
+            path: filePath,
             content,
             size: file.size,
             type: file.type || "text/plain",
             extension: file.name.split(".").pop() || "",
           });
+          console.log(`✅ Added: ${filePath}`);
         }
       } catch (error) {
         console.error(`Error reading file ${file.name}:`, error);
-        filteredCount++;
+        blockedCount++;
       }
     }
 
-    // Better notifications
+    console.log(
+      `📊 Results: ${codeFiles.length} source files, ${blockedCount} blocked`,
+    );
+
     if (codeFiles.length === 0) {
       showNotification(
-        "No source code files found. Make sure you're selecting actual programming files (.js, .py, .java, etc.) and not config/build directories.",
+        `No source code files found in the selected ${selectedFiles.length} files. Make sure you're selecting a source code directory (like 'src/') rather than the entire project.`,
         "warning",
       );
     } else {
-      let message = `Found ${codeFiles.length} source code files.`;
-      if (filteredCount > 0) {
-        message += ` Filtered out ${filteredCount} non-source files.`;
-      }
-      if (oversizedCount > 0) {
-        message += ` Skipped ${oversizedCount} oversized files (>300KB).`;
+      let message = `✅ Found ${codeFiles.length} source code files.`;
+      if (blockedCount > 0) {
+        message += ` Filtered out ${blockedCount} non-source files (including any node_modules, config files, etc.).`;
       }
       showNotification(message, "info");
     }
@@ -558,7 +432,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             <p className="text-white/70">Processing files...</p>
             <p className="text-xs text-white/50">
-              Filtering out dependencies and config files
+              Blocking node_modules and dependencies
             </p>
           </div>
         ) : (
@@ -568,12 +442,12 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
               Drop files or folders here
             </p>
             <p className="text-sm text-white/60 mb-6">
-              <strong>Source code only:</strong> JavaScript, TypeScript, Python,
-              Java, C++, HTML, CSS
+              <strong>Source code only:</strong> .js, .py, .java, .cpp, .html,
+              .css, etc.
               <br />
               <span className="text-xs opacity-75">
-                <strong>Auto-excluded:</strong> node_modules, build folders,
-                config files, images, docs
+                <strong>⚠️ Automatically blocks:</strong> node_modules, build
+                folders, config files, images
               </span>
             </p>
             <div className="flex gap-4 justify-center">
@@ -608,10 +482,13 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
                 Select Folder
               </button>
             </div>
-            <p className="text-xs text-white/40 mt-4">
-              💡 Tip: Upload your <strong>src/</strong> folder instead of the
-              entire project for best results
-            </p>
+            <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <p className="text-xs text-blue-200">
+                💡 <strong>Pro tip:</strong> Upload your <strong>src/</strong>{" "}
+                or <strong>components/</strong> folder instead of the entire
+                project to avoid unnecessary files.
+              </p>
+            </div>
           </div>
         )}
       </div>
