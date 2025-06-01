@@ -139,13 +139,46 @@ function ResultsDisplay({
         </div>
       </div>
 
-      {/* Optimization Summary */}
+      <div className="results-tabs">
+        {optimizedCode && (
+          <button
+            className={`tab-button ${activeTab === "code" ? "active" : ""}`}
+            onClick={() => setActiveTab("code")}
+          >
+            Pasted Code
+          </button>
+        )}
+        {files.length > 0 && (
+          <button
+            className={`tab-button ${activeTab === "files" ? "active" : ""}`}
+            onClick={() => setActiveTab("files")}
+          >
+            Files ({files.length})
+          </button>
+        )}
+      </div>
+
+      {/* Optimization Summary - Only for files/code that actually got optimized */}
       {optimizationSummary && Object.keys(optimizationSummary).length > 0 && (
         <div className="optimization-summary">
           <h4 className="summary-title">⚡ Optimizations Applied</h4>
           <div className="summary-content">
-            {Object.entries(optimizationSummary).map(
-              ([filename, optimizations]) => (
+            {Object.entries(optimizationSummary)
+              .filter(([filename, optimizations]) => {
+                // Only show if optimizations were actually made
+                if (filename === "pasted-code") {
+                  return optimizedCode && optimizations.length > 0;
+                } else {
+                  // For files, check if the file exists and has optimized content
+                  const file = files.find(
+                    (f) => f.path === filename || f.name === filename,
+                  );
+                  return (
+                    file && file.optimizedContent && optimizations.length > 0
+                  );
+                }
+              })
+              .map(([filename, optimizations]) => (
                 <div key={filename} className="file-summary">
                   <div className="file-summary-header">
                     <span className="file-summary-name">
@@ -165,30 +198,10 @@ function ResultsDisplay({
                     ))}
                   </div>
                 </div>
-              ),
-            )}
+              ))}
           </div>
         </div>
       )}
-
-      <div className="results-tabs">
-        {optimizedCode && (
-          <button
-            className={`tab-button ${activeTab === "code" ? "active" : ""}`}
-            onClick={() => setActiveTab("code")}
-          >
-            Pasted Code
-          </button>
-        )}
-        {files.length > 0 && (
-          <button
-            className={`tab-button ${activeTab === "files" ? "active" : ""}`}
-            onClick={() => setActiveTab("files")}
-          >
-            Files ({files.length})
-          </button>
-        )}
-      </div>
 
       <div className="results-content">
         {activeTab === "code" && optimizedCode && (
@@ -252,6 +265,32 @@ function ResultsDisplay({
                 </div>
               )}
             </div>
+
+            {/* Show optimizations for currently selected file */}
+            {files[selectedFileIndex] &&
+              optimizationSummary &&
+              (() => {
+                const currentFile = files[selectedFileIndex];
+                const fileKey = currentFile.path || currentFile.name;
+                const fileOptimizations = optimizationSummary[fileKey];
+
+                return fileOptimizations &&
+                  fileOptimizations.length > 0 &&
+                  currentFile.optimizedContent ? (
+                  <div className="current-file-optimizations">
+                    <h5 className="current-file-title">
+                      ⚡ Optimizations for {currentFile.name}:
+                    </h5>
+                    <div className="current-file-tags">
+                      {fileOptimizations.map((opt, index) => (
+                        <div key={index} className="optimization-tag-small">
+                          ✓ {opt}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null;
+              })()}
 
             {files[selectedFileIndex] && (
               <div className="code-comparison">
