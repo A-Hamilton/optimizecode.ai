@@ -129,7 +129,7 @@ const LoginPage: React.FC = () => {
       if (result.error) {
         setErrors({ general: result.error });
       } else {
-        navigate("/dashboard");
+        navigate("/optimize");
       }
     } catch (error) {
       setErrors({ general: `${provider} login failed. Please try again.` });
