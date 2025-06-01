@@ -400,34 +400,46 @@ const PricingPage: React.FC = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td>Optimizations per month</td>
-                  <td>100</td>
-                  <td>Unlimited</td>
-                  <td>Unlimited</td>
-                </tr>
-                <tr>
-                  <td>Files per optimization</td>
-                  <td>2</td>
-                  <td>50</td>
+                  <td>Optimizations per day</td>
+                  <td>10</td>
+                  <td>300</td>
                   <td>Unlimited</td>
                 </tr>
                 <tr>
-                  <td>Supported languages</td>
-                  <td>3</td>
-                  <td>15+</td>
-                  <td>15+</td>
+                  <td>File uploads per optimization</td>
+                  <td>2 files</td>
+                  <td>50 files</td>
+                  <td>Unlimited files</td>
                 </tr>
                 <tr>
-                  <td>API rate limits</td>
-                  <td>100/hour</td>
-                  <td>10,000/hour</td>
+                  <td>Copy & paste character limit</td>
+                  <td>10,000 chars</td>
+                  <td>100,000 chars</td>
                   <td>Unlimited</td>
                 </tr>
                 <tr>
-                  <td>Support response time</td>
-                  <td>Community</td>
-                  <td>4 hours</td>
-                  <td>1 hour</td>
+                  <td>Maximum file size</td>
+                  <td>1MB</td>
+                  <td>10MB</td>
+                  <td>100MB</td>
+                </tr>
+                <tr>
+                  <td>Language support</td>
+                  <td>Basic (JS, Python, Java)</td>
+                  <td>15+ languages & frameworks</td>
+                  <td>15+ languages & frameworks</td>
+                </tr>
+                <tr>
+                  <td>Support</td>
+                  <td>Community forums</td>
+                  <td>Priority email (4hr response)</td>
+                  <td>Dedicated account manager</td>
+                </tr>
+                <tr>
+                  <td>Advanced analytics & insights</td>
+                  <td>❌</td>
+                  <td>✅</td>
+                  <td>✅</td>
                 </tr>
                 <tr>
                   <td>Custom optimization rules</td>
@@ -436,16 +448,34 @@ const PricingPage: React.FC = () => {
                   <td>✅</td>
                 </tr>
                 <tr>
+                  <td>SLA & uptime guarantee</td>
+                  <td>❌</td>
+                  <td>❌</td>
+                  <td>99.9%</td>
+                </tr>
+                <tr>
                   <td>On-premise deployment</td>
                   <td>❌</td>
                   <td>❌</td>
                   <td>✅</td>
                 </tr>
                 <tr>
-                  <td>SLA guarantee</td>
+                  <td>Advanced security & compliance</td>
                   <td>❌</td>
                   <td>❌</td>
-                  <td>99.9%</td>
+                  <td>✅ (SOC 2, GDPR)</td>
+                </tr>
+                <tr>
+                  <td>Bulk user management & SSO</td>
+                  <td>❌</td>
+                  <td>❌</td>
+                  <td>✅</td>
+                </tr>
+                <tr>
+                  <td>Priority feature requests</td>
+                  <td>❌</td>
+                  <td>❌</td>
+                  <td>✅</td>
                 </tr>
                 <tr>
                   <td>White-label solutions</td>
