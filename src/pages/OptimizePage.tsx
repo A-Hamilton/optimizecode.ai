@@ -607,13 +607,19 @@ const OptimizePage: React.FC = () => {
             </div>
           </div>
 
-          <ResultsDisplay
-            originalCode={code}
-            optimizedCode={optimizedCode}
-            files={optimizedFiles}
-            isOptimizing={isOptimizing}
-            optimizationSummary={optimizationSummary}
-          />
+          {/* Only show results if there are optimizations or we're currently optimizing */}
+          {(optimizedCode ||
+            optimizedFiles.length > 0 ||
+            isOptimizing ||
+            Object.keys(optimizationSummary).length > 0) && (
+            <ResultsDisplay
+              originalCode={code}
+              optimizedCode={optimizedCode}
+              files={optimizedFiles}
+              isOptimizing={isOptimizing}
+              optimizationSummary={optimizationSummary}
+            />
+          )}
         </main>
       </div>
     </div>
