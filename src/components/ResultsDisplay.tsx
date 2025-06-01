@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+// Updated for TypeScript migration
+import React, { useState, useEffect } from "react";
 import { ResultsDisplayProps } from "../types";
 
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({

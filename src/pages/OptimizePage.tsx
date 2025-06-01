@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// Updated for TypeScript migration
+import React, { useState, useEffect } from "react";
 import CodeInput from "../components/CodeInput";
 import FileDropZone from "../components/FileDropZone";
 import ResultsDisplay from "../components/ResultsDisplay";

@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+// Updated for TypeScript migration
+import React, { useState } from "react";
 import { CodeInputProps } from "../types";
 
 const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {

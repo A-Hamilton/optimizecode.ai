@@ -1,3 +1,4 @@
+// Updated for TypeScript migration
 import React from "react";
 
 interface TeamMember {
