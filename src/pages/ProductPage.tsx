@@ -1,11 +1,32 @@
 import React, { useState } from "react";
 import "./ProductPage.css";
 
-function ProductPage() {
-  const [expandedTechSection, setExpandedTechSection] = useState(false);
-  const [activeCodeExample, setActiveCodeExample] = useState(0);
+interface CodeExample {
+  title: string;
+  language: string;
+  before: string;
+  after: string;
+  improvements: string[];
+}
 
-  const codeExamples = [
+interface Technology {
+  category: string;
+  items: string[];
+}
+
+interface Integration {
+  name: string;
+  icon: string;
+  description: string;
+  features: string[];
+}
+
+const ProductPage: React.FC = () => {
+  const [expandedTechSection, setExpandedTechSection] =
+    useState<boolean>(false);
+  const [activeCodeExample, setActiveCodeExample] = useState<number>(0);
+
+  const codeExamples: CodeExample[] = [
     {
       title: "Performance Optimization",
       language: "JavaScript",
@@ -138,7 +159,7 @@ app.get('/search', (req, res) => {
     },
   ];
 
-  const allTechnologies = [
+  const allTechnologies: Technology[] = [
     {
       category: "Frontend",
       items: [
@@ -220,7 +241,7 @@ app.get('/search', (req, res) => {
     ? allTechnologies
     : allTechnologies.slice(0, 3);
 
-  const integrations = [
+  const integrations: Integration[] = [
     {
       name: "GitHub App",
       icon: "🐙",
@@ -281,7 +302,7 @@ app.get('/search', (req, res) => {
     },
   ];
 
-  const copyToClipboard = async (text) => {
+  const copyToClipboard = async (text: string): Promise<void> => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
@@ -309,7 +330,10 @@ app.get('/search', (req, res) => {
     }
   };
 
-  const showCopyFeedback = (message, isError = false) => {
+  const showCopyFeedback = (
+    message: string,
+    isError: boolean = false,
+  ): void => {
     const notification = document.createElement("div");
     notification.textContent = message;
     notification.style.cssText = `
@@ -611,6 +635,6 @@ app.get('/search', (req, res) => {
       </div>
     </div>
   );
-}
+};
 
 export default ProductPage;

@@ -1,6 +1,6 @@
 import React from "react";
 
-function DashboardPage() {
+const DashboardPage: React.FC = () => {
   return (
     <div className="page">
       <div className="container">
@@ -28,6 +28,6 @@ function DashboardPage() {
       </div>
     </div>
   );
-}
+};
 
 export default DashboardPage;

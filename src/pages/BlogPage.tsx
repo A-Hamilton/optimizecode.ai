@@ -1,6 +1,6 @@
 import React from "react";
 
-function BlogPage() {
+const BlogPage: React.FC = () => {
   return (
     <div className="page">
       <div className="container">
@@ -24,6 +24,6 @@ function BlogPage() {
       </div>
     </div>
   );
-}
+};
 
 export default BlogPage;

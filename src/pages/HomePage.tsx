@@ -2,20 +2,33 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 
-function HomePage() {
-  const [animatedMetrics, setAnimatedMetrics] = useState({
-    performance: 0,
-    cost: 0,
-    lines: 0,
-    languages: 0,
+interface AnimatedMetrics {
+  performance: string;
+  cost: string;
+  lines: string;
+  languages: string;
+}
+
+const HomePage: React.FC = () => {
+  const [animatedMetrics, setAnimatedMetrics] = useState<AnimatedMetrics>({
+    performance: "0%",
+    cost: "0%",
+    lines: "0",
+    languages: "0",
   });
-  const [isMetricsVisible, setIsMetricsVisible] = useState(false);
-  const metricsRef = useRef(null);
+  const [isMetricsVisible, setIsMetricsVisible] = useState<boolean>(false);
+  const metricsRef = useRef<HTMLElement>(null);
 
   // Animated counter for metrics
-  const animateValue = (start, end, duration, setter, suffix = "") => {
+  const animateValue = (
+    start: number,
+    end: number,
+    duration: number,
+    setter: (value: string) => void,
+    suffix: string = "",
+  ): void => {
     const startTime = Date.now();
-    const step = () => {
+    const step = (): void => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const current = Math.floor(start + (end - start) * progress);
@@ -38,41 +51,61 @@ function HomePage() {
             // Animate metrics with delays
             setTimeout(
               () =>
-                animateValue(0, 40, 1500, (val) =>
-                  setAnimatedMetrics((prev) => ({
-                    ...prev,
-                    performance: val + "%",
-                  })),
+                animateValue(
+                  0,
+                  40,
+                  1500,
+                  (val: string) =>
+                    setAnimatedMetrics((prev) => ({
+                      ...prev,
+                      performance: val,
+                    })),
+                  "%",
                 ),
               200,
             );
 
             setTimeout(
               () =>
-                animateValue(0, 60, 1500, (val) =>
-                  setAnimatedMetrics((prev) => ({ ...prev, cost: val + "%" })),
+                animateValue(
+                  0,
+                  60,
+                  1500,
+                  (val: string) =>
+                    setAnimatedMetrics((prev) => ({ ...prev, cost: val })),
+                  "%",
                 ),
               400,
             );
 
             setTimeout(
               () =>
-                animateValue(0, 2, 1500, (val) =>
-                  setAnimatedMetrics((prev) => ({
-                    ...prev,
-                    lines: val + "M+",
-                  })),
+                animateValue(
+                  0,
+                  2,
+                  1500,
+                  (val: string) =>
+                    setAnimatedMetrics((prev) => ({
+                      ...prev,
+                      lines: val,
+                    })),
+                  "M+",
                 ),
               600,
             );
 
             setTimeout(
               () =>
-                animateValue(0, 15, 1500, (val) =>
-                  setAnimatedMetrics((prev) => ({
-                    ...prev,
-                    languages: val + "+",
-                  })),
+                animateValue(
+                  0,
+                  15,
+                  1500,
+                  (val: string) =>
+                    setAnimatedMetrics((prev) => ({
+                      ...prev,
+                      languages: val,
+                    })),
+                  "+",
                 ),
               800,
             );
@@ -536,6 +569,6 @@ function HomePage() {
       </section>
     </div>
   );
-}
+};
 
 export default HomePage;

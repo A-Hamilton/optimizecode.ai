@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from "react";
 import "./DocsPage.css";
 
-function DocsPage() {
-  const [activeSection, setActiveSection] = useState("getting-started");
+interface NavigationItem {
+  id: string;
+  title: string;
+  level: number;
+}
 
-  const copyToClipboard = async (text) => {
+interface CodeBlockProps {
+  code: string;
+  language?: string;
+}
+
+const DocsPage: React.FC = () => {
+  const [activeSection, setActiveSection] = useState<string>("getting-started");
+
+  const copyToClipboard = async (text: string): Promise<void> => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
@@ -32,7 +43,10 @@ function DocsPage() {
     }
   };
 
-  const showCopyFeedback = (message, isError = false) => {
+  const showCopyFeedback = (
+    message: string,
+    isError: boolean = false,
+  ): void => {
     const notification = document.createElement("div");
     notification.textContent = message;
     notification.style.cssText = `
@@ -61,7 +75,7 @@ function DocsPage() {
     }, 3000);
   };
 
-  const CodeBlock = ({ code, language = "bash" }) => (
+  const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = "bash" }) => (
     <div className="code-block-container">
       <div className="code-block-header">
         <span className="code-language">{language}</span>
@@ -80,7 +94,7 @@ function DocsPage() {
   );
 
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = (): void => {
       const sections = document.querySelectorAll(".doc-section");
       let current = "";
 
@@ -100,7 +114,7 @@ function DocsPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activeSection]);
 
-  const navigationItems = [
+  const navigationItems: NavigationItem[] = [
     { id: "getting-started", title: "🚀 Getting Started", level: 1 },
     { id: "installation", title: "Installation", level: 2 },
     { id: "basic-usage", title: "Basic Usage", level: 2 },
@@ -122,7 +136,7 @@ function DocsPage() {
     { id: "cicd-integration", title: "CI/CD Integration", level: 2 },
   ];
 
-  const scrollToSection = (sectionId) => {
+  const scrollToSection = (sectionId: string): void => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -441,6 +455,6 @@ npm run build`}
       </div>
     </div>
   );
-}
+};
 
 export default DocsPage;

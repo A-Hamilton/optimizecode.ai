@@ -1,6 +1,6 @@
 import React from "react";
 
-function SupportPage() {
+const SupportPage: React.FC = () => {
   return (
     <div className="page">
       <div className="container">
@@ -27,6 +27,6 @@ function SupportPage() {
       </div>
     </div>
   );
-}
+};
 
 export default SupportPage;

@@ -1,11 +1,40 @@
 import React, { useState } from "react";
 import "./PricingPage.css";
 
-function PricingPage() {
-  const [showTooltip, setShowTooltip] = useState(null);
-  const [billingCycle, setBillingCycle] = useState("monthly");
+interface Feature {
+  text: string;
+  hasTooltip: boolean;
+  tooltip?: string;
+}
 
-  const FeatureTooltip = ({ feature, description, id }) => (
+interface PricingPlan {
+  id: string;
+  name: string;
+  subtitle: string;
+  price: { monthly: number | string; yearly: number | string };
+  popular: boolean;
+  features: Feature[];
+  cta: string;
+  ctaStyle: "primary" | "secondary";
+}
+
+interface FeatureTooltipProps {
+  feature: string;
+  description: string;
+  id: string;
+}
+
+type BillingCycle = "monthly" | "yearly";
+
+const PricingPage: React.FC = () => {
+  const [showTooltip, setShowTooltip] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+
+  const FeatureTooltip: React.FC<FeatureTooltipProps> = ({
+    feature,
+    description,
+    id,
+  }) => (
     <div className="feature-tooltip-wrapper">
       <span
         className="feature-with-tooltip"
@@ -19,7 +48,7 @@ function PricingPage() {
     </div>
   );
 
-  const pricingPlans = [
+  const pricingPlans: PricingPlan[] = [
     {
       id: "free",
       name: "Free",
@@ -159,19 +188,20 @@ function PricingPage() {
     },
   ];
 
-  const getPrice = (plan) => {
+  const getPrice = (plan: PricingPlan): string => {
     if (typeof plan.price[billingCycle] === "number") {
       return billingCycle === "yearly"
         ? `$${plan.price.yearly}`
         : `$${plan.price.monthly}`;
     }
-    return plan.price[billingCycle];
+    return plan.price[billingCycle] as string;
   };
 
-  const getSavings = (plan) => {
+  const getSavings = (plan: PricingPlan): string | null => {
     if (
       billingCycle === "yearly" &&
       typeof plan.price.yearly === "number" &&
+      typeof plan.price.monthly === "number" &&
       plan.price.monthly > 0
     ) {
       const yearlySavings = plan.price.monthly * 12 - plan.price.yearly;
@@ -249,7 +279,7 @@ function PricingPage() {
                 {plan.features.map((feature, index) => (
                   <li key={index} className="feature-item">
                     <span className="feature-icon">✓</span>
-                    {feature.hasTooltip ? (
+                    {feature.hasTooltip && feature.tooltip ? (
                       <FeatureTooltip
                         feature={feature.text}
                         description={feature.tooltip}
@@ -385,6 +415,6 @@ function PricingPage() {
       </div>
     </div>
   );
-}
+};
 
 export default PricingPage;

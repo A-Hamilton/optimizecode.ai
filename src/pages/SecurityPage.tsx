@@ -1,6 +1,6 @@
 import React from "react";
 
-function SecurityPage() {
+const SecurityPage: React.FC = () => {
   return (
     <div className="page">
       <div className="container">
@@ -24,6 +24,6 @@ function SecurityPage() {
       </div>
     </div>
   );
-}
+};
 
 export default SecurityPage;

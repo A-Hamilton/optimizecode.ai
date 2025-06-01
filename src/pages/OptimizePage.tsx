@@ -2,16 +2,21 @@ import React, { useState } from "react";
 import CodeInput from "../components/CodeInput";
 import FileDropZone from "../components/FileDropZone";
 import ResultsDisplay from "../components/ResultsDisplay";
+import { CodeFile, OptimizationSummary } from "../types";
 import "./OptimizePage.css";
 
-function OptimizePage() {
-  const [code, setCode] = useState("");
-  const [files, setFiles] = useState([]);
-  const [optimizedCode, setOptimizedCode] = useState("");
-  const [isOptimizing, setIsOptimizing] = useState(false);
-  const [optimizationSummary, setOptimizationSummary] = useState({});
+const OptimizePage: React.FC = () => {
+  const [code, setCode] = useState<string>("");
+  const [files, setFiles] = useState<CodeFile[]>([]);
+  const [optimizedCode, setOptimizedCode] = useState<string>("");
+  const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
+  const [optimizationSummary, setOptimizationSummary] =
+    useState<OptimizationSummary>({});
 
-  const simulateOptimization = async (inputCode, filename = "") => {
+  const simulateOptimization = async (
+    inputCode: string,
+    filename: string = "",
+  ): Promise<string> => {
     console.log(
       `Starting optimization for ${filename || "code"}, input length: ${inputCode?.length}`,
     );
@@ -28,7 +33,7 @@ function OptimizePage() {
 
     try {
       // Track what optimizations were made
-      const optimizations = [];
+      const optimizations: string[] = [];
       let optimized = inputCode;
 
       // Replace var with const
@@ -90,7 +95,7 @@ function OptimizePage() {
     }
   };
 
-  const optimizeCode = async () => {
+  const optimizeCode = async (): Promise<void> => {
     const hasCodeInput = code && code.trim().length > 0;
     const hasFileInput = files && files.length > 0;
 
@@ -156,7 +161,7 @@ function OptimizePage() {
     }
   };
 
-  const resetAll = () => {
+  const resetAll = (): void => {
     setCode("");
     setFiles([]);
     setOptimizedCode("");
@@ -220,6 +225,6 @@ function OptimizePage() {
       </div>
     </div>
   );
-}
+};
 
 export default OptimizePage;

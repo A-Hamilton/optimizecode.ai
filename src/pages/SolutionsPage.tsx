@@ -1,10 +1,40 @@
 import React, { useState } from "react";
 import "./SolutionsPage.css";
 
-function SolutionsPage() {
-  const [activeFilter, setActiveFilter] = useState("all");
+interface Benefit {
+  metric: string;
+  description: string;
+}
 
-  const solutions = [
+interface CaseStudy {
+  company: string;
+  result: string;
+  improvement: string;
+}
+
+interface Solution {
+  id: string;
+  category: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  benefits: Benefit[];
+  useCases: string[];
+  technologies: string[];
+  caseStudy: CaseStudy;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+const SolutionsPage: React.FC = () => {
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+
+  const solutions: Solution[] = [
     {
       id: "performance",
       category: "performance",
@@ -173,7 +203,7 @@ function SolutionsPage() {
     },
   ];
 
-  const categories = [
+  const categories: Category[] = [
     { id: "all", name: "All Solutions", icon: "🎯" },
     { id: "performance", name: "Performance", icon: "⚡" },
     { id: "cost", name: "Cost Optimization", icon: "💰" },
@@ -360,6 +390,6 @@ function SolutionsPage() {
       </div>
     </div>
   );
-}
+};
 
 export default SolutionsPage;
