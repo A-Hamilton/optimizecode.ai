@@ -704,11 +704,17 @@
 
   .step-connector {
     transform: rotate(90deg);
+    min-height: 60px;
   }
 
   .connector-line {
     width: 40px;
     height: 2px;
+  }
+
+  .connector-arrow {
+    transform: rotate(90deg);
+    font-size: 1.5rem;
   }
 }
 
