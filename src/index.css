@@ -27,40 +27,34 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Target the root App container structure */
-  #root > div {
-    display: block !important;
+  /* Completely reset body and html spacing */
+  html,
+  body {
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* Remove any spacing from the router container */
-  #root > div > div:first-child ~ * {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-  }
-
-  /* Force footer to have no top margin/padding */
-  .footer {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-top: 3rem !important;
+  /* Target element immediately before footer */
+  .footer::before {
+    content: "";
+    display: block;
+    margin-top: -50px;
+    height: 50px;
     position: relative;
+    z-index: -1;
   }
 
-  /* Remove bottom spacing from ALL page elements */
-  [class*="page"],
-  .homepage,
-  .solutions-page,
-  .product-page,
-  .pricing-page {
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
+  /* Use sibling selector to target element before footer */
+  * + .footer {
+    margin-top: -50px !important;
   }
 
-  /* Override any Tailwind or framework spacing */
-  * {
-    box-sizing: border-box !important;
+  /* Adjust footer padding to compensate */
+  .footer {
+    padding-top: 50px !important;
+    margin-top: 0 !important;
+    position: relative;
+    z-index: 1;
   }
 }
 
