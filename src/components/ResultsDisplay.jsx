@@ -283,36 +283,6 @@ function ResultsDisplay({
               )}
             </div>
 
-            {/* Optimizations for ONLY the currently selected file */}
-            {files[selectedFileIndex] &&
-              optimizationSummary &&
-              (() => {
-                const currentFile = files[selectedFileIndex];
-                const fileKey = currentFile.path || currentFile.name;
-                const fileOptimizations = optimizationSummary[fileKey];
-
-                return fileOptimizations &&
-                  fileOptimizations.length > 0 &&
-                  currentFile.optimizedContent ? (
-                  <div className="optimization-summary">
-                    <h4 className="summary-title">
-                      ⚡ Optimizations Applied to {currentFile.name}
-                    </h4>
-                    <div className="summary-content">
-                      <div className="file-summary">
-                        <div className="optimizations-grid">
-                          {fileOptimizations.map((opt, index) => (
-                            <div key={index} className="optimization-tag">
-                              ✓ {opt}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : null;
-              })()}
-
             {/* Code comparison */}
             {files[selectedFileIndex] && (
               <div className="code-comparison">
@@ -340,6 +310,59 @@ function ResultsDisplay({
                 </div>
               </div>
             )}
+
+            {/* Optimizations for ONLY the currently selected file - MOVED TO BOTTOM */}
+            {files[selectedFileIndex] &&
+              (() => {
+                const currentFile = files[selectedFileIndex];
+                const fileKey = currentFile.path || currentFile.name;
+                const fileOptimizations = optimizationSummary?.[fileKey];
+
+                // If file has optimized content, show optimizations or no-optimizations message
+                if (currentFile.optimizedContent) {
+                  if (fileOptimizations && fileOptimizations.length > 0) {
+                    return (
+                      <div className="optimization-summary">
+                        <h4 className="summary-title">
+                          ⚡ Optimizations Applied to {currentFile.name}
+                        </h4>
+                        <div className="summary-content">
+                          <div className="file-summary">
+                            <div className="optimizations-grid">
+                              {fileOptimizations.map((opt, index) => (
+                                <div key={index} className="optimization-tag">
+                                  ✓ {opt}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    // Show message when no optimizations were applied
+                    return (
+                      <div className="optimization-summary">
+                        <h4 className="summary-title">
+                          ⚡ Optimizations Applied to {currentFile.name}
+                        </h4>
+                        <div className="summary-content">
+                          <div className="file-summary">
+                            <div className="no-optimizations-message">
+                              <span className="no-opt-icon">ℹ️</span>
+                              <span>
+                                No optimizations were needed - your code is
+                                already well-optimized!
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                }
+                return null;
+              })()}
           </div>
         )}
 
