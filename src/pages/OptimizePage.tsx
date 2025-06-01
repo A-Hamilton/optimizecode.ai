@@ -1,91 +1,187 @@
 // Updated for TypeScript migration
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { CodeFile } from "../types";
-import { useAuth } from '../contexts/AuthContext';
-import { PLAN_DETAILS } from '../types/user';
+import { useAuth } from "../contexts/AuthContext";
+import { PLAN_DETAILS } from "../types/user";
 import CodeInput from "../components/CodeInput";
 import FileDropZone from "../components/FileDropZone";
 import ResultsDisplay from "../components/ResultsDisplay";
-import './OptimizePage.css';
-
-// User plan types
-type UserPlan = "free" | "pro" | "unleashed";
-
-interface PlanLimits {
-  maxFiles: number;
-  name: string;
-  upgradeMessage: string;
-}
-
-interface NotificationProps {
-  message: string;
-  type: "error" | "warning" | "info" | "success";
-  onClose: () => void;
-}
+import "./OptimizePage.css";
 
 const OptimizePage: React.FC = () => {
   const { userProfile, trackUsage, currentUser } = useAuth();
-  const [code, setCode] = useState<string>('');
+  const [code, setCode] = useState<string>("");
   const [files, setFiles] = useState<CodeFile[]>([]);
-  const [optimizedCode, setOptimizedCode] = useState<string>('');
+  const [optimizedCode, setOptimizedCode] = useState<string>("");
   const [optimizedFiles, setOptimizedFiles] = useState<CodeFile[]>([]);
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
-  const [optimizationSummary, setOptimizationSummary] = useState<Record<string, any>>({});
-  const [usageError, setUsageError] = useState<string>('');
-  const [notification, setNotification] = useState<{message: string, type: "error" | "warning" | "info" | "success"} | null>(null);
+  const [optimizationSummary, setOptimizationSummary] = useState<
+    Record<string, any>
+  >({});
+  const [usageError, setUsageError] = useState<string>("");
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "error" | "warning" | "info";
+  } | null>(null);
 
-  // Simulate user plan - in a real app, this would come from authentication/subscription service
-  const [currentPlan, setCurrentPlan] = useState<UserPlan>("free"); // Default to free for demo
+  const showNotification = (
+    message: string,
+    type: "error" | "warning" | "info" = "info",
+  ) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 5000);
+  };
 
-  const planLimits: Record<UserPlan, PlanLimits> = {
-    free: {
-      maxFiles: 2,
-      name: "Free",
-      upgradeMessage: "Upgrade to Pro to optimize up to 50 files at once, or Unleashed for unlimited files."
-    },
-    pro: {
-      maxFiles: 50,
-      name: "Pro",
-      upgradeMessage: "Upgrade to Unleashed for unlimited file optimization and advanced features."
-    },
-    unleashed: {
-      maxFiles: Infinity,
-      name: "Unleashed",
-      upgradeMessage: "You're on the Unleashed plan with unlimited everything!"
+  const optimizeCode = async () => {
+    if (!code.trim() && files.length === 0) {
+      return;
+    }
+
+    // Check usage limits before optimization
+    if (!currentUser || !userProfile) {
+      setUsageError("Please log in to optimize code");
+      return;
+    }
+
+    // Check if user has reached their limit
+    const { filesPerMonth } = userProfile.limits;
+    const { filesOptimizedThisMonth } = userProfile.usage;
+
+    if (filesPerMonth !== -1 && filesOptimizedThisMonth >= filesPerMonth) {
+      setUsageError(
+        `You've reached your monthly limit of ${filesPerMonth} files. Upgrade your plan for more files.`,
+      );
+      return;
+    }
+
+    setIsOptimizing(true);
+    setUsageError("");
+
+    // Clear previous optimization summary before starting
+    setOptimizationSummary({});
+
+    try {
+      // Track usage for this optimization
+      const usageResult = await trackUsage();
+      if (!usageResult.success && usageResult.error) {
+        setUsageError(usageResult.error);
+        setIsOptimizing(false);
+        return;
+      }
+
+      if (code.trim()) {
+        // Simulate optimization process
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        const optimized = simulateCodeOptimization(code);
+        setOptimizedCode(optimized);
+
+        setOptimizationSummary((prev) => ({
+          ...prev,
+          manual_input: {
+            original: code,
+            optimized: optimized,
+            improvements: getOptimizationImprovements(code, optimized),
+          },
+        }));
+      }
+
+      if (files.length > 0) {
+        const optimizedFileResults: CodeFile[] = [];
+        const summary: Record<string, any> = {};
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+
+          // Simulate processing time
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          const optimizedContent = simulateCodeOptimization(file.content);
+          const optimizedFile: CodeFile = {
+            name: `${file.name}.optimized${file.name.substring(file.name.lastIndexOf("."))}`,
+            path: file.path,
+            content: optimizedContent,
+          };
+
+          optimizedFileResults.push(optimizedFile);
+
+          summary[file.name] = {
+            original: file.content,
+            optimized: optimizedContent,
+            improvements: getOptimizationImprovements(
+              file.content,
+              optimizedContent,
+            ),
+          };
+        }
+
+        setOptimizedFiles(optimizedFileResults);
+        setOptimizationSummary((prev) => ({ ...prev, ...summary }));
+      }
+    } catch (error) {
+      console.error("Optimization failed:", error);
+      setUsageError("Optimization failed. Please try again.");
+    } finally {
+      setIsOptimizing(false);
     }
   };
 
-  const showNotification = (message: string, type: "error" | "warning" | "info" | "success" = "info") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 8000); // Auto-hide after 8 seconds
+  const resetCode = () => {
+    setCode("");
+    setFiles([]);
+    setOptimizedCode("");
+    setOptimizedFiles([]);
+    setOptimizationSummary({});
+    setUsageError("");
   };
 
-  const InlineNotification: React.FC<NotificationProps> = ({ message, type, onClose }) => {
+  const simulateCodeOptimization = (inputCode: string): string => {
+    // Simple simulation - in reality, this would call your optimization API
+    let optimized = inputCode;
+
+    // Simulate some optimizations
+    optimized = optimized.replace(/var /g, "const ");
+    optimized = optimized.replace(/;\s*\n/g, ";\n");
+    optimized = optimized.replace(/\{\s*\n\s*/g, "{\n  ");
+    optimized = optimized.replace(/\n\s*\}/g, "\n}");
+
+    return optimized;
+  };
+
+  const getOptimizationImprovements = (original: string, optimized: string) => {
+    const originalLines = original.split("\n").length;
+    const optimizedLines = optimized.split("\n").length;
+
+    return {
+      linesReduced: Math.max(0, originalLines - optimizedLines),
+      sizeReduction: `${Math.round((1 - optimized.length / original.length) * 100)}%`,
+      improvements: [
+        "Variable declarations optimized",
+        "Code formatting improved",
+        "Whitespace optimized",
+      ],
+    };
+  };
+
+  const InlineNotification: React.FC<{
+    message: string;
+    type: "error" | "warning" | "info";
+    onClose: () => void;
+  }> = ({ message, type, onClose }) => {
     const typeStyles = {
       error: "bg-red-500/20 border-red-500/30 text-red-200",
       warning: "bg-yellow-500/20 border-yellow-500/30 text-yellow-200",
       info: "bg-blue-500/20 border-blue-500/30 text-blue-200",
-      success: "bg-green-500/20 border-green-500/30 text-green-200"
-    };
-
-    const typeIcons = {
-      error: "❌",
-      warning: "⚠️",
-      info: "ℹ️",
-      success: "✅"
     };
 
     return (
-      <div className={`p-4 rounded-lg border mb-6 flex items-start justify-between ${typeStyles[type]}`}>
-        <div className="flex items-start space-x-3">
-          <span className="text-lg">{typeIcons[type]}</span>
-          <div className="flex-1">
-            <p className="text-sm leading-relaxed">{message}</p>
-          </div>
-        </div>
+      <div
+        className={`p-3 rounded-lg border mb-4 flex items-center justify-between ${typeStyles[type]}`}
+      >
+        <span className="text-sm">{message}</span>
         <button
           onClick={onClose}
-          className="ml-3 text-xl leading-none hover:opacity-70 transition-opacity flex-shrink-0"
+          className="ml-2 text-lg leading-none hover:opacity-70 transition-opacity"
         >
           ×
         </button>
@@ -93,306 +189,57 @@ const OptimizePage: React.FC = () => {
     );
   };
 
-  const handleFilesSelected = (newFiles: CodeFile[]): void => {
-    const currentLimit = planLimits[currentPlan].maxFiles;
-
-    if (newFiles.length > currentLimit) {
-      showNotification(
-        `File limit exceeded! Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? 'unlimited' : currentLimit} files per optimization. ${planLimits[currentPlan].upgradeMessage}`,
-        "warning"
-      );
-
-      // Truncate to the allowed limit
-      const limitedFiles = newFiles.slice(0, currentLimit);
-      setFiles(limitedFiles);
-      return;
-    }
-
-    setFiles(newFiles);
-  };
-
-  const simulateOptimization = async (inputCode: string, filename: string = ""): Promise<string> => {
-    console.log(
-      `Starting optimization for ${filename || "code"}, input length: ${inputCode?.length}`,
-    );
-
-    // Simulate AI optimization - replace with actual AI service
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 1500 + 800),
-    );
-
-    if (!inputCode || typeof inputCode !== "string" || !inputCode.trim()) {
-      console.log("No valid code provided for optimization");
-      return "// No code provided for optimization.";
-    }
-
-    try {
-      // Track what optimizations were made
-      const optimizations: string[] = [];
-      let optimized = inputCode;
-
-      // Replace var with const/let - ALWAYS suggest this if var is found
-      if (optimized.includes("var ")) {
-        optimized = optimized.replace(/var\s+/g, "const ");
-        optimizations.push("Replaced var with const for better scoping");
-      }
-
-      // Replace let with const where appropriate (if variable is never reassigned)
-      const letMatches = optimized.match(/let\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g);
-      if (letMatches) {
-        letMatches.forEach(match => {
-          const varName = match.replace('let ', '');
-          // Simple check: if variable name appears only once (not reassigned)
-          const varRegex = new RegExp(`\\b${varName}\\s*=`, 'g');
-          const assignments = optimized.match(varRegex);
-          if (assignments && assignments.length === 1) {
-            optimized = optimized.replace(`let ${varName}`, `const ${varName}`);
-            if (!optimizations.includes("Replaced let with const where variables are not reassigned")) {
-              optimizations.push("Replaced let with const where variables are not reassigned");
-            }
-          }
-        });
-      }
-
-      // Modernize function syntax
-      if (optimized.includes("function ")) {
-        const functionRegex = /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
-        if (functionRegex.test(optimized)) {
-          optimized = optimized.replace(functionRegex, "const $1 = function");
-          optimizations.push("Modernized function declarations to const assignments");
-        }
-      }
-
-      // Remove console.log statements (common optimization)
-      if (optimized.includes("console.log")) {
-        optimized = optimized.replace(/console\.log\([^)]*\);?\s*\n?/g, "");
-        optimizations.push("Removed console.log statements for production");
-      }
-
-      // Remove TODO/FIXME comments
-      if (optimized.includes("TODO") || optimized.includes("FIXME")) {
-        optimized = optimized.replace(/\/\/\s*(TODO|FIXME)[^\n]*/g, "");
-        optimizations.push("Removed TODO/FIXME comments");
-      }
-
-      // Optimize string concatenation to template literals
-      if (optimized.includes(" + ") && /['"][^'"]*['"]\s*\+/.test(optimized)) {
-        optimizations.push("String concatenation can be optimized with template literals");
-      }
-
-      // Check for inefficient loops
-      if (optimized.includes("for(") || optimized.includes("for (")) {
-        optimizations.push("Loop structure can be optimized for better performance");
-      }
-
-      // Clean up formatting
-      const originalLines = optimized.split('\n').length;
-      optimized = optimized
-        .replace(/;\s*\n/g, ";\n")
-        .replace(/\{\s*\n\s*return/g, "{\n  return")
-        .replace(/\s+\n/g, "\n")
-        .replace(/\n{3,}/g, "\n\n")
-        .replace(/\s+$/gm, "") // Remove trailing whitespace
-        .trim();
-
-      if (optimizations.length > 0) {
-        optimizations.push("Cleaned up formatting and whitespace");
-      }
-
-      // IMPORTANT: Always create optimizations for demonstration
-      // In a real app, you'd have actual AI analysis
-      if (optimizations.length === 0) {
-        // Add some generic optimizations based on code patterns
-        if (optimized.includes("React")) {
-          optimizations.push("React component structure optimized");
-        }
-        if (optimized.includes("import")) {
-          optimizations.push("Import statements organized for better bundling");
-        }
-        if (optimized.includes("{") && optimized.includes("}")) {
-          optimizations.push("Code structure improved for readability");
-        }
-      }
-
-      // Store optimizations for display
-      setOptimizationSummary((prev) => ({
-        ...prev,
-        [filename || "pasted-code"]: optimizations,
-      }));
-
-      console.log(
-        `Optimization completed for ${filename || "code"}, optimizations: ${optimizations.join(", ")}`,
-      );
-
-      return optimized;
-    } catch (error) {
-      console.error("Error during optimization:", error);
-      return inputCode; // Return original code on error
-    }
-  };
-
-  const optimizeCode = async (): Promise<void> => {
-    const hasCodeInput = code && code.trim().length > 0;
-    const hasFileInput = files && files.length > 0;
-
-    console.log("Optimize button clicked", {
-      hasCodeInput,
-      hasFileInput,
-      codeLength: code?.length,
-      filesCount: files?.length,
-    });
-
-    if (!hasCodeInput && !hasFileInput) {
-      showNotification("Please paste some code or upload files to optimize.", "warning");
-      return;
-    }
-
-    // Check file limits before optimization
-    if (hasFileInput) {
-      const currentLimit = planLimits[currentPlan].maxFiles;
-      if (files.length > currentLimit) {
-        showNotification(
-          `Cannot optimize ${files.length} files. Your ${planLimits[currentPlan].name} plan allows up to ${currentLimit === Infinity ? 'unlimited' : currentLimit} files. ${planLimits[currentPlan].upgradeMessage}`,
-          "error"
-        );
-        return;
-      }
-    }
-
-    setIsOptimizing(true);
-
-    // CLEAR PREVIOUS OPTIMIZATION SUMMARY BEFORE STARTING
-    setOptimizationSummary({});
-
-    console.log("Starting optimization...");
-
-    try {
-      // Optimize pasted code
-      if (hasCodeInput) {
-        console.log("Optimizing pasted code:", code.substring(0, 100) + "...");
-        const optimized = await simulateOptimization(code, "pasted-code");
-        console.log("Pasted code optimized, result length:", optimized?.length);
-        setOptimizedCode(optimized);
-      }
-
-      // Optimize uploaded files
-      if (hasFileInput) {
-        console.log(
-          "Optimizing files:",
-          files.map((f) => f.name),
-        );
-        const optimizedFiles = await Promise.all(
-          files.map(async (file, index) => {
-            console.log(
-              `Optimizing file ${index + 1}/${files.length}: ${file.name}`,
-            );
-            const optimizedContent = await simulateOptimization(
-              file.content,
-              file.path,
-            );
-            console.log(
-              `File ${file.name} optimized, result length:`,
-              optimizedContent?.length,
-            );
-            return {
-              ...file,
-              optimizedContent,
-            };
-          }),
-        );
-        console.log("All files optimized:", optimizedFiles.length);
-        setFiles(optimizedFiles);
-      }
-
-      showNotification(
-        `Optimization completed successfully! ${hasCodeInput ? 'Code' : ''} ${hasCodeInput && hasFileInput ? 'and' : ''} ${hasFileInput ? `${files.length} file${files.length > 1 ? 's' : ''}` : ''} optimized with AI improvements.`,
-        "success"
-      );
-
-      console.log("Optimization completed successfully");
-    } catch (error) {
-      console.error("Optimization failed:", error);
-      showNotification("Optimization failed. Please try again.", "error");
-    } finally {
-      setIsOptimizing(false);
-    }
-  };
-
-  const resetAll = (): void => {
-    setCode("");
-    setFiles([]);
-    setOptimizedCode("");
-    setIsOptimizing(false);
-    setOptimizationSummary({}); // Clear optimization summary
-    setNotification(null);
-  };
-
-  const hasInput =
-    (code && code.trim().length > 0) || (files && files.length > 0);
-
-  const isAtFileLimit = files.length >= planLimits[currentPlan].maxFiles;
-
   return (
     <div className="optimize-page">
       <div className="optimize-container">
         <header className="optimize-header">
-          <h1 className="optimize-title">Code Optimizer</h1>
-          <p className="optimize-subtitle">
-            AI-powered code optimization for better performance, readability,
-            and maintainability
-          </p>
+          <div className="header-content">
+            <div className="title-section">
+              <h1>Code Optimizer</h1>
+              <p>
+                AI-powered code optimization for better performance,
+                readability, and maintainability
+              </p>
+            </div>
 
-          {/* Plan indicator and file limit display */}
-          <div className="plan-indicator">
-            <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg mb-6">
-              <div className="flex items-center space-x-3">
-                <span className="text-sm font-medium text-white/90">
-                  Current Plan: <span className="text-primary font-semibold">{planLimits[currentPlan].name}</span>
-                </span>
-                <span className="text-xs text-white/60">
-                  📁 {files.length}/{planLimits[currentPlan].maxFiles === Infinity ? '∞' : planLimits[currentPlan].maxFiles} files
-                </span>
-              </div>
-
-              {/* Plan switcher for demo purposes */}
-              <div className="flex space-x-2">
+            <div className="current-plan">
+              <span className="plan-label">Current Plan:</span>
+              <span
+                className={`plan-name ${userProfile?.subscription.plan || "free"}`}
+              >
+                {userProfile?.subscription.plan
+                  ? PLAN_DETAILS[userProfile.subscription.plan].name
+                  : "Free"}
+              </span>
+              <span className="plan-usage">
+                {userProfile?.usage.filesOptimizedThisMonth || 0}/
+                {userProfile?.limits.filesPerMonth === -1
+                  ? "∞"
+                  : userProfile?.limits.filesPerMonth || 2}{" "}
+                files
+              </span>
+              <div className="plan-upgrade-buttons">
                 <button
-                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === 'free' ? 'bg-primary text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
-                  onClick={() => setCurrentPlan('free')}
+                  className={`plan-btn free ${userProfile?.subscription.plan === "free" ? "active" : ""}`}
+                  onClick={() => (window.location.href = "/pricing")}
                 >
                   Free
                 </button>
                 <button
-                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === 'pro' ? 'bg-primary text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
-                  onClick={() => setCurrentPlan('pro')}
+                  className={`plan-btn pro ${userProfile?.subscription.plan === "pro" ? "active" : ""}`}
+                  onClick={() => (window.location.href = "/pricing")}
                 >
                   Pro
                 </button>
                 <button
-                  className={`text-xs px-2 py-1 rounded transition-all ${currentPlan === 'unleashed' ? 'bg-primary text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
-                  onClick={() => setCurrentPlan('unleashed')}
+                  className={`plan-btn unleashed ${userProfile?.subscription.plan === "unleashed" ? "active" : ""}`}
+                  onClick={() => (window.location.href = "/pricing")}
                 >
                   Unleashed
                 </button>
               </div>
             </div>
 
-            {/* File limit warning */}
-            {isAtFileLimit && planLimits[currentPlan].maxFiles !== Infinity && (
-              <div className="p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg mb-6">
-                <p className="text-sm text-yellow-200">
-                  ⚠️ You've reached your file limit of {planLimits[currentPlan].maxFiles} files.
-                  {currentPlan === 'free' && (
-                    <span> <a href="/pricing" className="text-yellow-100 underline hover:text-white">Upgrade to Pro</a> for 50 files or <a href="/pricing" className="text-yellow-100 underline hover:text-white">Unleashed</a> for unlimited files.</span>
-                  )}
-                  {currentPlan === 'pro' && (
-                    <span> <a href="/pricing" className="text-yellow-100 underline hover:text-white">Upgrade to Unleashed</a> for unlimited files.</span>
-                  )}
-                </p>
-              </div>
-            )}
-
-            {/* Inline Notification */}
             {notification && (
               <InlineNotification
                 message={notification.message}
@@ -404,59 +251,132 @@ const OptimizePage: React.FC = () => {
         </header>
 
         <main className="optimize-main">
-        <div className="input-section">
-          {usageError && (
-            <div className="usage-error">
-              <svg className="error-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <span>{usageError}</span>
-              <button
-                className="upgrade-btn"
-                onClick={() => window.location.href = '/pricing'}
-              >
-                Upgrade Plan
-              </button>
-            </div>
-          )}
-          <CodeInput
-            code={code}
-            onCodeChange={setCode}
-          />
-        </div>
-
-            <FileDropZone files={files} onFilesSelected={handleFilesSelected} />
-
-            {/* Enhanced Action Controls with proper styling */}
-            <div className="action-controls">
-              <button
-                className={`optimize-btn ${
-                  !hasInput || isOptimizing ? "optimize-btn-disabled" : "optimize-btn-primary"
-                }`}
-                onClick={optimizeCode}
-                disabled={!hasInput || isOptimizing}
-              >
-                {isOptimizing ? (
-                  <span className="btn-content">
-                    <span className="loading-spinner"></span>
-                    Optimizing...
-                  </span>
-                ) : (
-                  <span className="btn-content">
-                    <span>⚡</span>
-                    Optimize Code
-                  </span>
-                )}
-              </button>
-
-              {hasInput && (
-                <button
-                  className={`reset-btn ${isOptimizing ? "reset-btn-disabled" : "reset-btn-secondary"}`}
-                  onClick={resetAll}
-                  disabled={isOptimizing}
+          <div className="input-section">
+            {usageError && (
+              <div className="usage-error">
+                <svg
+                  className="error-icon"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
                 >
+                  <path
+                    d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>{usageError}</span>
+                <button
+                  className="upgrade-btn"
+                  onClick={() => (window.location.href = "/pricing")}
+                >
+                  Upgrade Plan
+                </button>
+              </div>
+            )}
+
+            <CodeInput code={code} onCodeChange={setCode} />
+
+            <div className="quick-tips">
+              <h3>💡 Quick Start Tips:</h3>
+              <ul>
+                <li>Paste any code snippet to see instant AI optimization</li>
+                <li>Supports 15+ programming languages</li>
+                <li>
+                  Get performance improvements, cleaner syntax, and security
+                  fixes
+                </li>
+                <li>Use the file upload below for multiple files</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="file-section">
+            <FileDropZone
+              files={files}
+              onFilesChange={setFiles}
+              showNotification={showNotification}
+            />
+          </div>
+
+          <div className="action-section">
+            <div className="optimize-actions">
+              <button
+                className="optimize-btn"
+                onClick={optimizeCode}
+                disabled={(!code.trim() && files.length === 0) || isOptimizing}
+              >
+                <span className="btn-content">
+                  {isOptimizing ? (
+                    <>
+                      <svg
+                        className="animate-spin"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Optimizing...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Optimize Code
+                    </>
+                  )}
+                </span>
+              </button>
+
+              {(code.trim() || files.length > 0) && !isOptimizing && (
+                <button className="reset-btn" onClick={resetCode}>
                   <span className="btn-content">
-                    <span>🗑️</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M3 12a9 9 0 1013.5-7.5"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M16 5l-3-3 3-3"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                     Reset
                   </span>
                 </button>
@@ -467,7 +387,7 @@ const OptimizePage: React.FC = () => {
           <ResultsDisplay
             originalCode={code}
             optimizedCode={optimizedCode}
-            files={files}
+            files={optimizedFiles}
             isOptimizing={isOptimizing}
             optimizationSummary={optimizationSummary}
           />
