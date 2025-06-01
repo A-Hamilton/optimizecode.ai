@@ -27,29 +27,40 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Eliminate the persistent gap with aggressive negative margin */
-  .footer {
-    margin-top: -100px !important;
-    padding-top: 100px !important;
-    position: relative;
-    z-index: 10;
-  }
-
-  /* Remove all possible spacing from body and root elements */
-  body,
-  #root {
+  /* Target the root App container structure */
+  #root > div {
+    display: block !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* Remove bottom spacing from all page containers */
+  /* Remove any spacing from the router container */
+  #root > div > div:first-child ~ * {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Force footer to have no top margin/padding */
+  .footer {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 3rem !important;
+    position: relative;
+  }
+
+  /* Remove bottom spacing from ALL page elements */
+  [class*="page"],
   .homepage,
   .solutions-page,
   .product-page,
-  .pricing-page,
-  div[class*="page"] {
+  .pricing-page {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
+  }
+
+  /* Override any Tailwind or framework spacing */
+  * {
+    box-sizing: border-box !important;
   }
 }
 
