@@ -10,9 +10,15 @@ function App() {
   const [optimizedCode, setOptimizedCode] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
 
-  const simulateOptimization = async (inputCode) => {
+  const simulateOptimization = async (inputCode, filename = "") => {
     // Simulate AI optimization - replace with actual AI service
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.random() * 1000 + 1000),
+    );
+
+    if (!inputCode || !inputCode.trim()) {
+      return "No code provided for optimization.";
+    }
 
     // Mock optimization improvements
     let optimized = inputCode
@@ -20,16 +26,22 @@ function App() {
       .replace(/function\s+(\w+)/g, "const $1 = ")
       .replace(/;\s*\n/g, "\n")
       .replace(/\{\s*\n\s*return/g, "{ return")
-      .replace(/console\.log\([^)]*\);?\s*\n?/g, "");
+      .replace(/console\.log\([^)]*\);?\s*\n?/g, "")
+      .replace(/\s+\n/g, "\n")
+      .replace(/\n{3,}/g, "\n\n");
 
     // Add some optimization comments
-    optimized = `// Optimized by OptimizeCode.ai\n// - Replaced var with const\n// - Modernized function syntax\n// - Removed console.log statements\n// - Cleaned up formatting\n\n${optimized}`;
+    const fileComment = filename ? `// File: ${filename}\n` : "";
+    optimized = `${fileComment}// Optimized by OptimizeCode.ai\n// - Replaced var with const\n// - Modernized function syntax\n// - Removed console.log statements\n// - Cleaned up formatting\n\n${optimized.trim()}`;
 
     return optimized;
   };
 
   const optimizeCode = async () => {
-    if (!code.trim() && files.length === 0) {
+    const hasCodeInput = code && code.trim();
+    const hasFileInput = files && files.length > 0;
+
+    if (!hasCodeInput && !hasFileInput) {
       alert("Please paste some code or upload files to optimize.");
       return;
     }
@@ -38,18 +50,29 @@ function App() {
 
     try {
       // Optimize pasted code
-      if (code.trim()) {
-        const optimized = await simulateOptimization(code);
+      if (hasCodeInput) {
+        console.log("Optimizing pasted code:", code.substring(0, 100) + "...");
+        const optimized = await simulateOptimization(code, "pasted-code");
         setOptimizedCode(optimized);
       }
 
       // Optimize uploaded files
-      if (files.length > 0) {
+      if (hasFileInput) {
+        console.log(
+          "Optimizing files:",
+          files.map((f) => f.name),
+        );
         const optimizedFiles = await Promise.all(
-          files.map(async (file) => ({
-            ...file,
-            optimizedContent: await simulateOptimization(file.content),
-          })),
+          files.map(async (file) => {
+            const optimizedContent = await simulateOptimization(
+              file.content,
+              file.path,
+            );
+            return {
+              ...file,
+              optimizedContent,
+            };
+          }),
         );
         setFiles(optimizedFiles);
       }
@@ -68,7 +91,16 @@ function App() {
     setIsOptimizing(false);
   };
 
-  const hasInput = code.trim() || files.length > 0;
+  const hasInput =
+    (code && code.trim().length > 0) || (files && files.length > 0);
+
+  // Debug logging
+  console.log("App state:", {
+    codeLength: code?.length || 0,
+    filesCount: files?.length || 0,
+    hasInput,
+    isOptimizing,
+  });
 
   return (
     <div className="app">

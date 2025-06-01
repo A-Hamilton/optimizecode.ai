@@ -153,7 +153,7 @@ function ResultsDisplay({ originalCode, optimizedCode, files, isOptimizing }) {
               >
                 {files.map((file, index) => (
                   <option key={index} value={index}>
-                    {file.name}
+                    {file.path || file.name}
                   </option>
                 ))}
               </select>
