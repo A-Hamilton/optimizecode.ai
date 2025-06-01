@@ -32,11 +32,7 @@ const PricingPage: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
-  const FeatureTooltip: React.FC<FeatureTooltipProps> = ({
-    feature,
-    description,
-    id,
-  }) => (
+  const FeatureTooltip: React.FC<FeatureTooltipProps> = ({ feature, description, id }) => (
     <div className="feature-tooltip-wrapper">
       <span
         className="feature-with-tooltip"
@@ -62,7 +58,8 @@ const PricingPage: React.FC = () => {
         {
           text: "10 optimizations per day",
           hasTooltip: true,
-          tooltip: "You can perform up to 10 code optimizations each day",
+          tooltip:
+            "You can perform up to 10 code optimizations each day",
         },
         {
           text: "Upload up to 2 files",
@@ -109,7 +106,17 @@ const PricingPage: React.FC = () => {
         {
           text: "Upload up to 50 files",
           hasTooltip: true,
-          tooltip: "Upload up to 50 code files at once for batch optimization",
+          tooltip: "Upload up to 50 code files for each optimization",
+        },
+        {
+          text: "Copy & paste up to 100,000 characters",
+          hasTooltip: true,
+          tooltip: "Paste large code blocks with a 100,000 character limit",
+        },
+        {
+          text: "10MB file size limit",
+          hasTooltip: true,
+          tooltip: "Each uploaded file can be up to 10MB in size",
         },
         {
           text: "All languages & frameworks",
@@ -128,27 +135,6 @@ const PricingPage: React.FC = () => {
           tooltip:
             "Detailed performance metrics, code quality scores, and optimization history",
         },
-        {
-          text: "API access with higher rate limits",
-          hasTooltip: true,
-          tooltip: "10,000 API requests per hour with dedicated endpoints",
-        },
-        {
-          text: "VS Code & IDE integrations",
-          hasTooltip: true,
-          tooltip: "Extensions for VS Code, IntelliJ, WebStorm, and PyCharm",
-        },
-        {
-          text: "CI/CD pipeline integration",
-          hasTooltip: true,
-          tooltip:
-            "GitHub Actions, GitLab CI, Jenkins, and Azure DevOps integration",
-        },
-        {
-          text: "3x faster optimization speed",
-          hasTooltip: true,
-          tooltip: "Priority processing queue with dedicated compute resources",
-        },
       ],
       cta: "Start 14-Day Free Trial",
       ctaStyle: "primary",
@@ -161,13 +147,27 @@ const PricingPage: React.FC = () => {
       popular: false,
       fileLimit: "Unlimited",
       features: [
-        { text: "Everything in Pro", hasTooltip: false },
         {
-          text: "Unlimited files per optimization",
+          text: "Unlimited optimizations per day",
           hasTooltip: true,
-          tooltip:
-            "No limits on the number of files you can upload and optimize at once",
+          tooltip: "No daily limits on code optimizations"
         },
+        {
+          text: "Unlimited file uploads",
+          hasTooltip: true,
+          tooltip: "No limits on the number of files you can upload for optimization",
+        },
+        {
+          text: "Unlimited character paste",
+          hasTooltip: true,
+          tooltip: "No character limits for pasting code directly",
+        },
+        {
+          text: "100MB file size limit",
+          hasTooltip: true,
+          tooltip: "Each uploaded file can be up to 100MB in size",
+        },
+        { text: "Everything in Pro", hasTooltip: false },
         {
           text: "Custom optimization rules",
           hasTooltip: true,
@@ -186,9 +186,6 @@ const PricingPage: React.FC = () => {
           tooltip:
             "Service level agreement with financial penalties for downtime",
         },
-        {
-          text: "On-premise deployment option",
-          hasTooltip: true,
           tooltip:
             "Install OptimizeCode.ai within your own infrastructure for maximum security",
         },
@@ -433,8 +430,7 @@ const PricingPage: React.FC = () => {
               <h3>What happens if I exceed the file limits?</h3>
               <p>
                 If you try to upload more files than your plan allows, you'll be
-                prompted to upgrade or remove some files to stay within your
-                limit.
+                prompted to upgrade or remove some files to stay within your limit.
               </p>
             </div>
             <div className="faq-item">
