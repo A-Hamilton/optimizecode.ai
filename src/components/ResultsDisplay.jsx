@@ -158,51 +158,6 @@ function ResultsDisplay({
         )}
       </div>
 
-      {/* Optimization Summary - Only for files/code that actually got optimized */}
-      {optimizationSummary && Object.keys(optimizationSummary).length > 0 && (
-        <div className="optimization-summary">
-          <h4 className="summary-title">⚡ Optimizations Applied</h4>
-          <div className="summary-content">
-            {Object.entries(optimizationSummary)
-              .filter(([filename, optimizations]) => {
-                // Only show if optimizations were actually made
-                if (filename === "pasted-code") {
-                  return optimizedCode && optimizations.length > 0;
-                } else {
-                  // For files, check if the file exists and has optimized content
-                  const file = files.find(
-                    (f) => f.path === filename || f.name === filename,
-                  );
-                  return (
-                    file && file.optimizedContent && optimizations.length > 0
-                  );
-                }
-              })
-              .map(([filename, optimizations]) => (
-                <div key={filename} className="file-summary">
-                  <div className="file-summary-header">
-                    <span className="file-summary-name">
-                      {filename === "pasted-code"
-                        ? "📄 Pasted Code"
-                        : `📁 ${filename}`}
-                    </span>
-                    <span className="optimizations-count">
-                      {optimizations.length} improvements
-                    </span>
-                  </div>
-                  <div className="optimizations-grid">
-                    {optimizations.map((opt, index) => (
-                      <div key={index} className="optimization-tag">
-                        ✓ {opt}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
-
       <div className="results-content">
         {activeTab === "code" && optimizedCode && (
           <div className="code-result">
@@ -225,6 +180,7 @@ function ResultsDisplay({
 
         {activeTab === "files" && files.length > 0 && (
           <div className="files-result">
+            {/* File Selector at the top */}
             <div className="file-selector">
               <select
                 value={selectedFileIndex}
@@ -266,7 +222,7 @@ function ResultsDisplay({
               )}
             </div>
 
-            {/* Show optimizations for currently selected file */}
+            {/* Optimizations for ONLY the currently selected file */}
             {files[selectedFileIndex] &&
               optimizationSummary &&
               (() => {
@@ -277,21 +233,26 @@ function ResultsDisplay({
                 return fileOptimizations &&
                   fileOptimizations.length > 0 &&
                   currentFile.optimizedContent ? (
-                  <div className="current-file-optimizations">
-                    <h5 className="current-file-title">
-                      ⚡ Optimizations for {currentFile.name}:
-                    </h5>
-                    <div className="current-file-tags">
-                      {fileOptimizations.map((opt, index) => (
-                        <div key={index} className="optimization-tag-small">
-                          ✓ {opt}
+                  <div className="optimization-summary">
+                    <h4 className="summary-title">
+                      ⚡ Optimizations Applied to {currentFile.name}
+                    </h4>
+                    <div className="summary-content">
+                      <div className="file-summary">
+                        <div className="optimizations-grid">
+                          {fileOptimizations.map((opt, index) => (
+                            <div key={index} className="optimization-tag">
+                              ✓ {opt}
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
                     </div>
                   </div>
                 ) : null;
               })()}
 
+            {/* Code comparison */}
             {files[selectedFileIndex] && (
               <div className="code-comparison">
                 <div className="code-section">
@@ -320,6 +281,29 @@ function ResultsDisplay({
             )}
           </div>
         )}
+
+        {/* Show optimizations for pasted code only when on code tab */}
+        {activeTab === "code" &&
+          optimizedCode &&
+          optimizationSummary &&
+          optimizationSummary["pasted-code"] && (
+            <div className="optimization-summary">
+              <h4 className="summary-title">
+                ⚡ Optimizations Applied to Pasted Code
+              </h4>
+              <div className="summary-content">
+                <div className="file-summary">
+                  <div className="optimizations-grid">
+                    {optimizationSummary["pasted-code"].map((opt, index) => (
+                      <div key={index} className="optimization-tag">
+                        ✓ {opt}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
       </div>
     </div>
   );
