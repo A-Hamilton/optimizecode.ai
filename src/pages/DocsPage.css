@@ -1,0 +1,360 @@
+.docs-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  padding-top: 80px;
+}
+
+.docs-container {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  gap: 2rem;
+  padding: 0 1rem;
+}
+
+/* Sticky Sidebar Navigation */
+.docs-sidebar {
+  position: sticky;
+  top: 100px;
+  width: 280px;
+  height: fit-content;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.sidebar-header h3 {
+  color: #646cff;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  margin-bottom: 0.25rem;
+}
+
+.nav-item.level-1 {
+  margin-top: 1rem;
+}
+
+.nav-item.level-1:first-child {
+  margin-top: 0;
+}
+
+.nav-item.level-2 {
+  margin-left: 1rem;
+}
+
+.nav-link {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background: rgba(100, 108, 255, 0.1);
+  color: #646cff;
+  transform: translateX(4px);
+}
+
+.nav-item.active .nav-link {
+  background: rgba(100, 108, 255, 0.2);
+  color: #646cff;
+  font-weight: 600;
+}
+
+/* Main Content */
+.docs-content {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 4rem;
+}
+
+.docs-header {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.docs-header h1 {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  background: linear-gradient(135deg, #646cff, #747bff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.docs-intro {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 700px;
+}
+
+/* Enhanced Typography */
+.doc-section {
+  margin-bottom: 4rem;
+  scroll-margin-top: 100px;
+}
+
+.doc-section h2 {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(100, 108, 255, 0.3);
+}
+
+.subsection {
+  margin: 2.5rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid rgba(100, 108, 255, 0.3);
+}
+
+.subsection h3 {
+  color: #646cff;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.subsection h4 {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.75rem 0;
+}
+
+/* Enhanced Body Text */
+.docs-content p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0 0 1.5rem 0;
+  max-width: 800px;
+}
+
+.docs-content ol,
+.docs-content ul {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0 0 1.5rem 0;
+  padding-left: 2rem;
+}
+
+.docs-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Code Blocks with Copy Functionality */
+.code-block-container {
+  margin: 1.5rem 0;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.code-language {
+  color: #646cff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.copy-button {
+  background: rgba(100, 108, 255, 0.2);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  color: #646cff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.copy-button:hover {
+  background: rgba(100, 108, 255, 0.3);
+  border-color: #646cff;
+  transform: translateY(-1px);
+}
+
+.code-block {
+  margin: 0;
+  padding: 1.5rem;
+  background: transparent;
+  color: #e2e8f0;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.code-block code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Inline Code */
+code {
+  background: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.9em;
+}
+
+/* Special Sections */
+.endpoint-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.endpoint-card h4 {
+  color: #22c55e;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  background: rgba(34, 197, 94, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  display: inline-block;
+}
+
+.tutorial-example {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.tutorial-example h4 {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .docs-container {
+    flex-direction: column;
+  }
+
+  .docs-sidebar {
+    position: relative;
+    top: 0;
+    width: 100%;
+    max-height: none;
+    margin-bottom: 2rem;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .nav-item {
+    margin: 0;
+  }
+
+  .nav-item.level-2 {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .docs-page {
+    padding-top: 60px;
+  }
+
+  .docs-header h1 {
+    font-size: 2rem;
+  }
+
+  .docs-intro {
+    font-size: 1.1rem;
+  }
+
+  .doc-section h2 {
+    font-size: 1.6rem;
+  }
+
+  .docs-content p,
+  .docs-content ol,
+  .docs-content ul {
+    font-size: 1rem;
+  }
+
+  .code-block {
+    font-size: 0.85rem;
+    padding: 1rem;
+  }
+}
+
+/* Custom Scrollbar for Sidebar */
+.docs-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.docs-sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.docs-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(100, 108, 255, 0.3);
+  border-radius: 3px;
+}
+
+.docs-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 108, 255, 0.5);
+}
