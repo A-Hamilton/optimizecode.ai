@@ -478,23 +478,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* 8. Final CTA Banner */}
-      <section className="final-cta">
-        <div className="container">
-          <div className="cta-content">
-            <h2>Ready to Optimize Your Code?</h2>
-            <p>
-              Join thousands of developers who've already improved their code
-              performance
-            </p>
-            <Link to="/optimize" className="btn-cta-large interactive-cta">
-              <span className="cta-text">Start Your Free Trial</span>
-              <span className="cta-arrow">→</span>
-            </Link>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };
