@@ -27,33 +27,29 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Nuclear option: Force footer to be positioned exactly where content ends */
-  .footer {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    z-index: 1000 !important;
-    background: rgba(0, 0, 0, 0.8) !important;
-  }
-
-  /* Add bottom padding to page content to prevent overlap */
-  .homepage,
-  .solutions-page,
-  .product-page,
-  .pricing-page,
-  [class*="page"] {
-    padding-bottom: 400px !important;
-  }
-
-  /* Reset all margins and padding */
+  /* Clean approach - remove browser default spacing */
   html,
-  body,
-  #root {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Target the main app wrapper to remove any framework spacing */
+  #root > div {
     margin: 0 !important;
     padding: 0 !important;
-    height: 100% !important;
+  }
+
+  /* Force the footer container itself to have no spacing */
+  .footer-container {
+    margin-top: 0 !important;
+    padding-top: 3rem !important;
+  }
+
+  /* Remove any spacing from the footer wrapper */
+  .footer {
+    margin-top: 0 !important;
+    position: relative;
   }
 }
 
