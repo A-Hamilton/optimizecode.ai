@@ -32,7 +32,11 @@ const PricingPage: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
-  const FeatureTooltip: React.FC<FeatureTooltipProps> = ({ feature, description, id }) => (
+  const FeatureTooltip: React.FC<FeatureTooltipProps> = ({
+    feature,
+    description,
+    id,
+  }) => (
     <div className="feature-tooltip-wrapper">
       <span
         className="feature-with-tooltip"
@@ -58,8 +62,7 @@ const PricingPage: React.FC = () => {
         {
           text: "10 optimizations per day",
           hasTooltip: true,
-          tooltip:
-            "You can perform up to 10 code optimizations each day",
+          tooltip: "You can perform up to 10 code optimizations each day",
         },
         {
           text: "Upload up to 2 files",
@@ -150,12 +153,13 @@ const PricingPage: React.FC = () => {
         {
           text: "Unlimited optimizations per day",
           hasTooltip: true,
-          tooltip: "No daily limits on code optimizations"
+          tooltip: "No daily limits on code optimizations",
         },
         {
           text: "Unlimited file uploads",
           hasTooltip: true,
-          tooltip: "No limits on the number of files you can upload for optimization",
+          tooltip:
+            "No limits on the number of files you can upload for optimization",
         },
         {
           text: "Unlimited character paste",
@@ -186,6 +190,9 @@ const PricingPage: React.FC = () => {
           tooltip:
             "Service level agreement with financial penalties for downtime",
         },
+        {
+          text: "On-premise deployment option",
+          hasTooltip: true,
           tooltip:
             "Install OptimizeCode.ai within your own infrastructure for maximum security",
         },
@@ -430,7 +437,8 @@ const PricingPage: React.FC = () => {
               <h3>What happens if I exceed the file limits?</h3>
               <p>
                 If you try to upload more files than your plan allows, you'll be
-                prompted to upgrade or remove some files to stay within your limit.
+                prompted to upgrade or remove some files to stay within your
+                limit.
               </p>
             </div>
             <div className="faq-item">
