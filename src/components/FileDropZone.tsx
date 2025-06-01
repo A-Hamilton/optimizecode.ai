@@ -1,5 +1,5 @@
 // Updated for TypeScript migration
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { FileDropZoneProps, CodeFile } from "../types";
 
 interface NotificationProps {
