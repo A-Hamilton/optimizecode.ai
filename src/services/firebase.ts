@@ -25,8 +25,19 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+let app;
+let auth;
+
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+} catch (error) {
+  console.warn("Firebase initialization failed, using demo mode:", error);
+  // Create a minimal auth object for demo mode
+  auth = null;
+}
+
+export { auth };
 
 // Auth providers
 const googleProvider = new GoogleAuthProvider();
@@ -43,6 +54,10 @@ export { googleProvider, githubProvider };
 
 // Authentication functions
 export const signInWithGoogle = async () => {
+  if (!auth) {
+    return { user: null, error: "Authentication not available" };
+  }
+
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return { user: result.user, error: null };
@@ -53,6 +68,10 @@ export const signInWithGoogle = async () => {
 };
 
 export const signInWithGithub = async () => {
+  if (!auth) {
+    return { user: null, error: "Authentication not available" };
+  }
+
   try {
     const result = await signInWithPopup(auth, githubProvider);
     return { user: result.user, error: null };
@@ -63,6 +82,10 @@ export const signInWithGithub = async () => {
 };
 
 export const signInWithEmail = async (email: string, password: string) => {
+  if (!auth) {
+    return { user: null, error: "Authentication not available" };
+  }
+
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
     return { user: result.user, error: null };
@@ -99,6 +122,10 @@ export const signUpWithEmail = async (
   password: string,
   displayName: string,
 ) => {
+  if (!auth) {
+    return { user: null, error: "Authentication not available" };
+  }
+
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
 
@@ -131,6 +158,10 @@ export const signUpWithEmail = async (
 };
 
 export const resetPassword = async (email: string) => {
+  if (!auth) {
+    return { success: false, error: "Authentication not available" };
+  }
+
   try {
     await sendPasswordResetEmail(auth, email);
     return { success: true, error: null };
@@ -154,6 +185,10 @@ export const resetPassword = async (email: string) => {
 };
 
 export const logout = async () => {
+  if (!auth) {
+    return { success: false, error: "Authentication not available" };
+  }
+
   try {
     await signOut(auth);
     return { success: true, error: null };
@@ -165,7 +200,7 @@ export const logout = async () => {
 
 // Demo mode fallback for development
 export const isDemoMode = () => {
-  return firebaseConfig.apiKey === "demo-api-key";
+  return firebaseConfig.apiKey === "demo-api-key" || !auth;
 };
 
 // Demo authentication (for development when Firebase isn't configured)
