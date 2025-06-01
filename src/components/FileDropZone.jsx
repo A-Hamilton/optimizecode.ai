@@ -66,20 +66,9 @@ function FileDropZone({ onFilesSelected, files }) {
     const files = [];
     const MAX_FILES = 15;
     const MAX_FILE_SIZE = 500 * 1024; // 500KB
-    const MAX_TOTAL_FILES_TO_CHECK = 10000; // Increased limit
 
-    console.log(
-      `📂 Processing entry: ${path}${entry.name} (${entry.isFile ? "file" : "directory"})`,
-    );
-
-    // Early exit if we've found enough files or checked too many
-    if (collected.count >= MAX_TOTAL_FILES_TO_CHECK) {
-      console.log(`⚠️ Reached file check limit (${MAX_TOTAL_FILES_TO_CHECK})`);
-      return files;
-    }
-
-    if (files.length >= MAX_FILES) {
-      console.log(`⚠️ Found enough files (${MAX_FILES})`);
+    // Early termination for performance
+    if (collected.count >= 1000 || files.length >= MAX_FILES) {
       return files;
     }
 
@@ -89,69 +78,69 @@ function FileDropZone({ onFilesSelected, files }) {
         const file = await new Promise((resolve) => entry.file(resolve));
         const fullPath = path + file.name;
 
-        console.log(`📄 File found: ${fullPath} (${file.size} bytes)`);
-
         if (file.size <= MAX_FILE_SIZE && isCodeFile(file.name, fullPath)) {
           Object.defineProperty(file, "webkitRelativePath", {
             value: fullPath,
             writable: false,
           });
           files.push(file);
-          console.log(`✅ Added file: ${fullPath}`);
-        } else if (file.size > MAX_FILE_SIZE) {
-          console.log(
-            `❌ File too large: ${fullPath} (${file.size} > ${MAX_FILE_SIZE})`,
-          );
         }
       } catch (error) {
         console.error(`Error processing file ${path}${entry.name}:`, error);
       }
     } else if (entry.isDirectory) {
-      // Less aggressive directory filtering - let more through
+      // Very aggressive directory exclusion for performance
       const excludedDirs = [
         "node_modules",
         ".git",
         "dist",
         "build",
         "__pycache__",
+        "coverage",
+        ".next",
+        ".nuxt",
+        "vendor",
+        "target",
+        "bin",
+        "obj",
+        "public",
+        "assets",
+        "static",
+        "images",
+        "img",
+        "fonts",
+        "docs",
+        "test",
+        "tests",
+        "__tests__",
+        ".github",
+        ".vscode",
+        ".idea",
+        "tmp",
+        "temp",
+        "logs",
+        "backup",
       ];
 
       const dirName = entry.name.toLowerCase();
-      const shouldExclude = excludedDirs.some((dir) => dirName === dir);
-
-      if (shouldExclude) {
-        console.log(`⏭️ Skipping excluded directory: ${path}${entry.name}`);
-        return files;
+      if (excludedDirs.includes(dirName)) {
+        return files; // Skip entirely
       }
-
-      console.log(`📁 Entering directory: ${path}${entry.name}`);
 
       try {
         const dirReader = entry.createReader();
-        const entries = await new Promise((resolve, reject) => {
-          const timeout = setTimeout(() => {
-            console.warn(`⏱️ Timeout reading directory: ${path}${entry.name}`);
-            resolve([]); // Don't reject, just return empty array
-          }, 3000); // Reduced timeout
-
+        const entries = await new Promise((resolve) => {
+          const timeout = setTimeout(() => resolve([]), 1000); // Fast timeout
           dirReader.readEntries((entries) => {
             clearTimeout(timeout);
-            console.log(
-              `📋 Found ${entries.length} entries in ${path}${entry.name}`,
-            );
             resolve(entries);
           });
         });
 
-        // Process all entries
-        for (const childEntry of entries) {
-          if (
-            files.length >= MAX_FILES ||
-            collected.count >= MAX_TOTAL_FILES_TO_CHECK
-          ) {
-            break;
-          }
-
+        // Process files first, skip deep nesting
+        for (const childEntry of entries.slice(0, 50)) {
+          // Limit entries per directory
+          if (files.length >= MAX_FILES) break;
           const childFiles = await getAllFiles(
             childEntry,
             path + entry.name + "/",
@@ -161,7 +150,7 @@ function FileDropZone({ onFilesSelected, files }) {
         }
       } catch (error) {
         console.error(
-          `❌ Error reading directory ${path}${entry.name}:`,
+          `Error reading directory ${path}${entry.name}:`,
           error.message,
         );
       }
@@ -185,23 +174,152 @@ function FileDropZone({ onFilesSelected, files }) {
 
     console.log(`🚀 Starting to process ${fileList.length} files...`);
     console.log(
-      `📋 First 10 files:`,
+      `📋 Sample files:`,
       Array.from(fileList)
-        .slice(0, 10)
+        .slice(0, 5)
         .map((f) => f.webkitRelativePath || f.name),
     );
 
     try {
-      // If too many files, show warning and limit processing
-      if (fileList.length > 10000) {
-        console.warn(
-          `⚠️ Large folder detected (${fileList.length} files). Processing first 5000 files only.`,
+      // AGGRESSIVE filtering for large projects
+      let filteredFiles = Array.from(fileList);
+
+      if (fileList.length > 1000) {
+        console.log(
+          `🔥 Large project detected (${fileList.length} files). Applying aggressive filtering...`,
         );
-        fileList = Array.from(fileList).slice(0, 5000);
+
+        // Pre-filter to remove obvious non-code files and folders
+        filteredFiles = filteredFiles.filter((file) => {
+          const path = (file.webkitRelativePath || file.name).toLowerCase();
+
+          // Skip files in excluded folders
+          const excludedFolders = [
+            "node_modules",
+            ".git",
+            "dist",
+            "build",
+            "coverage",
+            ".next",
+            ".nuxt",
+            "vendor",
+            "target",
+            "bin",
+            "obj",
+            "__pycache__",
+            ".cache",
+            "public",
+            "assets",
+            "static",
+            "images",
+            "img",
+            "fonts",
+            "docs",
+            "documentation",
+            "test",
+            "tests",
+            "spec",
+            "specs",
+            "__tests__",
+            ".github",
+            ".vscode",
+            ".idea",
+            "tmp",
+            "temp",
+            "logs",
+            "log",
+            "backup",
+            "backups",
+          ];
+
+          const shouldExclude = excludedFolders.some((folder) => {
+            return (
+              path.includes(`/${folder}/`) ||
+              path.includes(`\\${folder}\\`) ||
+              path.startsWith(`${folder}/`) ||
+              path.startsWith(`${folder}\\`)
+            );
+          });
+
+          if (shouldExclude) {
+            return false;
+          }
+
+          // Only keep known code file extensions
+          const codeExtensions = [
+            ".js",
+            ".jsx",
+            ".ts",
+            ".tsx",
+            ".vue",
+            ".py",
+            ".java",
+            ".cpp",
+            ".c",
+            ".cs",
+            ".go",
+            ".rs",
+            ".php",
+            ".rb",
+            ".swift",
+            ".kt",
+            ".html",
+            ".css",
+            ".scss",
+            ".sass",
+            ".less",
+            ".json",
+            ".md",
+          ];
+          const hasCodeExtension = codeExtensions.some((ext) =>
+            path.endsWith(ext),
+          );
+
+          return hasCodeExtension;
+        });
+
+        console.log(
+          `📉 Filtered from ${fileList.length} to ${filteredFiles.length} files`,
+        );
+
+        // If still too many, take only the most relevant ones
+        if (filteredFiles.length > 200) {
+          // Prioritize src, components, lib folders
+          filteredFiles.sort((a, b) => {
+            const aPath = (a.webkitRelativePath || a.name).toLowerCase();
+            const bPath = (b.webkitRelativePath || b.name).toLowerCase();
+
+            const highPriorityPaths = [
+              "src/",
+              "components/",
+              "lib/",
+              "utils/",
+              "hooks/",
+              "pages/",
+              "app/",
+            ];
+            const aScore = highPriorityPaths.reduce(
+              (score, path) => score + (aPath.includes(path) ? 10 : 0),
+              0,
+            );
+            const bScore = highPriorityPaths.reduce(
+              (score, path) => score + (bPath.includes(path) ? 10 : 0),
+              0,
+            );
+
+            if (aScore !== bScore) return bScore - aScore;
+            return a.size - b.size; // Then by size
+          });
+
+          filteredFiles = filteredFiles.slice(0, 200);
+          console.log(
+            `🎯 Further filtered to ${filteredFiles.length} most relevant files`,
+          );
+        }
       }
 
-      // First, filter out oversized files and sort by size
-      const validSizedFiles = Array.from(fileList).filter((file) => {
+      // Use pre-filtered files and filter out oversized ones
+      const validSizedFiles = filteredFiles.filter((file) => {
         if (file.size > MAX_FILE_SIZE) {
           oversizedFiles++;
           return false;
@@ -317,10 +435,21 @@ function FileDropZone({ onFilesSelected, files }) {
       console.log(`========================\n`);
 
       if (processedFiles.length === 0) {
-        const message =
-          fileList.length > 1000
-            ? `No valid code files found in the first 1,000 files of this large folder.\n\nTry selecting a specific subfolder (like 'src') instead of the entire project root.\n\nThe root folder contains ${fileList.length} files which is too many to process efficiently.`
-            : `No valid code files found.\n\nChecked ${fileList.length} files but found no supported code files.\n\nSupported: JS, TS, Python, HTML, CSS, and more.\nExcluded: node_modules, build folders, config files.`;
+        let message;
+        if (fileList.length > 10000) {
+          message =
+            `⚠️ Massive project detected (${fileList.length.toLocaleString()} files)!\n\n` +
+            `For projects this large, please select a specific subfolder:\n` +
+            `• Select the 'src' folder instead of root\n` +
+            `• Or select 'components', 'lib', 'pages' folders\n\n` +
+            `This will make processing much faster and find your actual code files.`;
+        } else if (fileList.length > 1000) {
+          message =
+            `Large project (${fileList.length} files) - no code files found after filtering.\n\n` +
+            `Try selecting a specific subfolder like 'src' for better results.`;
+        } else {
+          message = `No valid code files found.\n\nChecked ${fileList.length} files.\n\nSupported: JS, TS, Python, HTML, CSS, and more.`;
+        }
 
         alert(message);
       }
