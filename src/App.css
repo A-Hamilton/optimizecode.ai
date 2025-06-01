@@ -47,6 +47,10 @@
 .input-section {
   display: flex;
   flex-direction: column;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .section-divider {
@@ -74,7 +78,9 @@
 .action-controls {
   display: flex;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .optimize-button {
@@ -187,6 +193,15 @@
 @media (prefers-color-scheme: light) {
   .app-subtitle {
     color: rgba(0, 0, 0, 0.8);
+  }
+
+  .input-section {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .action-controls {
+    border-top-color: rgba(0, 0, 0, 0.1);
   }
 
   .section-divider::before,
