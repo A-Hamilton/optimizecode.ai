@@ -15,6 +15,7 @@ import SupportPage from "./pages/SupportPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import Footer from "./components/Footer";
 
@@ -37,6 +38,7 @@ function App(): JSX.Element {
             <Route path="/support" element={<SupportPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
           </Routes>
           <Footer />
