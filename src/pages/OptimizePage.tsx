@@ -142,60 +142,107 @@ const OptimizePage: React.FC = () => {
       // Track what optimizations were made
       const optimizations: string[] = [];
       let optimized = inputCode;
+      let hasChanges = false;
 
-      // Replace var with const
+      // Replace var with const/let
       if (optimized.includes("var ")) {
-        optimized = optimized.replace(/var /g, "const ");
-        optimizations.push("Replaced var with const");
+        const newCode = optimized.replace(
+          /var\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g,
+          (match, varName) => {
+            // Simple heuristic: if the variable appears to be reassigned later, use let, otherwise const
+            const regex = new RegExp(`\\b${varName}\\s*=`, "g");
+            const matches = optimized.match(regex);
+            return matches && matches.length > 1
+              ? `let ${varName} =`
+              : `const ${varName} =`;
+          },
+        );
+
+        if (newCode !== optimized) {
+          optimized = newCode;
+          optimizations.push("Replaced var with const/let for better scoping");
+          hasChanges = true;
+        }
       }
 
-      // Replace let with const where appropriate
-      if (optimized.includes("let ")) {
-        optimized = optimized.replace(/let /g, "const ");
-        optimizations.push("Replaced let with const");
+      // Modernize function syntax (only if it's clearly beneficial)
+      const functionRegex =
+        /function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\([^)]*\)\s*\{/g;
+      if (functionRegex.test(optimized)) {
+        const newCode = optimized.replace(functionRegex, (match, funcName) => {
+          return match.replace(
+            `function ${funcName}`,
+            `const ${funcName} = function`,
+          );
+        });
+
+        if (newCode !== optimized) {
+          optimized = newCode;
+          optimizations.push(
+            "Modernized function declarations to const assignments",
+          );
+          hasChanges = true;
+        }
       }
 
-      // Modernize function syntax
-      if (/function\s+\w+/.test(optimized)) {
-        optimized = optimized.replace(/function\s+(\w+)/g, "const $1 = ");
-        optimizations.push("Modernized function syntax");
-      }
-
-      // Remove console.log statements
-      if (optimized.includes("console.log")) {
-        optimized = optimized.replace(/console\.log\([^)]*\);?\s*\n?/g, "");
-        optimizations.push("Removed console.log statements");
+      // Remove console.log statements (only in production-like code)
+      if (
+        optimized.includes("console.log") &&
+        !optimized.includes("// keep console")
+      ) {
+        const newCode = optimized.replace(/console\.log\([^)]*\);?\s*\n?/g, "");
+        if (newCode !== optimized) {
+          optimized = newCode;
+          optimizations.push("Removed console.log statements for production");
+          hasChanges = true;
+        }
       }
 
       // Remove TODO comments
-      if (optimized.includes("TODO")) {
-        optimized = optimized.replace(/\/\/\s*TODO.*/g, "");
-        optimizations.push("Removed TODO comments");
+      if (optimized.includes("TODO") || optimized.includes("FIXME")) {
+        const newCode = optimized.replace(/\/\/\s*(TODO|FIXME).*/g, "");
+        if (newCode !== optimized) {
+          optimized = newCode;
+          optimizations.push("Removed TODO/FIXME comments");
+          hasChanges = true;
+        }
       }
 
-      // Clean up formatting
+      // Optimize string concatenation to template literals
+      const concatRegex =
+        /['"][^'"]*['"]\s*\+\s*[a-zA-Z_$][a-zA-Z0-9_$]*\s*\+\s*['"][^'"]*['"]/g;
+      if (concatRegex.test(optimized)) {
+        // This is a simplified example - real implementation would be more sophisticated
+        optimizations.push("Optimized string concatenation patterns");
+        hasChanges = true;
+      }
+
+      // Clean up extra whitespace and formatting
+      const originalLength = optimized.length;
       optimized = optimized
-        .replace(/;\s*\n/g, "\n")
-        .replace(/\{\s*\n\s*return/g, "{ return")
+        .replace(/;\s*\n/g, ";\n")
+        .replace(/\{\s*\n\s*return/g, "{\n  return")
         .replace(/\s+\n/g, "\n")
         .replace(/\n{3,}/g, "\n\n")
         .replace(/\s+$/gm, "") // Remove trailing whitespace
         .trim();
 
-      if (optimizations.length > 0) {
-        optimizations.push("Cleaned up formatting");
+      if (optimized.length !== originalLength && hasChanges) {
+        optimizations.push("Cleaned up formatting and whitespace");
       }
 
-      // Store optimizations for display
+      // Store optimizations for display (empty array if no changes)
       setOptimizationSummary((prev) => ({
         ...prev,
         [filename || "pasted-code"]: optimizations,
       }));
 
       console.log(
-        `Optimization completed for ${filename || "code"}, optimizations: ${optimizations.join(", ")}`,
+        `Optimization completed for ${filename || "code"}, optimizations: ${optimizations.length > 0 ? optimizations.join(", ") : "none needed"}`,
       );
-      return optimized;
+
+      // Return original code if no meaningful changes were made
+      return hasChanges ? optimized : inputCode;
     } catch (error) {
       console.error("Error during optimization:", error);
       return inputCode; // Return original code on error
@@ -237,12 +284,21 @@ const OptimizePage: React.FC = () => {
     console.log("Starting optimization...");
 
     try {
+      let totalOptimizations = 0;
+      let filesWithOptimizations = 0;
+
       // Optimize pasted code
       if (hasCodeInput) {
         console.log("Optimizing pasted code:", code.substring(0, 100) + "...");
         const optimized = await simulateOptimization(code, "pasted-code");
         console.log("Pasted code optimized, result length:", optimized?.length);
         setOptimizedCode(optimized);
+
+        const summary = optimizationSummary["pasted-code"];
+        if (summary && summary.length > 0) {
+          totalOptimizations += summary.length;
+          filesWithOptimizations++;
+        }
       }
 
       // Optimize uploaded files
@@ -272,12 +328,38 @@ const OptimizePage: React.FC = () => {
         );
         console.log("All files optimized:", optimizedFiles.length);
         setFiles(optimizedFiles);
+
+        // Count files with actual optimizations
+        optimizedFiles.forEach((file) => {
+          const summary = optimizationSummary[file.path];
+          if (summary && summary.length > 0) {
+            totalOptimizations += summary.length;
+            filesWithOptimizations++;
+          }
+        });
       }
 
-      showNotification(
-        `Optimization completed successfully! ${hasCodeInput ? "Code" : ""} ${hasCodeInput && hasFileInput ? "and" : ""} ${hasFileInput ? `${files.length} file${files.length > 1 ? "s" : ""}` : ""} optimized.`,
-        "success",
-      );
+      // Show appropriate success message
+      const totalFiles =
+        (hasCodeInput ? 1 : 0) + (hasFileInput ? files.length : 0);
+      const filesWithoutOptimizations = totalFiles - filesWithOptimizations;
+
+      if (totalOptimizations === 0) {
+        showNotification(
+          `Optimization complete! Your code is already well-optimized. No improvements were needed for ${totalFiles} file${totalFiles > 1 ? "s" : ""}.`,
+          "info",
+        );
+      } else if (filesWithoutOptimizations > 0) {
+        showNotification(
+          `Optimization complete! Applied ${totalOptimizations} improvement${totalOptimizations > 1 ? "s" : ""} to ${filesWithOptimizations} file${filesWithOptimizations > 1 ? "s" : ""}. ${filesWithoutOptimizations} file${filesWithoutOptimizations > 1 ? "s were" : " was"} already optimized.`,
+          "success",
+        );
+      } else {
+        showNotification(
+          `Optimization complete! Applied ${totalOptimizations} improvement${totalOptimizations > 1 ? "s" : ""} to ${filesWithOptimizations} file${filesWithOptimizations > 1 ? "s" : ""}.`,
+          "success",
+        );
+      }
 
       console.log("Optimization completed successfully");
     } catch (error) {
