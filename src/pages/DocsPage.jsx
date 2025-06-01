@@ -338,7 +338,7 @@ jobs:
       - name: Optimize code
         run: optimize-code ./src --check-only
         env:
-          OPTIMIZECODE_API_KEY: \${{ secrets.OPTIMIZECODE_API_KEY }}`}
+          OPTIMIZECODE_API_KEY: ${"$"}{{ secrets.OPTIMIZECODE_API_KEY }}`}
               />
             </div>
           </section>
@@ -381,7 +381,7 @@ function processUsers(users) {
   const managerMap = new Map(
     users.map(user => [user.id, user])
   );
-  
+
   return users
     .filter(user => user.managerId)
     .map(employee => ({
