@@ -16,6 +16,7 @@ interface PricingPlan {
   features: Feature[];
   cta: string;
   ctaStyle: "primary" | "secondary";
+  fileLimit: number | string;
 }
 
 interface FeatureTooltipProps {
@@ -55,12 +56,18 @@ const PricingPage: React.FC = () => {
       subtitle: "Perfect for getting started",
       price: { monthly: 0, yearly: 0 },
       popular: false,
+      fileLimit: 2,
       features: [
         {
           text: "100 optimizations per month",
           hasTooltip: true,
           tooltip:
             "Code optimization requests including both individual files and batch operations",
+        },
+        {
+          text: "Max 2 files per optimization",
+          hasTooltip: true,
+          tooltip: "You can upload up to 2 code files at once for optimization",
         },
         {
           text: "Basic language support",
@@ -84,11 +91,17 @@ const PricingPage: React.FC = () => {
       subtitle: "Most popular for serious developers",
       price: { monthly: 29, yearly: 290 },
       popular: true,
+      fileLimit: 50,
       features: [
         {
           text: "Unlimited optimizations",
           hasTooltip: true,
           tooltip: "No limits on the number of code optimization requests",
+        },
+        {
+          text: "Max 50 files per optimization",
+          hasTooltip: true,
+          tooltip: "Upload up to 50 code files at once for batch optimization",
         },
         {
           text: "All languages & frameworks",
@@ -133,13 +146,20 @@ const PricingPage: React.FC = () => {
       ctaStyle: "primary",
     },
     {
-      id: "enterprise",
-      name: "Enterprise",
-      subtitle: "Advanced features for teams",
-      price: { monthly: "Custom", yearly: "Custom" },
+      id: "unleashed",
+      name: "Unleashed",
+      subtitle: "Unlimited everything for power users",
+      price: { monthly: 200, yearly: 2000 },
       popular: false,
+      fileLimit: "Unlimited",
       features: [
         { text: "Everything in Pro", hasTooltip: false },
+        {
+          text: "Unlimited files per optimization",
+          hasTooltip: true,
+          tooltip:
+            "No limits on the number of files you can upload and optimize at once",
+        },
         {
           text: "Custom optimization rules",
           hasTooltip: true,
@@ -181,6 +201,12 @@ const PricingPage: React.FC = () => {
           hasTooltip: true,
           tooltip:
             "Direct input on product roadmap and custom feature development",
+        },
+        {
+          text: "White-label solutions",
+          hasTooltip: true,
+          tooltip:
+            "Brand OptimizeCode.ai with your company's logo and custom domain",
         },
       ],
       cta: "Contact Sales",
@@ -273,6 +299,11 @@ const PricingPage: React.FC = () => {
                     <div className="savings">{getSavings(plan)}</div>
                   )}
                 </div>
+
+                {/* File Limit Display */}
+                <div className="file-limit-badge">
+                  📁 {plan.fileLimit} files per optimization
+                </div>
               </div>
 
               <ul className="features-list">
@@ -312,7 +343,7 @@ const PricingPage: React.FC = () => {
                   <th>Features</th>
                   <th>Free</th>
                   <th>Pro</th>
-                  <th>Enterprise</th>
+                  <th>Unleashed</th>
                 </tr>
               </thead>
               <tbody>
@@ -320,6 +351,12 @@ const PricingPage: React.FC = () => {
                   <td>Optimizations per month</td>
                   <td>100</td>
                   <td>Unlimited</td>
+                  <td>Unlimited</td>
+                </tr>
+                <tr>
+                  <td>Files per optimization</td>
+                  <td>2</td>
+                  <td>50</td>
                   <td>Unlimited</td>
                 </tr>
                 <tr>
@@ -332,7 +369,7 @@ const PricingPage: React.FC = () => {
                   <td>API rate limits</td>
                   <td>100/hour</td>
                   <td>10,000/hour</td>
-                  <td>Custom</td>
+                  <td>Unlimited</td>
                 </tr>
                 <tr>
                   <td>Support response time</td>
@@ -358,6 +395,12 @@ const PricingPage: React.FC = () => {
                   <td>❌</td>
                   <td>99.9%</td>
                 </tr>
+                <tr>
+                  <td>White-label solutions</td>
+                  <td>❌</td>
+                  <td>❌</td>
+                  <td>✅</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -375,10 +418,11 @@ const PricingPage: React.FC = () => {
               </p>
             </div>
             <div className="faq-item">
-              <h3>What happens if I exceed the free plan limits?</h3>
+              <h3>What happens if I exceed the file limits?</h3>
               <p>
-                Your optimizations will be queued until the next month, or you
-                can upgrade to Pro for unlimited access.
+                If you try to upload more files than your plan allows, you'll be
+                prompted to upgrade or remove some files to stay within your
+                limit.
               </p>
             </div>
             <div className="faq-item">
@@ -391,7 +435,7 @@ const PricingPage: React.FC = () => {
             <div className="faq-item">
               <h3>Is there a setup fee?</h3>
               <p>
-                No setup fees for any plan. Enterprise customers get dedicated
+                No setup fees for any plan. Unleashed customers get dedicated
                 onboarding support included.
               </p>
             </div>
