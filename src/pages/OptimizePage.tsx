@@ -202,7 +202,7 @@ const OptimizePage: React.FC = () => {
   return (
     <div className="optimize-page">
       <div className="optimize-container">
-        {/* Header with improved plan display */}
+        {/* Header with compact plan display */}
         <header className="optimize-header">
           <div className="header-content">
             <div className="title-section">
@@ -213,11 +213,11 @@ const OptimizePage: React.FC = () => {
               </p>
             </div>
 
-            {/* Redesigned Plan Status */}
-            <div className="plan-status-card">
-              <div className="plan-info">
-                <div className="plan-header">
-                  <span className="current-plan-label">Current Plan</span>
+            {/* Compact Plan Status */}
+            {currentUser ? (
+              <div className="plan-status-compact">
+                <div className="plan-info-inline">
+                  <span className="plan-label">Current Plan:</span>
                   <span
                     className={`plan-badge ${userProfile?.subscription.plan || "free"}`}
                   >
@@ -225,45 +225,53 @@ const OptimizePage: React.FC = () => {
                       ? PLAN_DETAILS[userProfile.subscription.plan].name
                       : "Free"}
                   </span>
-                </div>
-
-                <div className="usage-section">
-                  <div className="usage-header">
-                    <span className="usage-label">Files Used</span>
+                  <span className="usage-separator">•</span>
+                  <span className="usage-display">
+                    Files Used:{" "}
                     <span
                       className={`usage-count ${isLimitReached ? "limit-reached" : ""}`}
                     >
                       {usageInfo.used} / {usageInfo.total}
                     </span>
-                  </div>
+                  </span>
 
                   {!usageInfo.isUnlimited && (
-                    <div className="usage-progress">
-                      <div className="progress-bar">
-                        <div
-                          className={`progress-fill ${isLimitReached ? "limit-reached" : ""}`}
-                          style={{ width: `${usageInfo.percentage}%` }}
-                        />
-                      </div>
+                    <div className="progress-mini">
+                      <div
+                        className={`progress-fill-mini ${isLimitReached ? "limit-reached" : ""}`}
+                        style={{ width: `${usageInfo.percentage}%` }}
+                      />
                     </div>
                   )}
                 </div>
-              </div>
 
-              {(userProfile?.subscription.plan === "free" ||
-                isLimitReached) && (
-                <div className="upgrade-section">
+                {(userProfile?.subscription.plan === "free" ||
+                  isLimitReached) && (
                   <button
-                    className="upgrade-btn"
+                    className="upgrade-btn-compact"
                     onClick={() => (window.location.href = "/pricing")}
                   >
                     {isLimitReached
                       ? "Upgrade for More Files"
                       : "Upgrade to Pro"}
                   </button>
+                )}
+              </div>
+            ) : (
+              <div className="plan-status-compact">
+                <div className="plan-info-inline">
+                  <span className="guest-message">
+                    Start optimizing your code with AI
+                  </span>
                 </div>
-              )}
-            </div>
+                <button
+                  className="upgrade-btn-compact"
+                  onClick={() => (window.location.href = "/pricing")}
+                >
+                  Upgrade to Pro
+                </button>
+              </div>
+            )}
 
             {notification && (
               <InlineNotification

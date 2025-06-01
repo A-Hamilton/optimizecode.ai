@@ -46,43 +46,37 @@
   margin: 0 auto;
 }
 
-/* Redesigned Plan Status Card */
-.plan-status-card {
+/* Compact Plan Status */
+.plan-status-compact {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 2rem;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  gap: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-.plan-info {
+.plan-info-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   flex: 1;
 }
 
-.plan-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.current-plan-label {
+.plan-label {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .plan-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
-  font-size: 1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
   font-weight: 600;
   text-transform: capitalize;
 }
@@ -105,26 +99,18 @@
   border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
-.usage-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.usage-separator {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 300;
 }
 
-.usage-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.usage-label {
+.usage-display {
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
 }
 
 .usage-count {
-  font-size: 1.125rem;
   font-weight: 700;
   color: white;
 }
@@ -133,49 +119,48 @@
   color: #f87171;
 }
 
-.usage-progress {
-  width: 100%;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 8px;
+.progress-mini {
+  width: 60px;
+  height: 4px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
-.progress-fill {
+.progress-fill-mini {
   height: 100%;
   background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  border-radius: 4px;
+  border-radius: 2px;
   transition: width 0.3s ease;
 }
 
-.progress-fill.limit-reached {
+.progress-fill-mini.limit-reached {
   background: linear-gradient(90deg, #ef4444, #f87171);
 }
 
-.upgrade-section {
-  flex-shrink: 0;
+.guest-message {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
 }
 
-.upgrade-btn {
+.upgrade-btn-compact {
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   color: white;
   border: none;
-  padding: 0.875rem 1.5rem;
-  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  flex-shrink: 0;
 }
 
-.upgrade-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+.upgrade-btn-compact:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
 }
 
 /* Global Usage Error Banner */
@@ -581,10 +566,16 @@
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   }
 
-  .plan-status-card {
+  .plan-status-compact {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
+    gap: 1rem;
+  }
+
+  .plan-info-inline {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 
@@ -601,8 +592,21 @@
     font-size: 1.125rem;
   }
 
-  .plan-status-card {
-    padding: 1.5rem;
+  .plan-status-compact {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .plan-info-inline {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .progress-mini {
+    align-self: center;
   }
 
   .input-section {
@@ -645,10 +649,13 @@
     font-size: 1.875rem;
   }
 
-  .plan-header {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
+  .plan-info-inline {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .upgrade-btn-compact {
+    width: 100%;
   }
 
   .supported-files {
