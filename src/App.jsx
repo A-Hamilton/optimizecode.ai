@@ -11,35 +11,58 @@ function App() {
   const [isOptimizing, setIsOptimizing] = useState(false);
 
   const simulateOptimization = async (inputCode, filename = "") => {
-    // Simulate AI optimization - replace with actual AI service
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 1000 + 1000),
+    console.log(
+      `Starting optimization for ${filename || "code"}, input length: ${inputCode?.length}`,
     );
 
-    if (!inputCode || !inputCode.trim()) {
-      return "No code provided for optimization.";
+    // Simulate AI optimization - replace with actual AI service
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.random() * 1500 + 800),
+    );
+
+    if (!inputCode || typeof inputCode !== "string" || !inputCode.trim()) {
+      console.log("No valid code provided for optimization");
+      return "// No code provided for optimization.";
     }
 
-    // Mock optimization improvements
-    let optimized = inputCode
-      .replace(/var /g, "const ")
-      .replace(/function\s+(\w+)/g, "const $1 = ")
-      .replace(/;\s*\n/g, "\n")
-      .replace(/\{\s*\n\s*return/g, "{ return")
-      .replace(/console\.log\([^)]*\);?\s*\n?/g, "")
-      .replace(/\s+\n/g, "\n")
-      .replace(/\n{3,}/g, "\n\n");
+    try {
+      // Mock optimization improvements
+      let optimized = inputCode
+        .replace(/var /g, "const ")
+        .replace(/let /g, "const ")
+        .replace(/function\s+(\w+)/g, "const $1 = ")
+        .replace(/;\s*\n/g, "\n")
+        .replace(/\{\s*\n\s*return/g, "{ return")
+        .replace(/console\.log\([^)]*\);?\s*\n?/g, "")
+        .replace(/\s+\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/\/\/\s*TODO.*/g, "") // Remove TODO comments
+        .replace(/\s+$/gm, ""); // Remove trailing whitespace
 
-    // Add some optimization comments
-    const fileComment = filename ? `// File: ${filename}\n` : "";
-    optimized = `${fileComment}// Optimized by OptimizeCode.ai\n// - Replaced var with const\n// - Modernized function syntax\n// - Removed console.log statements\n// - Cleaned up formatting\n\n${optimized.trim()}`;
+      // Add some optimization comments
+      const fileComment = filename ? `// File: ${filename}\n` : "";
+      optimized = `${fileComment}// Optimized by OptimizeCode.ai\n// Improvements made:\n// ✓ Replaced var/let with const where possible\n// ✓ Modernized function syntax\n// ✓ Removed console.log statements\n// ✓ Cleaned up formatting and removed TODO comments\n// ✓ Optimized whitespace\n\n${optimized.trim()}`;
 
-    return optimized;
+      console.log(
+        `Optimization completed for ${filename || "code"}, output length: ${optimized.length}`,
+      );
+      return optimized;
+    } catch (error) {
+      console.error("Error during optimization:", error);
+      return `// Error during optimization: ${error.message}\n\n${inputCode}`;
+    }
   };
 
   const optimizeCode = async () => {
-    const hasCodeInput = code && code.trim();
+    const hasCodeInput = code && code.trim().length > 0;
     const hasFileInput = files && files.length > 0;
+
+    console.log("Optimize button clicked", {
+      hasCodeInput,
+      hasFileInput,
+      codeLength: code?.length,
+      filesCount: files?.length,
+    });
 
     if (!hasCodeInput && !hasFileInput) {
       alert("Please paste some code or upload files to optimize.");
@@ -47,12 +70,14 @@ function App() {
     }
 
     setIsOptimizing(true);
+    console.log("Starting optimization...");
 
     try {
       // Optimize pasted code
       if (hasCodeInput) {
         console.log("Optimizing pasted code:", code.substring(0, 100) + "...");
         const optimized = await simulateOptimization(code, "pasted-code");
+        console.log("Pasted code optimized, result length:", optimized?.length);
         setOptimizedCode(optimized);
       }
 
@@ -63,10 +88,17 @@ function App() {
           files.map((f) => f.name),
         );
         const optimizedFiles = await Promise.all(
-          files.map(async (file) => {
+          files.map(async (file, index) => {
+            console.log(
+              `Optimizing file ${index + 1}/${files.length}: ${file.name}`,
+            );
             const optimizedContent = await simulateOptimization(
               file.content,
               file.path,
+            );
+            console.log(
+              `File ${file.name} optimized, result length:`,
+              optimizedContent?.length,
             );
             return {
               ...file,
@@ -74,8 +106,11 @@ function App() {
             };
           }),
         );
+        console.log("All files optimized:", optimizedFiles.length);
         setFiles(optimizedFiles);
       }
+
+      console.log("Optimization completed successfully");
     } catch (error) {
       console.error("Optimization failed:", error);
       alert("Optimization failed. Please try again.");

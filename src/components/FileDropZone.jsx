@@ -20,27 +20,39 @@ function FileDropZone({ onFilesSelected, files }) {
   const handleDrop = async (e) => {
     e.preventDefault();
     setIsDragOver(false);
+    setIsProcessing(true);
 
-    const items = Array.from(e.dataTransfer.items);
-    const allFiles = [];
+    try {
+      const items = Array.from(e.dataTransfer.items);
+      const allFiles = [];
 
-    // Handle both files and folders
-    for (const item of items) {
-      if (item.kind === "file") {
-        const entry = item.webkitGetAsEntry();
-        if (entry) {
-          const files = await getAllFiles(entry);
-          allFiles.push(...files);
+      // Handle both files and folders
+      for (const item of items) {
+        if (item.kind === "file") {
+          const entry = item.webkitGetAsEntry();
+          if (entry) {
+            const files = await getAllFiles(entry);
+            allFiles.push(...files);
+          }
         }
       }
-    }
 
-    handleFiles(allFiles);
+      await handleFiles(allFiles);
+    } catch (error) {
+      console.error("Error processing dropped files:", error);
+      setIsProcessing(false);
+    }
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const selectedFiles = Array.from(e.target.files);
-    handleFiles(selectedFiles);
+    setIsProcessing(true);
+    try {
+      await handleFiles(selectedFiles);
+    } catch (error) {
+      console.error("Error processing selected files:", error);
+      setIsProcessing(false);
+    }
   };
 
   const getAllFiles = async (entry, path = "") => {
@@ -97,58 +109,77 @@ function FileDropZone({ onFilesSelected, files }) {
   };
 
   const handleFiles = async (fileList) => {
-    setIsProcessing(true);
+    if (!fileList || fileList.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
     const MAX_FILES = 15;
     const MAX_FILE_SIZE = 500 * 1024; // 500KB
     const processedFiles = [];
     let skippedFiles = 0;
     let oversizedFiles = 0;
 
-    // Sort files by size (smaller first) and limit to MAX_FILES
-    const sortedFiles = Array.from(fileList)
-      .filter((file) => file.size <= MAX_FILE_SIZE)
-      .sort((a, b) => a.size - b.size)
-      .slice(0, MAX_FILES);
+    try {
+      // Sort files by size (smaller first) and limit to MAX_FILES
+      const sortedFiles = Array.from(fileList)
+        .filter((file) => {
+          if (file.size > MAX_FILE_SIZE) {
+            oversizedFiles++;
+            return false;
+          }
+          return true;
+        })
+        .sort((a, b) => a.size - b.size)
+        .slice(0, MAX_FILES);
 
-    oversizedFiles = fileList.length - sortedFiles.length;
+      console.log(`Processing ${sortedFiles.length} files...`);
 
-    for (const file of sortedFiles) {
-      const filepath = file.webkitRelativePath || file.name;
-      if (isCodeFile(file.name, filepath)) {
-        try {
-          const content = await readFileContent(file);
-          processedFiles.push({
-            name: file.name,
-            path: filepath,
-            content: content,
-            size: file.size,
-            type: file.type,
-            extension: getFileExtension(file.name),
-          });
-        } catch (error) {
-          console.error(`Error reading file ${file.name}:`, error);
+      for (const file of sortedFiles) {
+        const filepath = file.webkitRelativePath || file.name;
+        console.log(`Checking file: ${filepath}`);
+
+        if (isCodeFile(file.name, filepath)) {
+          try {
+            const content = await readFileContent(file);
+            processedFiles.push({
+              name: file.name,
+              path: filepath,
+              content: content,
+              size: file.size,
+              type: file.type,
+              extension: getFileExtension(file.name),
+            });
+            console.log(`Successfully processed: ${filepath}`);
+          } catch (error) {
+            console.error(`Error reading file ${file.name}:`, error);
+            skippedFiles++;
+          }
+        } else {
           skippedFiles++;
+          console.log(`Skipped non-code file: ${filepath}`);
         }
-      } else {
-        skippedFiles++;
       }
-    }
 
-    // Show feedback about filtered files
-    if (skippedFiles > 0 || oversizedFiles > 0) {
-      let message = `Processed ${processedFiles.length} files.`;
-      if (skippedFiles > 0)
-        message += ` Skipped ${skippedFiles} non-code files.`;
-      if (oversizedFiles > 0)
-        message += ` Excluded ${oversizedFiles} files over 500KB.`;
-      console.log(message);
-      // You could show this in a toast notification
-    }
+      // Show feedback about filtered files
+      if (skippedFiles > 0 || oversizedFiles > 0) {
+        let message = `Processed ${processedFiles.length} files.`;
+        if (skippedFiles > 0)
+          message += ` Skipped ${skippedFiles} non-code files.`;
+        if (oversizedFiles > 0)
+          message += ` Excluded ${oversizedFiles} files over 500KB.`;
+        console.log(message);
+      }
 
-    // Combine with existing files instead of replacing, but respect total limit
-    const totalFiles = [...files, ...processedFiles].slice(0, MAX_FILES);
-    onFilesSelected(totalFiles);
-    setIsProcessing(false);
+      // Combine with existing files instead of replacing, but respect total limit
+      const totalFiles = [...files, ...processedFiles].slice(0, MAX_FILES);
+      console.log(`Final file count: ${totalFiles.length}`);
+      onFilesSelected(totalFiles);
+    } catch (error) {
+      console.error("Error processing files:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const readFileContent = (file) => {
@@ -273,35 +304,48 @@ function FileDropZone({ onFilesSelected, files }) {
         onDrop={handleDrop}
       >
         <div className="drop-content">
-          <div className="drop-icon">{isProcessing ? "⏳" : "📁"}</div>
-          <p className="drop-text">
-            {isProcessing
-              ? "Processing files..."
-              : "Drag and drop files/folders here, or click to select"}
-          </p>
-          <p className="drop-subtext">
-            Supports: JS, TS, Python, Java, C++, HTML, CSS, and more
-            <br />
-            <small>
-              Max 15 files, 500KB each. Excludes node_modules, build folders.
-            </small>
-          </p>
-          <div className="upload-buttons">
-            <button
-              type="button"
-              className="upload-btn"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Select Files
-            </button>
-            <button
-              type="button"
-              className="upload-btn"
-              onClick={() => folderInputRef.current?.click()}
-            >
-              Select Folder
-            </button>
-          </div>
+          {isProcessing ? (
+            <div className="processing-state">
+              <div className="loading-spinner"></div>
+              <p className="drop-text">Processing files...</p>
+              <p className="drop-subtext">
+                Reading and filtering code files...
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="drop-icon">📁</div>
+              <p className="drop-text">
+                Drag and drop files/folders here, or click to select
+              </p>
+              <p className="drop-subtext">
+                Supports: JS, TS, Python, Java, C++, HTML, CSS, and more
+                <br />
+                <small>
+                  Max 15 files, 500KB each. Excludes node_modules, build
+                  folders.
+                </small>
+              </p>
+              <div className="upload-buttons">
+                <button
+                  type="button"
+                  className="upload-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isProcessing}
+                >
+                  Select Files
+                </button>
+                <button
+                  type="button"
+                  className="upload-btn"
+                  onClick={() => folderInputRef.current?.click()}
+                  disabled={isProcessing}
+                >
+                  Select Folder
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         <input
