@@ -135,13 +135,20 @@ const Navbar: React.FC = () => {
                 </button>
 
                 {isMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-2 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-2 z-50">
                     <Link
                       to="/dashboard"
                       className="block px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Dashboard
+                    </Link>
+                    <Link
+                      to="/subscription"
+                      className="block px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Manage Subscription
                     </Link>
                     <Link
                       to="/profile"
