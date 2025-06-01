@@ -28,27 +28,32 @@ function App(): JSX.Element {
     <AuthProvider>
       <NotificationProvider>
         <Router>
-          <div className="min-h-screen flex flex-col">
+          <div className="flex flex-col">
             <Navbar />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/optimize" element={<OptimizePage />} />
-              <Route path="/product" element={<ProductPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/docs" element={<DocsPage />} />
-              <Route path="/solutions" element={<SolutionsPage />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/security" element={<SecurityPage />} />
-              <Route path="/support" element={<SupportPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/subscription" element={<SubscriptionPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/test" element={<TestPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-            </Routes>
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/optimize" element={<OptimizePage />} />
+                <Route path="/product" element={<ProductPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/docs" element={<DocsPage />} />
+                <Route path="/solutions" element={<SolutionsPage />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/security" element={<SecurityPage />} />
+                <Route path="/support" element={<SupportPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route
+                  path="/forgot-password"
+                  element={<ForgotPasswordPage />}
+                />
+                <Route path="/subscription" element={<SubscriptionPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/test" element={<TestPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+              </Routes>
+            </main>
             <Footer />
           </div>
         </Router>
