@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import CodeInput from "../components/CodeInput";
 import FileDropZone from "../components/FileDropZone";
 import ResultsDisplay from "../components/ResultsDisplay";
