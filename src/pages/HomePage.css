@@ -594,7 +594,7 @@
 
 /* Pricing Teaser */
 .pricing-teaser {
-  padding: 6rem 0;
+  padding: 4rem 0 2rem;
   background: rgba(100, 108, 255, 0.05);
   border-top: 1px solid rgba(100, 108, 255, 0.2);
   border-bottom: 1px solid rgba(100, 108, 255, 0.2);
