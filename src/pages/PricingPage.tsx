@@ -32,7 +32,11 @@ const PricingPage: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
-  const FeatureTooltip: React.FC<FeatureTooltipProps> = ({ feature, description, id }) => (
+  const FeatureTooltip: React.FC<FeatureTooltipProps> = ({
+    feature,
+    description,
+    id,
+  }) => (
     <div className="feature-tooltip-wrapper">
       <span
         className="feature-with-tooltip"
@@ -154,7 +158,8 @@ const PricingPage: React.FC = () => {
         {
           text: "Unlimited files per optimization",
           hasTooltip: true,
-          tooltip: "No limits on the number of files you can upload and optimize at once",
+          tooltip:
+            "No limits on the number of files you can upload and optimize at once",
         },
         {
           text: "Custom optimization rules",
@@ -304,6 +309,7 @@ const PricingPage: React.FC = () => {
                       : `Up to ${plan.fileLimit} files`}
                   </div>
                 )}
+              </div>
 
               <ul className="features-list">
                 {plan.features.map((feature, index) => (
@@ -420,7 +426,8 @@ const PricingPage: React.FC = () => {
               <h3>What happens if I exceed the file limits?</h3>
               <p>
                 If you try to upload more files than your plan allows, you'll be
-                prompted to upgrade or remove some files to stay within your limit.
+                prompted to upgrade or remove some files to stay within your
+                limit.
               </p>
             </div>
             <div className="faq-item">
