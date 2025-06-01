@@ -5,6 +5,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Override Tailwind base styles that might cause gaps */
+@layer utilities {
+  .no-gap-footer {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
 @layer base {
   :root {
     color-scheme: light dark;
