@@ -596,9 +596,21 @@
 /* Pricing Teaser */
 .pricing-teaser {
   padding: 4rem 0 0;
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
   background: rgba(100, 108, 255, 0.05);
   border-top: 1px solid rgba(100, 108, 255, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+/* Force pricing teaser to connect directly to footer */
+.homepage .pricing-teaser:last-child {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.homepage .pricing-teaser + * {
+  margin-top: 0 !important;
 }
 
 .pricing-content {
