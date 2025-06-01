@@ -1,6 +1,7 @@
 // Updated for TypeScript migration
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import "./LoginPage.css";
 
 interface LoginFormData {
@@ -18,6 +19,7 @@ interface FormErrors {
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const emailInputRef = useRef<HTMLInputElement>(null);
+  const { login, loginWithGoogle, loginWithGithub } = useAuth();
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -94,26 +96,18 @@ const LoginPage: React.FC = () => {
     setErrors({});
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await login(formData.email, formData.password);
 
-      // Simulate authentication logic
-      if (
-        formData.email === "demo@optimizecode.ai" &&
-        formData.password === "demo123"
-      ) {
-        // Store login state (in real app, use proper auth)
+      if (result.error) {
+        setErrors({ general: result.error });
+      } else {
+        // Store remember me preference
         if (formData.rememberMe) {
           localStorage.setItem("rememberLogin", "true");
         }
 
-        // Redirect to dashboard
+        // Redirect to dashboard on successful login
         navigate("/dashboard");
-      } else {
-        setErrors({
-          general:
-            "Invalid email or password. Try demo@optimizecode.ai with password: demo123",
-        });
       }
     } catch (error) {
       setErrors({ general: "Login failed. Please try again." });
@@ -122,9 +116,26 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`);
-    // Implement social login logic here
+  const handleSocialLogin = async (provider: "google" | "github") => {
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      const result =
+        provider === "google"
+          ? await loginWithGoogle()
+          : await loginWithGithub();
+
+      if (result.error) {
+        setErrors({ general: result.error });
+      } else {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      setErrors({ general: `${provider} login failed. Please try again.` });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -147,7 +158,8 @@ const LoginPage: React.FC = () => {
           <button
             type="button"
             className="social-btn google-btn"
-            onClick={() => handleSocialLogin("Google")}
+            onClick={() => handleSocialLogin("google")}
+            disabled={isLoading}
           >
             <svg
               className="social-icon"
@@ -178,7 +190,8 @@ const LoginPage: React.FC = () => {
           <button
             type="button"
             className="social-btn github-btn"
-            onClick={() => handleSocialLogin("GitHub")}
+            onClick={() => handleSocialLogin("github")}
+            disabled={isLoading}
           >
             <svg
               className="social-icon"
