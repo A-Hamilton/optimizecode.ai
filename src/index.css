@@ -27,19 +27,27 @@
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Force footer to connect directly to content with negative margin */
+  /* Eliminate the persistent gap with aggressive negative margin */
   .footer {
-    margin-top: -50px !important;
-    padding-top: 50px !important;
+    margin-top: -100px !important;
+    padding-top: 100px !important;
     position: relative;
     z-index: 10;
   }
 
-  /* Ensure all page content has no bottom margin */
+  /* Remove all possible spacing from body and root elements */
+  body,
+  #root {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove bottom spacing from all page containers */
   .homepage,
   .solutions-page,
   .product-page,
-  .pricing-page {
+  .pricing-page,
+  div[class*="page"] {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
   }
