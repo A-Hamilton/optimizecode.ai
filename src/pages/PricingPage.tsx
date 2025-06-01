@@ -343,12 +343,29 @@ const PricingPage: React.FC = () => {
                 ))}
               </ul>
 
-              <button
-                className={`cta-button ${plan.ctaStyle} ${plan.popular ? "enhanced" : ""}`}
-              >
-                {plan.cta}
-                {plan.popular && <span className="cta-arrow">→</span>}
-              </button>
+              {plan.id === "free" ? (
+                <button
+                  className={`cta-button ${plan.ctaStyle}`}
+                  onClick={() =>
+                    currentUser
+                      ? (window.location.href = "/optimize")
+                      : (window.location.href = "/signup")
+                  }
+                >
+                  {plan.cta}
+                </button>
+              ) : (
+                <StripeCheckout
+                  plan={plan.id as "pro" | "unleashed"}
+                  billingCycle={billingCycle}
+                  onError={(error) => setCheckoutError(error)}
+                  onSuccess={() => setCheckoutError("")}
+                  className={`cta-button ${plan.ctaStyle} ${plan.popular ? "enhanced" : ""}`}
+                >
+                  {plan.cta}
+                  {plan.popular && <span className="cta-arrow">→</span>}
+                </StripeCheckout>
+              )}
             </div>
           ))}
         </div>
