@@ -26,6 +26,16 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
   }
+
+  /* Prevent excessive spacing before footer */
+  main {
+    margin-bottom: 0;
+  }
+
+  /* Ensure all pages end cleanly without excessive bottom padding */
+  .page-content:last-child {
+    padding-bottom: 2rem;
+  }
 }
 
 @layer components {
