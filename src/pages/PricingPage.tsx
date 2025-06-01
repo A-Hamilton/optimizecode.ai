@@ -288,6 +288,21 @@ const PricingPage: React.FC = () => {
           </div>
         </header>
 
+        {/* Error Notification */}
+        {checkoutError && (
+          <div className="checkout-error-banner">
+            <div className="error-content">
+              <span>{checkoutError}</span>
+              <button
+                onClick={() => setCheckoutError("")}
+                className="error-close"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="pricing-grid">
           {pricingPlans.map((plan) => (
             <div
