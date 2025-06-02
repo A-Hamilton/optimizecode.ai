@@ -268,87 +268,128 @@ const HomePage: React.FC = () => {
       <section className="problem-solution">
         <div className="container">
           <div className="split-layout">
-            <div className="problem-side">
-              <h2>The Code Performance Problem</h2>
-              <div className="pain-points">
-                <div className="pain-point">
-                  <span className="pain-icon">⚡</span>
-                  <div>
-                    <h3>Slow Application Performance</h3>
-                    <p>
-                      Unoptimized code causes 60% slower load times and poor
-                      user experience
-                    </p>
-                    <div className="pain-stat">❌ 3.2s average load time</div>
-                  </div>
-                </div>
-                <div className="pain-point">
-                  <span className="pain-icon">💰</span>
-                  <div>
-                    <h3>High Cloud Computing Costs</h3>
-                    <p>
-                      Inefficient code increases server costs by 40-70%
-                      unnecessarily
-                    </p>
-                    <div className="pain-stat">💸 $847k annual overspend</div>
-                  </div>
-                </div>
-                <div className="pain-point">
-                  <span className="pain-icon">🔍</span>
-                  <div>
-                    <h3>Hard to Maintain Legacy Code</h3>
-                    <p>
-                      Technical debt slows development and increases bug risk
-                    </p>
-                    <div className="pain-stat">
-                      🐛 73% more bugs in legacy code
+            <AnimatedSection
+              animation="animate-fade-in-left"
+              className="problem-side"
+            >
+              <h2 className="animate-fade-in-up">
+                The Code Performance Problem
+              </h2>
+              <StaggeredList
+                className="pain-points"
+                staggerDelay={200}
+                animation="animate-fade-in-up"
+              >
+                {[
+                  {
+                    icon: "⚡",
+                    title: "Slow Application Performance",
+                    description:
+                      "Unoptimized code causes 60% slower load times and poor user experience",
+                    stat: "❌ 3.2s average load time",
+                    iconAnimation: "hover:animate-wiggle",
+                  },
+                  {
+                    icon: "💰",
+                    title: "High Cloud Computing Costs",
+                    description:
+                      "Inefficient code increases server costs by 40-70% unnecessarily",
+                    stat: "💸 $847k annual overspend",
+                    iconAnimation: "hover:animate-bounce",
+                  },
+                  {
+                    icon: "🔍",
+                    title: "Hard to Maintain Legacy Code",
+                    description:
+                      "Technical debt slows development and increases bug risk",
+                    stat: "🐛 73% more bugs in legacy code",
+                    iconAnimation: "hover:animate-pulse-gentle",
+                  },
+                ].map((pain, index) => (
+                  <div
+                    key={index}
+                    className="pain-point group hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <span
+                      className={`pain-icon text-2xl transition-all duration-300 group-hover:scale-125 ${pain.iconAnimation}`}
+                    >
+                      {pain.icon}
+                    </span>
+                    <div>
+                      <h3 className="group-hover:text-red-400 transition-colors duration-300">
+                        {pain.title}
+                      </h3>
+                      <p>{pain.description}</p>
+                      <div className="pain-stat animate-pulse-gentle">
+                        {pain.stat}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div className="solution-side">
-              <h2>How OptimizeCode.ai Solves It</h2>
-              <div className="solutions">
-                <div className="solution">
-                  <span className="solution-icon">⚡</span>
-                  <div>
-                    <h3>Instant Performance Boost</h3>
-                    <p>
-                      AI analyzes and optimizes algorithms, reducing execution
-                      time by 40%+
-                    </p>
-                    <div className="solution-stat">
-                      ✅ 1.1s optimized load time
+                ))}
+              </StaggeredList>
+            </AnimatedSection>
+
+            <AnimatedSection
+              animation="animate-fade-in-right"
+              delay={300}
+              className="solution-side"
+            >
+              <h2 className="animate-fade-in-up">
+                How OptimizeCode.ai Solves It
+              </h2>
+              <StaggeredList
+                className="solutions"
+                staggerDelay={200}
+                animation="animate-fade-in-up"
+              >
+                {[
+                  {
+                    icon: "⚡",
+                    title: "Instant Performance Boost",
+                    description:
+                      "AI analyzes and optimizes algorithms, reducing execution time by 40%+",
+                    stat: "✅ 1.1s optimized load time",
+                    iconAnimation: "hover:animate-wiggle",
+                  },
+                  {
+                    icon: "💡",
+                    title: "Smart Cost Optimization",
+                    description:
+                      "Reduces cloud bills through efficient resource usage and better algorithms",
+                    stat: "💰 $312k annual savings",
+                    iconAnimation: "hover:animate-bounce",
+                  },
+                  {
+                    icon: "🛡️",
+                    title: "Enhanced Code Quality",
+                    description:
+                      "Modernizes syntax, improves readability, and reduces security vulnerabilities",
+                    stat: "🎯 95% fewer vulnerabilities",
+                    iconAnimation: "hover:animate-heart-beat",
+                  },
+                ].map((solution, index) => (
+                  <div
+                    key={index}
+                    className="solution group hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <span
+                      className={`solution-icon text-2xl transition-all duration-300 group-hover:scale-125 ${solution.iconAnimation}`}
+                    >
+                      {solution.icon}
+                    </span>
+                    <div>
+                      <h3 className="group-hover:text-primary transition-colors duration-300">
+                        {solution.title}
+                      </h3>
+                      <p>{solution.description}</p>
+                      <div className="solution-stat animate-pulse-gentle">
+                        {solution.stat}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="solution">
-                  <span className="solution-icon">💡</span>
-                  <div>
-                    <h3>Smart Cost Optimization</h3>
-                    <p>
-                      Reduces cloud bills through efficient resource usage and
-                      better algorithms
-                    </p>
-                    <div className="solution-stat">💰 $312k annual savings</div>
-                  </div>
-                </div>
-                <div className="solution">
-                  <span className="solution-icon">🛡️</span>
-                  <div>
-                    <h3>Enhanced Code Quality</h3>
-                    <p>
-                      Modernizes syntax, improves readability, and reduces
-                      security vulnerabilities
-                    </p>
-                    <div className="solution-stat">
-                      🎯 95% fewer vulnerabilities
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                ))}
+              </StaggeredList>
+            </AnimatedSection>
           </div>
         </div>
       </section>
