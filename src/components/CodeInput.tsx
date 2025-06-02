@@ -65,18 +65,38 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(code);
+        setCopySuccess(true);
+        showSuccess("Code copied to clipboard!");
       } else {
-        // Fallback for older browsers
-        if (textareaRef.current) {
-          textareaRef.current.select();
-          document.execCommand("copy");
+        // Modern fallback using temporary textarea
+        const textArea = document.createElement("textarea");
+        textArea.value = code;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          const successful = document.execCommand("copy");
+          if (successful) {
+            setCopySuccess(true);
+            showSuccess("Code copied to clipboard!");
+          } else {
+            throw new Error("Copy command failed");
+          }
+        } finally {
+          document.body.removeChild(textArea);
         }
       }
 
-      setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (error) {
       console.error("Failed to copy code:", error);
+      showError(
+        "Failed to copy code to clipboard. Please select and copy manually.",
+        "Copy Failed",
+      );
     }
   };
 
@@ -209,7 +229,7 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
               📝 {code.length} characters
             </span>
             <span className="flex items-center gap-1">
-              ���� {code.split("\n").length} lines
+              📄 {code.split("\n").length} lines
             </span>
             {code && (
               <span className="flex items-center gap-1">
