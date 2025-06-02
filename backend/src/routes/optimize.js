@@ -174,37 +174,17 @@ router.post(
     }
 
     try {
-      const results = [];
+      const result = await optimizeBatchService(files, optimizationType);
 
-      for (const file of files) {
-        const detectedLanguage = detectLanguage(file.content, file.name);
-        const optimizedCode = await aiOptimization(
-          file.content,
-          detectedLanguage,
-          optimizationType,
-        );
-        const insights = generateInsights(
-          file.content,
-          optimizedCode,
-          detectedLanguage,
-        );
-
-        results.push({
-          fileName: file.name,
-          original: file.content,
-          optimized: optimizedCode,
-          insights,
-          language: detectedLanguage,
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(500).json({
+          error: "Batch Optimization Failed",
+          message:
+            result.message || "Unable to optimize files. Please try again.",
         });
       }
-
-      res.json({
-        success: true,
-        results,
-        totalFiles: files.length,
-        optimizationType,
-        timestamp: new Date().toISOString(),
-      });
     } catch (error) {
       console.error("Batch optimization error:", error);
       res.status(500).json({
