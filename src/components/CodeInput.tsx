@@ -100,35 +100,6 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     }
   };
 
-  const showFeedback = (message: string): void => {
-    // Create temporary notification
-    const notification = document.createElement("div");
-    notification.textContent = message;
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #22c55e;
-      color: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      z-index: 10000;
-      animation: slideIn 0.3s ease;
-    `;
-
-    document.body.appendChild(notification);
-    setTimeout(() => {
-      notification.style.animation = "slideOut 0.3s ease";
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
-        }
-      }, 300);
-    }, 2000);
-  };
-
   const formatCode = (): void => {
     if (!code) return;
 
@@ -142,7 +113,7 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
       .replace(/;/g, ";\n");
 
     onCodeChange(formatted);
-    showFeedback("Code formatted!");
+    showSuccess("Code formatted successfully!");
   };
 
   const getLanguageFromCode = (): string => {
