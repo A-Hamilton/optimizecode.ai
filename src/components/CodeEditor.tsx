@@ -4,6 +4,16 @@ import { editor } from "monaco-editor";
 import { useAuth } from "../contexts/AuthContext";
 import { useNotificationHelpers } from "../contexts/NotificationContext";
 
+// Monaco Editor global types
+declare global {
+  interface Window {
+    monaco: typeof import("monaco-editor");
+  }
+}
+
+// Add monaco to global scope
+const monaco = (window as any).monaco;
+
 interface CodeEditorProps {
   code: string;
   onCodeChange: (code: string) => void;
@@ -168,7 +178,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   showMinimap = true,
   showLineNumbers = true,
   readOnly = false,
-  placeholder = "Start typing your code here...",
+  placeholder: _placeholder = "Start typing your code here...",
   onLanguageChange,
 }) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -210,7 +220,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         enabled: true,
       },
       lightbulb: {
-        enabled: true,
+        enabled: "on" as any,
       },
       folding: true,
       foldingStrategy: "indentation",
@@ -463,12 +473,12 @@ console.log(fibonacci(10));`)
                       insertExample(`def quick_sort(arr):
     if len(arr) <= 1:
         return arr
-    
+
     pivot = arr[len(arr) // 2]
     left = [x for x in arr if x < pivot]
     middle = [x for x in arr if x == pivot]
     right = [x for x in arr if x > pivot]
-    
+
     return quick_sort(left) + middle + quick_sort(right)
 
 print(quick_sort([3, 6, 8, 10, 1, 2, 1]))`)
@@ -485,7 +495,7 @@ print(quick_sort([3, 6, 8, 10, 1, 2, 1]))`)
 
 int main() {
     std::vector<int> numbers = {64, 34, 25, 12, 22, 11, 90};
-    
+
     // Bubble sort
     for (size_t i = 0; i < numbers.size() - 1; i++) {
         for (size_t j = 0; j < numbers.size() - i - 1; j++) {
@@ -494,11 +504,11 @@ int main() {
             }
         }
     }
-    
+
     for (int num : numbers) {
         std::cout << num << " ";
     }
-    
+
     return 0;
 }`)
                     }
