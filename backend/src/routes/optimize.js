@@ -3,21 +3,13 @@ const { body, validationResult } = require("express-validator");
 const { userService } = require("../config/firebase");
 const { asyncHandler } = require("../middleware/errorHandler");
 const { checkUsageLimits, requireSubscription } = require("../middleware/auth");
+const {
+  optimizeCode: optimizeCodeService,
+  optimizeBatch: optimizeBatchService,
+  detectLanguage,
+} = require("../services/optimizationService");
 
 const router = express.Router();
-
-// OpenAI integration (optional - you'll need to install openai package)
-let openai = null;
-try {
-  if (process.env.OPENAI_API_KEY) {
-    const { OpenAI } = require("openai");
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-  }
-} catch (error) {
-  console.log("OpenAI not configured, using mock optimization");
-}
 
 // Mock code optimization (fallback if no OpenAI)
 const mockOptimization = (code, language = "javascript") => {
