@@ -4,12 +4,6 @@ import { FileDropZoneProps, CodeFile } from "../types";
 import { useAuth } from "../contexts/AuthContext";
 import { useNotificationHelpers } from "../contexts/NotificationContext";
 
-interface NotificationProps {
-  message: string;
-  type: "error" | "warning" | "info";
-  onClose: () => void;
-}
-
 const FileDropZone: React.FC<FileDropZoneProps> = ({
   onFilesSelected,
   files,
