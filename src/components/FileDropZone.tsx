@@ -21,32 +21,6 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   const maxFileSize = (userProfile?.limits?.maxFileSize || 1) * 1024 * 1024; // Convert MB to bytes
   const planName = userProfile?.subscription?.plan || "free";
 
-  const InlineNotification: React.FC<NotificationProps> = ({
-    message,
-    type,
-    onClose,
-  }) => {
-    const typeStyles = {
-      error: "bg-red-500/20 border-red-500/30 text-red-200",
-      warning: "bg-yellow-500/20 border-yellow-500/30 text-yellow-200",
-      info: "bg-blue-500/20 border-blue-500/30 text-blue-200",
-    };
-
-    return (
-      <div
-        className={`p-3 rounded-lg border mb-4 flex items-center justify-between ${typeStyles[type]}`}
-      >
-        <span className="text-sm">{message}</span>
-        <button
-          onClick={onClose}
-          className="ml-2 text-lg leading-none hover:opacity-70 transition-opacity"
-        >
-          ×
-        </button>
-      </div>
-    );
-  };
-
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     setIsDragOver(true);
