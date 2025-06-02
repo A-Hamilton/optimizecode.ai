@@ -75,7 +75,7 @@ const fetchUserData = async (userId) => {
   try {
     const response = await fetch(\`/api/users/\${userId}\`);
     const data = await response.json();
-    
+
     if (data.error) throw new Error(data.error);
     return data;
   } catch (error) {
@@ -109,7 +109,7 @@ def find_matching_pairs(list1, list2):
     user_dict = {item['id']: item for item in list1}
     return [
         {'user': user_dict[item['user_id']], 'data': item}
-        for item in list2 
+        for item in list2
         if item['user_id'] in user_dict
     ]`,
     improvements: [
@@ -208,7 +208,7 @@ const HomePage: React.FC = () => {
             <AnimatedSection animation="animate-fade-in-up" delay={800}>
               <div className="hero-actions">
                 <Link
-                  to="/optimize"
+                  to="/optimize-enhanced"
                   className="btn-primary interactive-cta group hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
                 >
                   <span className="cta-text">Start Optimizing Free</span>
@@ -854,11 +854,11 @@ const HomePage: React.FC = () => {
                   seconds.
                 </p>
                 <Link
-                  to="/optimize"
+                  to="/optimize-enhanced"
                   className="inline-flex items-center gap-3 bg-primary hover:bg-primary-dark px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 text-white"
                 >
                   <span>🚀</span>
-                  Try the Optimizer Now
+                  Try the Enhanced Optimizer
                   <span className="transition-transform duration-300 group-hover:translate-x-1">
                     →
                   </span>
@@ -882,10 +882,10 @@ const HomePage: React.FC = () => {
             </p>
             <div className="pricing-actions animate-fade-in-up animate-delay-400">
               <Link
-                to="/optimize"
+                to="/optimize-enhanced"
                 className="btn-primary interactive-cta group hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
               >
-                <span className="cta-text">Try Free Now</span>
+                <span className="cta-text">Try Enhanced Optimizer</span>
                 <span className="cta-arrow transition-transform duration-300 group-hover:translate-x-2 group-hover:animate-bounce">
                   →
                 </span>
