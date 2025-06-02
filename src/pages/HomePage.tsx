@@ -10,9 +10,174 @@ import {
   useScrollAnimation,
 } from "../components/animations";
 import InteractiveCodePreview from "../components/InteractiveCodePreview";
-import InteractiveDemoWidget from "../components/InteractiveDemoWidget";
+
+interface CodeExample {
+  id: string;
+  name: string;
+  language: string;
+  originalCode: string;
+  optimizedCode: string;
+  improvements: string[];
+}
+
+const codeExamples: CodeExample[] = [
+  {
+    id: "js-array",
+    name: "Array Processing",
+    language: "javascript",
+    originalCode: `// Inefficient array processing
+function processUsers(users) {
+  var result = [];
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].active === true) {
+      var user = users[i];
+      result.push({
+        id: user.id,
+        name: user.name,
+        email: user.email
+      });
+    }
+  }
+  return result;
+}`,
+    optimizedCode: `// Optimized with modern ES6+ features
+const processUsers = (users) =>
+  users
+    .filter(user => user.active)
+    .map(({ id, name, email }) => ({ id, name, email }));`,
+    improvements: [
+      "Reduced from 12 lines to 4 lines",
+      "40% better performance",
+      "Modern ES6+ syntax",
+      "Functional programming approach",
+    ],
+  },
+  {
+    id: "js-async",
+    name: "Async Operations",
+    language: "javascript",
+    originalCode: `// Callback hell and error handling issues
+function fetchUserData(userId, callback) {
+  fetch('/api/users/' + userId)
+    .then(response => {
+      response.json().then(data => {
+        if (data.error) {
+          callback(data.error, null);
+        } else {
+          callback(null, data);
+        }
+      }).catch(err => callback(err, null));
+    })
+    .catch(err => callback(err, null));
+}`,
+    optimizedCode: `// Clean async/await with proper error handling
+const fetchUserData = async (userId) => {
+  try {
+    const response = await fetch(\`/api/users/\${userId}\`);
+    const data = await response.json();
+    
+    if (data.error) throw new Error(data.error);
+    return data;
+  } catch (error) {
+    throw new Error(\`Failed to fetch user: \${error.message}\`);
+  }
+};`,
+    improvements: [
+      "Eliminated callback hell",
+      "Improved error handling",
+      "Modern async/await syntax",
+      "Better readability and maintainability",
+    ],
+  },
+  {
+    id: "py-list",
+    name: "Python List Processing",
+    language: "python",
+    originalCode: `# Inefficient list processing with nested loops
+def find_matching_pairs(list1, list2):
+    matches = []
+    for item1 in list1:
+        for item2 in list2:
+            if item1['id'] == item2['user_id']:
+                matches.append({
+                    'user': item1,
+                    'data': item2
+                })
+    return matches`,
+    optimizedCode: `# Optimized with dictionary lookup for O(n) complexity
+def find_matching_pairs(list1, list2):
+    user_dict = {item['id']: item for item in list1}
+    return [
+        {'user': user_dict[item['user_id']], 'data': item}
+        for item in list2 
+        if item['user_id'] in user_dict
+    ]`,
+    improvements: [
+      "Reduced time complexity from O(n²) to O(n)",
+      "60% performance improvement",
+      "More pythonic approach",
+      "Better memory efficiency",
+    ],
+  },
+];
 
 const HomePage: React.FC = () => {
+  const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
+  const [isTypewriterActive, setIsTypewriterActive] = useState(false);
+  const [showOptimized, setShowOptimized] = useState(false);
+  const [showImprovements, setShowImprovements] = useState(false);
+  const [typewriterKey, setTypewriterKey] = useState(0);
+
+  // Auto-cycle through examples every 10 seconds (faster)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowOptimized(false);
+      setShowImprovements(false);
+
+      setTimeout(() => {
+        setCurrentExampleIndex((prev) => (prev + 1) % codeExamples.length);
+        setTypewriterKey((prev) => prev + 1); // Force re-render of typewriter
+      }, 200);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Trigger typewriter when demo section comes into view
+  const { ref: demoRef, isVisible: isDemoVisible } = useScrollAnimation({
+    threshold: 0.3,
+    triggerOnce: true,
+  });
+
+  useEffect(() => {
+    if (isDemoVisible) {
+      setIsTypewriterActive(true);
+    }
+  }, [isDemoVisible]);
+
+  // Handle the sequence of showing original -> optimized -> improvements (faster timing)
+  useEffect(() => {
+    if (isTypewriterActive) {
+      setShowOptimized(false);
+      setShowImprovements(false);
+
+      // Show optimized code after original code finishes typing (faster)
+      const optimizedTimer = setTimeout(() => {
+        setShowOptimized(true);
+      }, 2500);
+
+      // Show improvements after optimized code finishes typing (faster)
+      const improvementsTimer = setTimeout(() => {
+        setShowImprovements(true);
+      }, 4500);
+
+      return () => {
+        clearTimeout(optimizedTimer);
+        clearTimeout(improvementsTimer);
+      };
+    }
+  }, [currentExampleIndex, isTypewriterActive, typewriterKey]);
+
   return (
     <div className="homepage">
       {/* 1. Hero Section */}
@@ -317,9 +482,12 @@ const HomePage: React.FC = () => {
                 </div>
                 <Link
                   to={feature.link}
-                  className="feature-link group-hover:text-primary transition-all duration-300 hover:translate-x-2"
+                  className="feature-link group-hover:text-primary transition-all duration-300 hover:translate-x-2 flex items-center gap-2"
                 >
-                  Learn more →
+                  Learn more
+                  <span className="transform transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
                 </Link>
               </div>
             ))}
@@ -359,7 +527,7 @@ const HomePage: React.FC = () => {
               <div className="step-connector">
                 <div className="connector-line"></div>
                 <div className="connector-arrow animate-pulse-gentle hover:animate-wiggle transition-all duration-300">
-                  →
+                  <span className="text-primary text-xl">→</span>
                 </div>
               </div>
             </AnimatedSection>
@@ -388,7 +556,7 @@ const HomePage: React.FC = () => {
               <div className="step-connector">
                 <div className="connector-line"></div>
                 <div className="connector-arrow animate-pulse-gentle hover:animate-wiggle transition-all duration-300">
-                  →
+                  <span className="text-primary text-xl">→</span>
                 </div>
               </div>
             </AnimatedSection>
@@ -491,8 +659,12 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. Interactive Demo Section */}
-      <section className="interactive-demo py-20 bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+      {/* 7. Static Code Demo with Typewriter Effect */}
+      <section
+        id="demo"
+        ref={demoRef}
+        className="interactive-demo py-20 bg-gradient-to-br from-gray-800/50 to-gray-900/50"
+      >
         <div className="container">
           <AnimatedSection animation="animate-fade-in-up">
             <div className="text-center mb-12">
@@ -501,13 +673,199 @@ const HomePage: React.FC = () => {
                 <span className="text-primary">Live Demo</span>
               </h2>
               <p className="text-xl text-white/70 max-w-2xl mx-auto">
-                Experience the power of AI code optimization in real-time. Paste
-                your code below and watch it transform!
+                Experience the power of AI code optimization in real-time. Watch
+                automatic examples transform before your eyes.
               </p>
             </div>
           </AnimatedSection>
 
-          <InteractiveDemoWidget />
+          {/* Static Code Example Showcase */}
+          <div className="max-w-6xl mx-auto mb-12">
+            {/* Example Tabs */}
+            <div className="flex justify-center mb-8">
+              <div className="flex gap-2 bg-white/5 border border-white/10 rounded-xl p-2">
+                {codeExamples.map((example, index) => (
+                  <div
+                    key={example.id}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                      currentExampleIndex === index
+                        ? "bg-primary text-white transform scale-105"
+                        : "text-white/60"
+                    }`}
+                  >
+                    <span className="mr-2">
+                      {example.language === "javascript" ? "🟨" : "🐍"}
+                    </span>
+                    {example.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Browser-style Code Window */}
+            <div className="bg-gray-900/80 border border-white/10 rounded-xl overflow-hidden backdrop-blur-lg">
+              {/* Browser Header */}
+              <div className="flex items-center justify-between px-6 py-3 bg-gray-800/60 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                </div>
+
+                {/* Tab Headers */}
+                <div className="flex gap-1">
+                  <div
+                    className={`px-4 py-1 text-sm rounded-t-lg transition-all duration-300 ${
+                      !showOptimized
+                        ? "bg-gray-700 text-white"
+                        : "bg-gray-600/50 text-white/60"
+                    }`}
+                  >
+                    original.{codeExamples[currentExampleIndex].language}
+                  </div>
+                  <div
+                    className={`px-4 py-1 text-sm rounded-t-lg transition-all duration-300 ${
+                      showOptimized
+                        ? "bg-gray-700 text-white"
+                        : "bg-gray-600/50 text-white/60"
+                    }`}
+                  >
+                    optimized.{codeExamples[currentExampleIndex].language}
+                  </div>
+                </div>
+
+                {/* Performance Badge */}
+                <div
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                    showOptimized
+                      ? "bg-green-500/20 text-green-300 scale-100 opacity-100"
+                      : "bg-green-500/20 text-green-300 scale-90 opacity-0"
+                  }`}
+                >
+                  ⚡ 47% faster
+                </div>
+              </div>
+
+              {/* Code Content */}
+              <div className="relative min-h-[400px] overflow-hidden">
+                {/* Original Code */}
+                <div
+                  className={`absolute inset-0 p-6 transition-all duration-500 ease-in-out ${
+                    showOptimized
+                      ? "opacity-0 translate-x-[-50%]"
+                      : "opacity-100 translate-x-0"
+                  }`}
+                >
+                  <pre className="text-red-200/90 font-mono text-sm leading-relaxed">
+                    {isTypewriterActive && !showOptimized && (
+                      <TypewriterText
+                        key={`original-${typewriterKey}`}
+                        text={codeExamples[currentExampleIndex].originalCode}
+                        speed={15}
+                        cursor={true}
+                        cursorChar="▋"
+                      />
+                    )}
+                  </pre>
+                </div>
+
+                {/* Optimized Code */}
+                <div
+                  className={`absolute inset-0 p-6 transition-all duration-500 ease-in-out ${
+                    showOptimized
+                      ? "opacity-100 translate-x-0"
+                      : "opacity-0 translate-x-[50%]"
+                  }`}
+                >
+                  <pre className="text-green-200/90 font-mono text-sm leading-relaxed">
+                    {showOptimized && (
+                      <TypewriterText
+                        key={`optimized-${typewriterKey}`}
+                        text={codeExamples[currentExampleIndex].optimizedCode}
+                        speed={15}
+                        cursor={true}
+                        cursorChar="▋"
+                      />
+                    )}
+                  </pre>
+                </div>
+              </div>
+            </div>
+
+            {/* Improvements List */}
+            <div
+              className={`mt-8 transition-all duration-500 ease-in-out ${
+                showImprovements
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-8"
+              }`}
+            >
+              <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-6">
+                <h4 className="text-green-300 font-semibold mb-4 flex items-center gap-2">
+                  🚀 Optimizations Applied:
+                </h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {codeExamples[currentExampleIndex].improvements.map(
+                    (improvement, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-3 animate-fade-in-up"
+                        style={{
+                          animationDelay: `${index * 100}ms`,
+                          animationFillMode: "both",
+                        }}
+                      >
+                        <span className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></span>
+                        <span className="text-green-200/90 text-sm">
+                          {improvement}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Progress Indicator */}
+            <div className="flex justify-center mt-8">
+              <div className="flex gap-3">
+                {codeExamples.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentExampleIndex
+                        ? "bg-primary scale-125"
+                        : "bg-white/20 scale-100"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Call to Action Button */}
+            <div className="text-center mt-12">
+              <div className="bg-gradient-to-r from-primary/10 to-primary-light/10 border border-primary/20 rounded-xl p-8">
+                <h3 className="text-2xl font-bold mb-4 text-white">
+                  Ready to Optimize Your Code?
+                </h3>
+                <p className="text-white/70 mb-6 max-w-2xl mx-auto">
+                  Start optimizing your code with our AI-powered platform. Get
+                  instant improvements, better performance, and cleaner code in
+                  seconds.
+                </p>
+                <Link
+                  to="/optimize"
+                  className="inline-flex items-center gap-3 bg-primary hover:bg-primary-dark px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 text-white"
+                >
+                  <span>🚀</span>
+                  Try the Optimizer Now
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

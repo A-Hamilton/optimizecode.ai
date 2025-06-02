@@ -120,9 +120,7 @@ const Footer: React.FC = () => {
             <FooterLink to="/optimize">Try Free</FooterLink>
             <FooterLink to="/docs">API Documentation</FooterLink>
             <FooterLink to="/security">Security</FooterLink>
-            <FooterLink href="#" external>
-              Integrations
-            </FooterLink>
+            <FooterLink to="/docs">Integrations</FooterLink>
           </FooterSection>
 
           {/* Solutions Links */}
@@ -132,25 +130,17 @@ const Footer: React.FC = () => {
             <FooterLink to="/solutions">Legacy Modernization</FooterLink>
             <FooterLink to="/solutions">Security Enhancement</FooterLink>
             <FooterLink to="/solutions">Team Collaboration</FooterLink>
-            <FooterLink href="#" external>
-              Case Studies
-            </FooterLink>
+            <FooterLink to="/blog">Case Studies</FooterLink>
           </FooterSection>
 
           {/* Company Links */}
           <FooterSection title="Company">
             <FooterLink to="/about">About Us</FooterLink>
             <FooterLink to="/blog">Blog</FooterLink>
-            <FooterLink href="#" external>
-              Careers
-            </FooterLink>
+            <FooterLink to="/about">Careers</FooterLink>
             <FooterLink to="/support">Support</FooterLink>
-            <FooterLink href="#" external>
-              Press Kit
-            </FooterLink>
-            <FooterLink href="#" external>
-              Contact
-            </FooterLink>
+            <FooterLink to="/about">Press Kit</FooterLink>
+            <FooterLink to="/support">Contact</FooterLink>
           </FooterSection>
         </div>
 
@@ -158,30 +148,30 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 gap-6">
           {/* Legal Links */}
           <div className="flex flex-wrap gap-6 justify-center md:justify-start">
-            <a
-              href="#"
+            <Link
+              to="/privacy"
               className="text-white/60 hover:text-white/80 text-sm transition-colors hover:underline"
             >
               Privacy Policy
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/terms"
               className="text-white/60 hover:text-white/80 text-sm transition-colors hover:underline"
             >
               Terms of Service
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/privacy"
               className="text-white/60 hover:text-white/80 text-sm transition-colors hover:underline"
             >
               Cookie Policy
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/security"
               className="text-white/60 hover:text-white/80 text-sm transition-colors hover:underline"
             >
               GDPR Compliance
-            </a>
+            </Link>
           </div>
 
           {/* Copyright */}
