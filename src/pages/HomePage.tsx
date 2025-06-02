@@ -126,9 +126,9 @@ const HomePage: React.FC = () => {
   const [isTypewriterActive, setIsTypewriterActive] = useState(false);
   const [showOptimized, setShowOptimized] = useState(false);
   const [showImprovements, setShowImprovements] = useState(false);
-  const demoSectionRef = useRef<HTMLDivElement>(null);
+  const [typewriterKey, setTypewriterKey] = useState(0);
 
-  // Auto-cycle through examples every 12 seconds
+  // Auto-cycle through examples every 10 seconds (faster)
   useEffect(() => {
     const interval = setInterval(() => {
       setShowOptimized(false);
@@ -136,8 +136,9 @@ const HomePage: React.FC = () => {
 
       setTimeout(() => {
         setCurrentExampleIndex((prev) => (prev + 1) % codeExamples.length);
-      }, 500);
-    }, 12000);
+        setTypewriterKey((prev) => prev + 1); // Force re-render of typewriter
+      }, 200);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
@@ -154,28 +155,28 @@ const HomePage: React.FC = () => {
     }
   }, [isDemoVisible]);
 
-  // Handle the sequence of showing original -> optimized -> improvements
+  // Handle the sequence of showing original -> optimized -> improvements (faster timing)
   useEffect(() => {
     if (isTypewriterActive) {
       setShowOptimized(false);
       setShowImprovements(false);
 
-      // Show optimized code after original code finishes typing
+      // Show optimized code after original code finishes typing (faster)
       const optimizedTimer = setTimeout(() => {
         setShowOptimized(true);
-      }, 4000);
+      }, 2500);
 
-      // Show improvements after optimized code finishes typing
+      // Show improvements after optimized code finishes typing (faster)
       const improvementsTimer = setTimeout(() => {
         setShowImprovements(true);
-      }, 7000);
+      }, 4500);
 
       return () => {
         clearTimeout(optimizedTimer);
         clearTimeout(improvementsTimer);
       };
     }
-  }, [currentExampleIndex, isTypewriterActive]);
+  }, [currentExampleIndex, isTypewriterActive, typewriterKey]);
 
   return (
     <div className="homepage">
@@ -679,14 +680,14 @@ const HomePage: React.FC = () => {
           </AnimatedSection>
 
           {/* Static Code Example Showcase */}
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto mb-12">
             {/* Example Tabs */}
             <div className="flex justify-center mb-8">
               <div className="flex gap-2 bg-white/5 border border-white/10 rounded-xl p-2">
                 {codeExamples.map((example, index) => (
                   <div
                     key={example.id}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-500 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                       currentExampleIndex === index
                         ? "bg-primary text-white transform scale-105"
                         : "text-white/60"
@@ -714,7 +715,7 @@ const HomePage: React.FC = () => {
                 {/* Tab Headers */}
                 <div className="flex gap-1">
                   <div
-                    className={`px-4 py-1 text-sm rounded-t-lg transition-all duration-500 ${
+                    className={`px-4 py-1 text-sm rounded-t-lg transition-all duration-300 ${
                       !showOptimized
                         ? "bg-gray-700 text-white"
                         : "bg-gray-600/50 text-white/60"
@@ -723,7 +724,7 @@ const HomePage: React.FC = () => {
                     original.{codeExamples[currentExampleIndex].language}
                   </div>
                   <div
-                    className={`px-4 py-1 text-sm rounded-t-lg transition-all duration-500 ${
+                    className={`px-4 py-1 text-sm rounded-t-lg transition-all duration-300 ${
                       showOptimized
                         ? "bg-gray-700 text-white"
                         : "bg-gray-600/50 text-white/60"
@@ -735,7 +736,7 @@ const HomePage: React.FC = () => {
 
                 {/* Performance Badge */}
                 <div
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-500 ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
                     showOptimized
                       ? "bg-green-500/20 text-green-300 scale-100 opacity-100"
                       : "bg-green-500/20 text-green-300 scale-90 opacity-0"
@@ -749,18 +750,18 @@ const HomePage: React.FC = () => {
               <div className="relative min-h-[400px] overflow-hidden">
                 {/* Original Code */}
                 <div
-                  className={`absolute inset-0 p-6 transition-all duration-700 ease-in-out ${
+                  className={`absolute inset-0 p-6 transition-all duration-500 ease-in-out ${
                     showOptimized
-                      ? "opacity-0 translate-x-[-100%]"
+                      ? "opacity-0 translate-x-[-50%]"
                       : "opacity-100 translate-x-0"
                   }`}
                 >
                   <pre className="text-red-200/90 font-mono text-sm leading-relaxed">
                     {isTypewriterActive && !showOptimized && (
                       <TypewriterText
-                        key={`original-${currentExampleIndex}`}
+                        key={`original-${typewriterKey}`}
                         text={codeExamples[currentExampleIndex].originalCode}
-                        speed={30}
+                        speed={15}
                         cursor={true}
                         cursorChar="▋"
                       />
@@ -770,18 +771,18 @@ const HomePage: React.FC = () => {
 
                 {/* Optimized Code */}
                 <div
-                  className={`absolute inset-0 p-6 transition-all duration-700 ease-in-out ${
+                  className={`absolute inset-0 p-6 transition-all duration-500 ease-in-out ${
                     showOptimized
                       ? "opacity-100 translate-x-0"
-                      : "opacity-0 translate-x-[100%]"
+                      : "opacity-0 translate-x-[50%]"
                   }`}
                 >
                   <pre className="text-green-200/90 font-mono text-sm leading-relaxed">
                     {showOptimized && (
                       <TypewriterText
-                        key={`optimized-${currentExampleIndex}`}
+                        key={`optimized-${typewriterKey}`}
                         text={codeExamples[currentExampleIndex].optimizedCode}
-                        speed={30}
+                        speed={15}
                         cursor={true}
                         cursorChar="▋"
                       />
@@ -793,7 +794,7 @@ const HomePage: React.FC = () => {
 
             {/* Improvements List */}
             <div
-              className={`mt-8 transition-all duration-700 ease-in-out ${
+              className={`mt-8 transition-all duration-500 ease-in-out ${
                 showImprovements
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-8"
@@ -810,7 +811,7 @@ const HomePage: React.FC = () => {
                         key={index}
                         className="flex items-start gap-3 animate-fade-in-up"
                         style={{
-                          animationDelay: `${index * 200}ms`,
+                          animationDelay: `${index * 100}ms`,
                           animationFillMode: "both",
                         }}
                       >
@@ -831,13 +832,37 @@ const HomePage: React.FC = () => {
                 {codeExamples.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-3 h-3 rounded-full transition-all duration-500 ${
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
                       index === currentExampleIndex
                         ? "bg-primary scale-125"
                         : "bg-white/20 scale-100"
                     }`}
                   />
                 ))}
+              </div>
+            </div>
+
+            {/* Call to Action Button */}
+            <div className="text-center mt-12">
+              <div className="bg-gradient-to-r from-primary/10 to-primary-light/10 border border-primary/20 rounded-xl p-8">
+                <h3 className="text-2xl font-bold mb-4 text-white">
+                  Ready to Optimize Your Code?
+                </h3>
+                <p className="text-white/70 mb-6 max-w-2xl mx-auto">
+                  Start optimizing your code with our AI-powered platform. Get
+                  instant improvements, better performance, and cleaner code in
+                  seconds.
+                </p>
+                <Link
+                  to="/optimize"
+                  className="inline-flex items-center gap-3 bg-primary hover:bg-primary-dark px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 text-white"
+                >
+                  <span>🚀</span>
+                  Try the Optimizer Now
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
               </div>
             </div>
           </div>
