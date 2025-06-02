@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useRef } from "react";
 import { FileDropZoneProps, CodeFile } from "../types";
 import { useAuth } from "../contexts/AuthContext";
+import { useNotificationHelpers } from "../contexts/NotificationContext";
 
 interface NotificationProps {
   message: string;
