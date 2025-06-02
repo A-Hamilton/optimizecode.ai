@@ -174,23 +174,23 @@ export const InteractiveDemoWidget: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Quick Examples */}
+      {/* Example Selection */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4 text-center">
-          Quick Examples - Click to try:
+        <h3 className="text-lg font-semibold mb-4 text-center text-white">
+          Try These Examples:
         </h3>
         <div className="flex flex-wrap justify-center gap-3">
           {demoExamples.map((example, index) => (
             <button
               key={example.id}
               onClick={() => selectExample(example)}
-              className={`px-4 py-2 rounded-lg border transition-all duration-300 text-sm font-medium
+              className={`px-4 py-2 rounded-lg border transition-all duration-300 text-sm font-medium hover:scale-105
                 ${
                   selectedExample?.id === example.id
                     ? "bg-primary/20 border-primary text-primary"
                     : "bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:border-primary/50"
                 }
-                animate-fade-in-up hover:scale-105`}
+                animate-fade-in-up`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <span className="mr-2">
@@ -207,11 +207,13 @@ export const InteractiveDemoWidget: React.FC = () => {
         {/* Input Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">📝 Your Code</h3>
+            <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+              📝 Your Code
+            </h3>
             {inputCode && (
               <button
                 onClick={resetDemo}
-                className="text-sm text-white/60 hover:text-white transition-colors"
+                className="text-sm text-white/60 hover:text-white transition-colors px-3 py-1 hover:bg-white/10 rounded-lg"
               >
                 Clear
               </button>
@@ -223,7 +225,7 @@ export const InteractiveDemoWidget: React.FC = () => {
               value={inputCode}
               onChange={(e) => setInputCode(e.target.value)}
               placeholder="Paste your code here... or select an example above"
-              className="w-full h-64 p-4 bg-gray-900/50 border border-white/20 rounded-lg text-white font-mono text-sm resize-none focus:border-primary focus:outline-none transition-all duration-300"
+              className="w-full h-64 p-4 bg-gray-900/70 border border-white/20 rounded-lg text-white font-mono text-sm resize-none focus:border-primary focus:outline-none transition-all duration-300 placeholder-white/40"
               disabled={isOptimizing}
             />
             {currentStep === "input" && inputCode && (
@@ -231,9 +233,10 @@ export const InteractiveDemoWidget: React.FC = () => {
                 <button
                   onClick={optimizeCode}
                   disabled={isOptimizing}
-                  className="bg-primary hover:bg-primary-dark px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
+                  className="bg-primary hover:bg-primary-dark px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 text-white flex items-center gap-2"
                 >
-                  ✨ Optimize Code
+                  <span>✨</span>
+                  Optimize Code
                 </button>
               </div>
             )}
@@ -243,23 +246,30 @@ export const InteractiveDemoWidget: React.FC = () => {
         {/* Output Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">⚡ Optimized Code</h3>
+            <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+              ⚡ Optimized Code
+            </h3>
             {currentStep === "result" && (
               <div className="flex items-center gap-2">
-                <span className="text-green-400 font-semibold">
-                  +{performanceGain}% performance
+                <span className="text-green-400 font-semibold bg-green-500/20 px-3 py-1 rounded-full text-sm">
+                  +{performanceGain}% faster
                 </span>
               </div>
             )}
           </div>
 
           <div className="relative">
-            <div className="w-full h-64 p-4 bg-gray-900/50 border border-white/20 rounded-lg overflow-auto">
+            <div className="w-full h-64 p-4 bg-gray-900/70 border border-white/20 rounded-lg overflow-auto">
               {currentStep === "input" && (
                 <div className="h-full flex items-center justify-center text-white/40">
                   <div className="text-center">
-                    <div className="text-4xl mb-2">🤖</div>
-                    <p>Your optimized code will appear here</p>
+                    <div className="text-4xl mb-4 animate-float">🤖</div>
+                    <p className="text-lg mb-2">
+                      Your optimized code will appear here
+                    </p>
+                    <p className="text-sm text-white/30">
+                      Enter code above to get started
+                    </p>
                   </div>
                 </div>
               )}
@@ -267,23 +277,23 @@ export const InteractiveDemoWidget: React.FC = () => {
               {currentStep === "optimizing" && (
                 <div className="h-full flex items-center justify-center">
                   <div className="text-center">
-                    <div className="flex justify-center mb-4">
-                      <div className="flex space-x-1">
-                        <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
+                    <div className="flex justify-center mb-6">
+                      <div className="flex space-x-2">
+                        <div className="w-4 h-4 bg-primary rounded-full animate-bounce"></div>
                         <div
-                          className="w-3 h-3 bg-primary rounded-full animate-bounce"
+                          className="w-4 h-4 bg-primary rounded-full animate-bounce"
                           style={{ animationDelay: "0.1s" }}
                         ></div>
                         <div
-                          className="w-3 h-3 bg-primary rounded-full animate-bounce"
+                          className="w-4 h-4 bg-primary rounded-full animate-bounce"
                           style={{ animationDelay: "0.2s" }}
                         ></div>
                       </div>
                     </div>
-                    <p className="text-white/70">
+                    <p className="text-white/70 text-lg mb-2">
                       AI is optimizing your code...
                     </p>
-                    <p className="text-sm text-white/50 mt-1">
+                    <p className="text-sm text-white/50">
                       Analyzing patterns and applying improvements
                     </p>
                   </div>
@@ -295,7 +305,7 @@ export const InteractiveDemoWidget: React.FC = () => {
                   {showTypewriter ? (
                     <TypewriterText
                       text={outputCode}
-                      speed={15}
+                      speed={20}
                       cursor={false}
                     />
                   ) : (
@@ -336,7 +346,7 @@ export const InteractiveDemoWidget: React.FC = () => {
           style={{ animationDelay: "800ms" }}
         >
           <div className="bg-gradient-to-r from-primary/10 to-primary-light/10 border border-primary/20 rounded-xl p-8">
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-2xl font-bold mb-4 text-white">
               🎉 Amazing Results! Ready for More?
             </h3>
             <p className="text-white/70 mb-6 max-w-2xl mx-auto">
@@ -347,15 +357,17 @@ export const InteractiveDemoWidget: React.FC = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => (window.location.href = "/optimize")}
-                className="bg-primary hover:bg-primary-dark px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
+                className="bg-primary hover:bg-primary-dark px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30 text-white flex items-center gap-2"
               >
-                🚀 Try Full Platform
+                <span>🚀</span>
+                Try Full Platform
               </button>
               <button
                 onClick={() => (window.location.href = "/pricing")}
-                className="border border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+                className="border border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
               >
-                💰 View Pricing
+                <span>💰</span>
+                View Pricing
               </button>
             </div>
           </div>
