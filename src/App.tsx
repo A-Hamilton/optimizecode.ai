@@ -1,9 +1,9 @@
 // TypeScript migration completed - all .jsx files removed
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import OptimizePage from "./pages/OptimizePage";
+import EnhancedOptimizePage from "./pages/EnhancedOptimizePage";
 import ProductPage from "./pages/ProductPage";
 import PricingPage from "./pages/PricingPage";
 import DocsPage from "./pages/DocsPage";
@@ -24,6 +24,7 @@ import TestPage from "./pages/TestPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import Footer from "./components/Footer";
+import "./styles/optimization.css";
 
 function App(): JSX.Element {
   return (
@@ -35,6 +36,10 @@ function App(): JSX.Element {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/optimize" element={<OptimizePage />} />
+              <Route
+                path="/optimize-enhanced"
+                element={<EnhancedOptimizePage />}
+              />
               <Route path="/product" element={<ProductPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/docs" element={<DocsPage />} />

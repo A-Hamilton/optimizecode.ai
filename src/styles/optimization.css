@@ -1,0 +1,411 @@
+/* Enhanced Optimization Interface Styles */
+
+/* Monaco Editor Enhancements */
+.monaco-editor {
+  --vscode-editor-background: rgba(17, 24, 39, 0.8) !important;
+  --vscode-editor-foreground: rgb(243, 244, 246) !important;
+  --vscode-editorLineNumber-foreground: rgba(156, 163, 175, 0.6) !important;
+  --vscode-editor-selectionBackground: rgba(59, 130, 246, 0.3) !important;
+}
+
+.monaco-editor .current-line {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.monaco-editor .selected-text {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Code Editor Container */
+.code-editor-container {
+  position: relative;
+}
+
+.code-editor-container .monaco-editor {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.code-editor-container .monaco-editor .overflow-guard {
+  border-radius: 0.75rem;
+}
+
+/* File Upload Enhancements */
+.file-upload-container .drop-zone-active {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.file-upload-container .file-preview {
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.5) rgba(255, 255, 255, 0.1);
+}
+
+.file-upload-container .file-preview::-webkit-scrollbar {
+  width: 6px;
+}
+
+.file-upload-container .file-preview::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.file-upload-container .file-preview::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 3px;
+}
+
+.file-upload-container .file-preview::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+/* Optimization Panel */
+.optimization-panel {
+  min-height: 400px;
+}
+
+.optimization-panel .loading-skeleton {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.optimization-panel .progress-bar {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  height: 4px;
+  border-radius: 2px;
+  transition: width 0.5s ease-out;
+}
+
+.optimization-panel .metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.optimization-panel .metric-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.optimization-panel .metric-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Split View */
+.split-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.split-view .panel {
+  background: rgba(17, 24, 39, 0.8);
+  min-height: 400px;
+}
+
+.split-view .panel-header {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  display: flex;
+  justify-content: between;
+  align-items: center;
+}
+
+/* Diff View */
+.diff-view .monaco-diff-editor {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.diff-view .monaco-diff-editor .original-in-monaco-diff-editor {
+  background: rgba(220, 38, 38, 0.1) !important;
+}
+
+.diff-view .monaco-diff-editor .modified-in-monaco-diff-editor {
+  background: rgba(34, 197, 94, 0.1) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1280px) {
+  .split-view {
+    grid-template-columns: 1fr;
+  }
+
+  .optimization-panel .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .code-editor-container .monaco-editor {
+    height: 300px !important;
+  }
+
+  .optimization-panel .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .file-upload-container .file-preview {
+    max-height: 200px;
+  }
+}
+
+/* Accessibility Enhancements */
+.focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.screen-reader-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .optimization-panel,
+  .code-editor-container,
+  .file-upload-container {
+    border-width: 2px;
+    border-color: rgb(255, 255, 255);
+  }
+
+  .btn-primary {
+    border: 2px solid rgb(255, 255, 255);
+  }
+
+  .text-white\/70 {
+    color: rgb(255, 255, 255) !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .optimization-panel .loading-skeleton,
+  .progress-bar,
+  .metric-card {
+    animation: none;
+    transition: none;
+  }
+
+  .split-view .panel {
+    transform: none;
+  }
+}
+
+/* Performance Optimizations */
+.optimization-panel .virtualized-list {
+  contain: layout style paint;
+  will-change: transform;
+}
+
+.code-editor-container {
+  contain: layout;
+}
+
+.file-upload-container .file-preview {
+  contain: layout;
+  transform: translateZ(0);
+}
+
+/* Custom Loading Animations */
+.loading-dots {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.loading-dots > div {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: currentColor;
+  border-radius: 50%;
+  animation: loading-bounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dots > div:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.loading-dots > div:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes loading-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* Status Indicators */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-indicator.success {
+  background: rgba(34, 197, 94, 0.1);
+  color: rgb(34, 197, 94);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-indicator.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: rgb(245, 158, 11);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-indicator.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: rgb(239, 68, 68);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-indicator.info {
+  background: rgba(59, 130, 246, 0.1);
+  color: rgb(59, 130, 246);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Enhanced Button Styles */
+.btn-gradient {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border: none;
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-gradient:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px 0 rgba(59, 130, 246, 0.3);
+}
+
+/* Code Syntax Highlighting Enhancements */
+.monaco-editor .token.comment {
+  color: #6b7280 !important;
+  font-style: italic;
+}
+
+.monaco-editor .token.keyword {
+  color: #8b5cf6 !important;
+  font-weight: 600;
+}
+
+.monaco-editor .token.string {
+  color: #10b981 !important;
+}
+
+.monaco-editor .token.number {
+  color: #f59e0b !important;
+}
+
+.monaco-editor .token.function {
+  color: #3b82f6 !important;
+}
+
+.monaco-editor .token.variable {
+  color: #ef4444 !important;
+}
+
+/* Tooltip Enhancements */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: rgba(17, 24, 39, 0.95);
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px 12px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(17, 24, 39, 0.95) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Print Styles */
+@media print {
+  .optimization-panel,
+  .code-editor-container {
+    background: white !important;
+    color: black !important;
+    border: 1px solid black;
+  }
+
+  .monaco-editor {
+    background: white !important;
+    color: black !important;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    display: none;
+  }
+}

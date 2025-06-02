@@ -154,11 +154,13 @@ const Navbar: React.FC = () => {
             style={{ animationDelay: "300ms" }}
           >
             <Link
-              to="/optimize"
+              to="/optimize-enhanced"
               className="btn-primary w-full text-center group hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
               onClick={() => setIsMenuOpen(false)}
             >
-              <span className="group-hover:animate-pulse">Try Free Now</span>
+              <span className="group-hover:animate-pulse">
+                Try Enhanced Optimizer
+              </span>
             </Link>
           </div>
         </div>
@@ -169,9 +171,9 @@ const Navbar: React.FC = () => {
             // Authenticated state
             <>
               <Link
-                to="/optimize"
+                to="/optimize-enhanced"
                 className={`btn-primary relative overflow-hidden group ${
-                  isActive("/optimize") ? "ring-2 ring-primary/50" : ""
+                  isActive("/optimize-enhanced") ? "ring-2 ring-primary/50" : ""
                 }`}
               >
                 <span className="relative z-10">Optimize Code</span>
