@@ -85,23 +85,21 @@ router.post(
     }
 
     try {
-      const detectedLanguage = language || detectLanguage(code);
-      const optimizedCode = await aiOptimization(
+      const result = await optimizeCodeService(
         code,
-        detectedLanguage,
+        language,
         optimizationType,
       );
-      const insights = generateInsights(code, optimizedCode, detectedLanguage);
 
-      res.json({
-        success: true,
-        original: code,
-        optimized: optimizedCode,
-        insights,
-        language: detectedLanguage,
-        optimizationType,
-        timestamp: new Date().toISOString(),
-      });
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(500).json({
+          error: "Optimization Failed",
+          message:
+            result.message || "Unable to optimize code. Please try again.",
+        });
+      }
     } catch (error) {
       console.error("Code optimization error:", error);
       res.status(500).json({
