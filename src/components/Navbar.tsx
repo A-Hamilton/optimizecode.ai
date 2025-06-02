@@ -120,28 +120,47 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Navigation */}
         <div
-          className={`md:hidden flex items-center gap-6 ${
-            isMenuOpen ? "flex" : "hidden"
-          } absolute top-16 left-0 right-0 bg-gray-900/98 backdrop-blur-xl border-b border-white/10 flex-col p-6`}
+          className={`md:hidden absolute ${isScrolled ? "top-14" : "top-16"} left-0 right-0 bg-gray-900/98 backdrop-blur-xl border-b border-white/10 transition-all duration-300 ${
+            isMenuOpen ? `flex flex-col p-6 gap-4 ${slideAnimation}` : "hidden"
+          }`}
+          onClick={(e) => e.stopPropagation()}
         >
-          <NavLink to="/product" onClick={() => setIsMenuOpen(false)}>
-            Product
-          </NavLink>
-          <NavLink to="/solutions" onClick={() => setIsMenuOpen(false)}>
-            Solutions
-          </NavLink>
-          <NavLink to="/pricing" onClick={() => setIsMenuOpen(false)}>
-            Pricing
-          </NavLink>
-          <NavLink to="/docs" onClick={() => setIsMenuOpen(false)}>
-            Docs
-          </NavLink>
-          <NavLink to="/blog" onClick={() => setIsMenuOpen(false)}>
-            Blog
-          </NavLink>
-          <NavLink to="/about" onClick={() => setIsMenuOpen(false)}>
-            About
-          </NavLink>
+          {[
+            { to: "/product", label: "Product" },
+            { to: "/solutions", label: "Solutions" },
+            { to: "/pricing", label: "Pricing" },
+            { to: "/docs", label: "Docs" },
+            { to: "/blog", label: "Blog" },
+            { to: "/about", label: "About" },
+          ].map((item, index) => (
+            <div
+              key={item.to}
+              className={`animate-fade-in-up`}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <NavLink
+                to={item.to}
+                onClick={() => setIsMenuOpen(false)}
+                mobile={true}
+              >
+                {item.label}
+              </NavLink>
+            </div>
+          ))}
+
+          {/* Mobile CTA */}
+          <div
+            className="pt-4 border-t border-white/10 animate-fade-in-up"
+            style={{ animationDelay: "300ms" }}
+          >
+            <Link
+              to="/optimize"
+              className="btn-primary w-full text-center group hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <span className="group-hover:animate-pulse">Try Free Now</span>
+            </Link>
+          </div>
         </div>
 
         {/* Action Buttons */}
