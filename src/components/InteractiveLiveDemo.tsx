@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Editor from '@monaco-editor/react';
-import { useNotificationHelpers } from '../contexts/NotificationContext';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import Editor from "@monaco-editor/react";
+import { useNotificationHelpers } from "../contexts/NotificationContext";
 
 interface CodeExample {
   id: string;
@@ -12,8 +12,8 @@ interface CodeExample {
   performanceGain: number;
   complexity: string;
   icon: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  timeToOptimize: number; // in seconds
+  difficulty: "Easy" | "Medium" | "Hard";
+  timeToOptimize: number;
   linesReduced: number;
   sizeReduction: number;
 }
@@ -28,13 +28,13 @@ interface PerformanceMetric {
 
 const codeExamples: CodeExample[] = [
   {
-    id: 'javascript-array',
-    name: 'Array Processing',
-    language: 'javascript',
-    icon: '🟨',
-    complexity: 'O(n²) → O(n)',
+    id: "javascript-array",
+    name: "Array Processing",
+    language: "javascript",
+    icon: "🟨",
+    complexity: "O(n²) → O(n)",
     performanceGain: 47,
-    difficulty: 'Easy',
+    difficulty: "Easy",
     timeToOptimize: 2.3,
     linesReduced: 8,
     sizeReduction: 60,
@@ -59,20 +59,20 @@ const processUsers = (users) =>
     .filter(user => user.active)
     .map(({ id, name, email }) => ({ id, name, email }));`,
     improvements: [
-      'Reduced time complexity from O(n²) to O(n)',
-      '60% fewer lines of code',
-      'Modern ES6+ syntax with destructuring',
-      'Functional programming approach'
-    ]
+      "Reduced time complexity from O(n²) to O(n)",
+      "60% fewer lines of code",
+      "Modern ES6+ syntax with destructuring",
+      "Functional programming approach",
+    ],
   },
   {
-    id: 'javascript-async',
-    name: 'Async Operations',
-    language: 'javascript',
-    icon: '⚡',
-    complexity: 'Callback Hell → Promise Chain',
+    id: "javascript-async",
+    name: "Async Operations",
+    language: "javascript",
+    icon: "⚡",
+    complexity: "Callback Hell → Promise Chain",
     performanceGain: 35,
-    difficulty: 'Medium',
+    difficulty: "Medium",
     timeToOptimize: 3.8,
     linesReduced: 6,
     sizeReduction: 40,
@@ -95,7 +95,7 @@ const fetchUserData = async (userId) => {
   try {
     const response = await fetch(\`/api/users/\${userId}\`);
     const data = await response.json();
-
+    
     if (data.error) throw new Error(data.error);
     return data;
   } catch (error) {
@@ -103,20 +103,20 @@ const fetchUserData = async (userId) => {
   }
 };`,
     improvements: [
-      'Eliminated callback hell pattern',
-      'Improved error handling with try/catch',
-      'Modern async/await syntax',
-      'Better readability and maintainability'
-    ]
+      "Eliminated callback hell pattern",
+      "Improved error handling with try/catch",
+      "Modern async/await syntax",
+      "Better readability and maintainability",
+    ],
   },
   {
-    id: 'python-list',
-    name: 'Python List Processing',
-    language: 'python',
-    icon: '🐍',
-    complexity: 'O(n²) → O(n)',
+    id: "python-list",
+    name: "Python List Processing",
+    language: "python",
+    icon: "🐍",
+    complexity: "O(n²) → O(n)",
     performanceGain: 60,
-    difficulty: 'Hard',
+    difficulty: "Hard",
     timeToOptimize: 5.2,
     linesReduced: 12,
     sizeReduction: 65,
@@ -136,32 +136,33 @@ def find_matching_pairs(list1, list2):
     user_dict = {item['id']: item for item in list1}
     return [
         {'user': user_dict[item['user_id']], 'data': item}
-        for item in list2
+        for item in list2 
         if item['user_id'] in user_dict
     ]`,
     improvements: [
-      'Reduced time complexity from O(n²) to O(n)',
-      '60% performance improvement',
-      'More pythonic approach with comprehensions',
-      'Better memory efficiency'
-    ]
-  }];
+      "Reduced time complexity from O(n²) to O(n)",
+      "60% performance improvement",
+      "More pythonic approach with comprehensions",
+      "Better memory efficiency",
+    ],
+  },
 ];
 
 const InteractiveLiveDemo: React.FC = () => {
   const [activeExample, setActiveExample] = useState(0);
   const [isEditable, setIsEditable] = useState(false);
-  const [userCode, setUserCode] = useState('');
+  const [userCode, setUserCode] = useState("");
   const [showOptimized, setShowOptimized] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [animationStep, setAnimationStep] = useState(0);
   const [customMode, setCustomMode] = useState(false);
-  const [copySuccess, setCopySuccess] = useState<{ [key: string]: boolean }>({});
+  const [copySuccess, setCopySuccess] = useState<{ [key: string]: boolean }>(
+    {},
+  );
   const [showMetrics, setShowMetrics] = useState(false);
   const [optimizationProgress, setOptimizationProgress] = useState(0);
-  const [draggedCode, setDraggedCode] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [playSpeed, setPlaySpeed] = useState(1); // 0.5x, 1x, 2x speed
+  const [playSpeed, setPlaySpeed] = useState(1);
   const [userInteractions, setUserInteractions] = useState(0);
   const [showHints, setShowHints] = useState(true);
 
@@ -170,14 +171,69 @@ const InteractiveLiveDemo: React.FC = () => {
   const editorRef = useRef<any>(null);
 
   const currentExample = codeExamples[activeExample];
-  const displayCode = customMode ? userCode : (showOptimized ? currentExample.optimizedCode : currentExample.originalCode);
+  const displayCode = customMode
+    ? userCode
+    : showOptimized
+      ? currentExample.optimizedCode
+      : currentExample.originalCode;
 
   // Performance metrics for current example
   const performanceMetrics: PerformanceMetric[] = [
-    { name: 'Execution Time', before: 100, after: 100 - currentExample.performanceGain, unit: 'ms', icon: '⏱️' },
-    { name: 'Memory Usage', before: 50, after: 35, unit: 'MB', icon: '🧠' },
-    { name: 'Lines of Code', before: 15, after: 15 - currentExample.linesReduced, unit: 'lines', icon: '📝' },
-    { name: 'Complexity Score', before: 8, after: 3, unit: '/10', icon: '📊' }
+    {
+      name: "Execution Time",
+      before: 100,
+      after: 100 - currentExample.performanceGain,
+      unit: "ms",
+      icon: "⏱️",
+    },
+    { name: "Memory Usage", before: 50, after: 35, unit: "MB", icon: "🧠" },
+    {
+      name: "Lines of Code",
+      before: 15,
+      after: 15 - currentExample.linesReduced,
+      unit: "lines",
+      icon: "📝",
+    },
+    { name: "Complexity Score", before: 8, after: 3, unit: "/10", icon: "📊" },
+  ];
+
+  // Quick code snippets for users to try
+  const quickSnippets = [
+    {
+      name: "Inefficient Loop",
+      language: "javascript",
+      code: `for (let i = 0; i < items.length; i++) {
+  for (let j = 0; j < items.length; j++) {
+    if (items[i].id === items[j].parentId) {
+      console.log('Match found');
+    }
+  }
+}`,
+      icon: "🔄",
+    },
+    {
+      name: "Memory Leak",
+      language: "javascript",
+      code: `function createHandler() {
+  const data = new Array(1000000).fill('data');
+  return function() {
+    console.log(data.length);
+  };
+}`,
+      icon: "🚰",
+    },
+    {
+      name: "Callback Hell",
+      language: "javascript",
+      code: `getData(function(a) {
+  getMoreData(a, function(b) {
+    getEvenMoreData(b, function(c) {
+      console.log(c);
+    });
+  });
+});`,
+      icon: "🌀",
+    },
   ];
 
   // Handle drag and drop
@@ -191,30 +247,35 @@ const InteractiveLiveDemo: React.FC = () => {
     setIsDragOver(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const droppedText = e.dataTransfer.getData('text/plain');
-    if (droppedText) {
-      setCustomMode(true);
-      setIsEditable(true);
-      setUserCode(droppedText);
-      setUserInteractions(prev => prev + 1);
-      showSuccess('Code dropped successfully! You can now edit and optimize it.');
-    }
-  }, [showSuccess]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      const droppedText = e.dataTransfer.getData("text/plain");
+      if (droppedText) {
+        setCustomMode(true);
+        setIsEditable(true);
+        setUserCode(droppedText);
+        setUserInteractions((prev) => prev + 1);
+        showSuccess(
+          "Code dropped successfully! You can now edit and optimize it.",
+        );
+      }
+    },
+    [showSuccess],
+  );
 
   // Auto-cycle through examples when not in custom mode
   useEffect(() => {
     if (!customMode && !isEditable) {
       const interval = setInterval(() => {
-        setActiveExample(prev => (prev + 1) % codeExamples.length);
+        setActiveExample((prev) => (prev + 1) % codeExamples.length);
         setShowOptimized(false);
         setAnimationStep(0);
-      }, 12000);
+      }, 12000 / playSpeed);
       return () => clearInterval(interval);
     }
-  }, [customMode, isEditable]);
+  }, [customMode, isEditable, playSpeed]);
 
   // Simulate optimization process
   useEffect(() => {
@@ -222,25 +283,27 @@ const InteractiveLiveDemo: React.FC = () => {
       const timer = setTimeout(() => {
         setShowOptimized(true);
         setAnimationStep(2);
-      }, 2000);
+        setShowMetrics(true);
+      }, 2000 / playSpeed);
       return () => clearTimeout(timer);
     } else if (animationStep === 2) {
       const timer = setTimeout(() => {
         setAnimationStep(0);
-      }, 8000);
+        setShowMetrics(false);
+      }, 8000 / playSpeed);
       return () => clearTimeout(timer);
     }
-  }, [animationStep]);
+  }, [animationStep, playSpeed]);
 
   // Trigger optimization animation on example change
   useEffect(() => {
     if (!customMode) {
       const timer = setTimeout(() => {
         setAnimationStep(1);
-      }, 3000);
+      }, 3000 / playSpeed);
       return () => clearTimeout(timer);
     }
-  }, [activeExample, customMode]);
+  }, [activeExample, customMode, playSpeed]);
 
   const handleExampleChange = (index: number) => {
     setActiveExample(index);
@@ -248,113 +311,84 @@ const InteractiveLiveDemo: React.FC = () => {
     setAnimationStep(0);
     setCustomMode(false);
     setIsEditable(false);
+    setShowMetrics(false);
+    setUserInteractions((prev) => prev + 1);
   };
 
   const handleOptimizeCode = async () => {
     if (!displayCode.trim()) {
-      showError('Please enter some code to optimize');
+      showError("Please enter some code to optimize");
       return;
     }
 
     setIsOptimizing(true);
     setOptimizationProgress(0);
-    setUserInteractions(prev => prev + 1);
+    setUserInteractions((prev) => prev + 1);
 
     // Simulate detailed optimization process with progress
     const steps = [
-      'Analyzing code structure...',
-      'Detecting performance bottlenecks...',
-      'Applying algorithmic improvements...',
-      'Optimizing syntax and patterns...',
-      'Running security analysis...',
-      'Finalizing optimizations...'
+      "Analyzing code structure...",
+      "Detecting performance bottlenecks...",
+      "Applying algorithmic improvements...",
+      "Optimizing syntax and patterns...",
+      "Running security analysis...",
+      "Finalizing optimizations...",
     ];
 
     for (let i = 0; i < steps.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, (800 / playSpeed)));
+      await new Promise((resolve) => setTimeout(resolve, 800 / playSpeed));
       setOptimizationProgress(((i + 1) / steps.length) * 100);
     }
 
     setIsOptimizing(false);
     setShowOptimized(true);
     setShowMetrics(true);
-    showSuccess('Code optimized successfully!');
+    showSuccess("Code optimized successfully!");
   };
 
   const handleTryYourCode = () => {
     setCustomMode(true);
     setIsEditable(true);
-    setUserCode('// Try your own code here!\nfunction yourFunction() {\n  // Write your code here\n  console.log("Hello, OptimizeCode.ai!");\n}');
+    setUserCode(
+      '// Try your own code here!\nfunction yourFunction() {\n  // Write your code here\n  console.log("Hello, OptimizeCode.ai!");\n}',
+    );
     setShowOptimized(false);
+    setShowMetrics(false);
+    setUserInteractions((prev) => prev + 1);
   };
 
   const copyToClipboard = async (text: string, key: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopySuccess(prev => ({ ...prev, [key]: true }));
-      setTimeout(() => setCopySuccess(prev => ({ ...prev, [key]: false })), 2000);
-      showSuccess('Code copied to clipboard!');
+      setCopySuccess((prev) => ({ ...prev, [key]: true }));
+      setTimeout(
+        () => setCopySuccess((prev) => ({ ...prev, [key]: false })),
+        2000,
+      );
+      showSuccess("Code copied to clipboard!");
     } catch (error) {
-      showError('Failed to copy code');
+      showError("Failed to copy code");
     }
   };
 
   const downloadCode = (code: string, filename: string) => {
-    const blob = new Blob([code], { type: 'text/plain' });
+    const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    showSuccess('Code downloaded successfully!');
+    showSuccess("Code downloaded successfully!");
   };
 
-  // Quick code snippets for users to try
-  const quickSnippets = [
-    {
-      name: 'Inefficient Loop',
-      language: 'javascript',
-      code: `for (let i = 0; i < items.length; i++) {
-  for (let j = 0; j < items.length; j++) {
-    if (items[i].id === items[j].parentId) {
-      console.log('Match found');
-    }
-  }
-}`,
-      icon: '🔄'
-    },
-    {
-      name: 'Memory Leak',
-      language: 'javascript',
-      code: `function createHandler() {
-  const data = new Array(1000000).fill('data');
-  return function() {
-    console.log(data.length);
-  };
-}`,
-      icon: '🚰'
-    },
-    {
-      name: 'Callback Hell',
-      language: 'javascript',
-      code: `getData(function(a) {
-  getMoreData(a, function(b) {
-    getEvenMoreData(b, function(c) {
-      console.log(c);
-    });
-  });
-});`,
-      icon: '🌀'
-    }
-  ];
-
-  const loadQuickSnippet = (snippet: typeof quickSnippets[0]) => {
+  const loadQuickSnippet = (snippet: (typeof quickSnippets)[0]) => {
     setCustomMode(true);
     setIsEditable(true);
     setUserCode(snippet.code);
     setShowOptimized(false);
-    setUserInteractions(prev => prev + 1);
+    setShowMetrics(false);
+    setUserInteractions((prev) => prev + 1);
     showSuccess(`Loaded ${snippet.name} snippet!`);
   };
 
@@ -364,24 +398,28 @@ const InteractiveLiveDemo: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-6">
-            Try OptimizeCode.ai{' '}
+            Try OptimizeCode.ai{" "}
             <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
               Live Demo
             </span>
           </h2>
           <p className="text-xl text-white/70 max-w-3xl mx-auto mb-8">
-            Experience the power of AI code optimization in real-time. Watch automatic
-            examples transform before your eyes, or try your own code!
+            Experience the power of AI code optimization in real-time. Watch
+            automatic examples transform before your eyes, or try your own code
+            with our interactive editor!
           </p>
 
           {/* Interactive Controls */}
           <div className="flex flex-wrap justify-center gap-4 mb-8">
             <button
-              onClick={() => setCustomMode(false)}
+              onClick={() => {
+                setCustomMode(false);
+                setUserInteractions((prev) => prev + 1);
+              }}
               className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
                 !customMode
-                  ? 'bg-primary text-white shadow-lg'
-                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  ? "bg-primary text-white shadow-lg"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
               }`}
             >
               🤖 Auto Examples
@@ -390,8 +428,8 @@ const InteractiveLiveDemo: React.FC = () => {
               onClick={handleTryYourCode}
               className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:scale-105 ${
                 customMode
-                  ? 'bg-primary text-white shadow-lg'
-                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  ? "bg-primary text-white shadow-lg"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
               }`}
             >
               ✏️ Try Your Code
@@ -405,9 +443,15 @@ const InteractiveLiveDemo: React.FC = () => {
                 onChange={(e) => setPlaySpeed(Number(e.target.value))}
                 className="bg-transparent text-white text-sm outline-none"
               >
-                <option value={0.5} className="bg-gray-800">0.5x</option>
-                <option value={1} className="bg-gray-800">1x</option>
-                <option value={2} className="bg-gray-800">2x</option>
+                <option value={0.5} className="bg-gray-800">
+                  0.5x
+                </option>
+                <option value={1} className="bg-gray-800">
+                  1x
+                </option>
+                <option value={2} className="bg-gray-800">
+                  2x
+                </option>
               </select>
             </div>
 
@@ -416,23 +460,27 @@ const InteractiveLiveDemo: React.FC = () => {
               onClick={() => setShowHints(!showHints)}
               className={`px-4 py-3 rounded-lg font-medium transition-all duration-300 ${
                 showHints
-                  ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
-                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
               }`}
             >
-              💡 Hints {showHints ? 'On' : 'Off'}
+              💡 Hints {showHints ? "On" : "Off"}
             </button>
 
             {/* Interaction Counter */}
             <div className="flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 rounded-lg px-4 py-3">
-              <span className="text-blue-300 text-sm">🎯 Interactions: {userInteractions}</span>
+              <span className="text-blue-300 text-sm">
+                🎯 Interactions: {userInteractions}
+              </span>
             </div>
           </div>
 
           {/* Quick Snippets */}
           {customMode && (
             <div className="mb-8">
-              <h3 className="text-center text-white/80 mb-4">🚀 Try these common problematic patterns:</h3>
+              <h3 className="text-center text-white/80 mb-4">
+                🚀 Try these common problematic patterns:
+              </h3>
               <div className="flex flex-wrap justify-center gap-3">
                 {quickSnippets.map((snippet, index) => (
                   <button
@@ -457,14 +505,25 @@ const InteractiveLiveDemo: React.FC = () => {
                 <button
                   key={example.id}
                   onClick={() => handleExampleChange(index)}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                  className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${
                     activeExample === index
-                      ? 'bg-primary text-white transform scale-105 shadow-lg'
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                      ? "bg-primary text-white transform scale-105 shadow-lg"
+                      : "text-white/60 hover:text-white hover:bg-white/10"
                   }`}
                 >
                   <span className="text-lg">{example.icon}</span>
                   <span>{example.name}</span>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      example.difficulty === "Easy"
+                        ? "bg-green-500/20 text-green-300"
+                        : example.difficulty === "Medium"
+                          ? "bg-yellow-500/20 text-yellow-300"
+                          : "bg-red-500/20 text-red-300"
+                    }`}
+                  >
+                    {example.difficulty}
+                  </span>
                   {activeExample === index && (
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   )}
@@ -482,27 +541,40 @@ const InteractiveLiveDemo: React.FC = () => {
             <div className="flex items-center justify-between px-6 py-4 bg-gray-800/60 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="flex gap-2">
-                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
+                  <div
+                    className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-3 h-3 bg-green-400 rounded-full animate-pulse"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
                 </div>
                 <div className="text-white/70 text-sm font-medium">
-                  {customMode ? 'custom.js' : `${currentExample.name.toLowerCase().replace(' ', '_')}.${currentExample.language === 'python' ? 'py' : 'js'}`}
+                  {customMode
+                    ? "custom.js"
+                    : `${currentExample.name.toLowerCase().replace(" ", "_")}.${currentExample.language === "python" ? "py" : "js"}`}
                 </div>
               </div>
 
               {/* Status Indicators */}
               <div className="flex items-center gap-4">
                 {!customMode && (
-                  <div className="text-sm text-white/60">
-                    {currentExample.complexity}
+                  <div className="text-sm text-white/60 flex items-center gap-2">
+                    <span>🕒 {currentExample.timeToOptimize}s</span>
+                    <span>•</span>
+                    <span>{currentExample.complexity}</span>
                   </div>
                 )}
 
-                {(showOptimized || customMode) && (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 text-green-300 rounded-lg text-sm font-medium">
+                {(showOptimized || customMode) && !isOptimizing && (
+                  <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 text-green-300 rounded-lg text-sm font-medium animate-bounce-in">
                     <span>⚡</span>
-                    <span>{customMode ? '40%' : currentExample.performanceGain}% faster</span>
+                    <span>
+                      {customMode ? "40%" : currentExample.performanceGain}%
+                      faster
+                    </span>
                   </div>
                 )}
 
@@ -517,7 +589,7 @@ const InteractiveLiveDemo: React.FC = () => {
 
             {/* Code Editor */}
             <div
-              className={`relative ${isDragOver ? 'ring-2 ring-primary ring-opacity-50' : ''}`}
+              className={`relative ${isDragOver ? "ring-2 ring-primary ring-opacity-50" : ""}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
@@ -526,50 +598,55 @@ const InteractiveLiveDemo: React.FC = () => {
               {isDragOver && (
                 <div className="absolute inset-0 bg-primary/20 border-2 border-dashed border-primary rounded-lg flex items-center justify-center z-50">
                   <div className="text-center text-primary">
-                    <div className="text-4xl mb-2">📁</div>
+                    <div className="text-4xl mb-2 animate-bounce">📁</div>
                     <div className="font-semibold">Drop your code here!</div>
                   </div>
                 </div>
               )}
 
-              <div className={`transition-all duration-500 ${isOptimizing ? 'opacity-50' : 'opacity-100'}`}>
+              <div
+                className={`transition-all duration-500 ${isOptimizing ? "opacity-50" : "opacity-100"}`}
+              >
                 <Editor
                   height="450px"
-                  language={customMode ? 'javascript' : currentExample.language}
+                  language={customMode ? "javascript" : currentExample.language}
                   value={displayCode}
                   onChange={(value) => {
                     if (customMode) {
-                      setUserCode(value || '');
-                      setUserInteractions(prev => prev + 1);
+                      setUserCode(value || "");
+                      setUserInteractions((prev) => prev + 1);
                     }
                   }}
-                  onMount={(editor) => { editorRef.current = editor; }}
+                  onMount={(editor) => {
+                    editorRef.current = editor;
+                  }}
                   options={{
                     minimap: { enabled: true, scale: 0.5 },
-                    lineNumbers: 'on',
+                    lineNumbers: "on",
                     fontSize: 14,
-                    fontFamily: '"Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace',
-                    wordWrap: 'on',
+                    fontFamily:
+                      '"Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace',
+                    wordWrap: "on",
                     automaticLayout: true,
                     scrollBeyondLastLine: false,
                     readOnly: !isEditable,
                     smoothScrolling: true,
-                    cursorBlinking: 'smooth',
-                    renderWhitespace: 'selection',
+                    cursorBlinking: "smooth",
+                    renderWhitespace: "selection",
                     bracketPairColorization: { enabled: true },
                     guides: {
                       indentation: true,
-                      bracketPairs: true
+                      bracketPairs: true,
                     },
                     suggest: {
                       showKeywords: true,
-                      showSnippets: true
+                      showSnippets: true,
                     },
                     quickSuggestions: {
                       other: true,
                       comments: false,
-                      strings: false
-                    }
+                      strings: false,
+                    },
                   }}
                   theme="vs-dark"
                 />
@@ -599,12 +676,22 @@ const InteractiveLiveDemo: React.FC = () => {
                     </div>
 
                     <div className="text-white/70 text-sm mb-4">
-                      {optimizationProgress < 20 && '🔍 Analyzing code structure...'}
-                      {optimizationProgress >= 20 && optimizationProgress < 40 && '🚀 Detecting performance bottlenecks...'}
-                      {optimizationProgress >= 40 && optimizationProgress < 60 && '⚡ Applying algorithmic improvements...'}
-                      {optimizationProgress >= 60 && optimizationProgress < 80 && '🎨 Optimizing syntax and patterns...'}
-                      {optimizationProgress >= 80 && optimizationProgress < 95 && '🛡️ Running security analysis...'}
-                      {optimizationProgress >= 95 && '✨ Finalizing optimizations...'}
+                      {optimizationProgress < 20 &&
+                        "🔍 Analyzing code structure..."}
+                      {optimizationProgress >= 20 &&
+                        optimizationProgress < 40 &&
+                        "🚀 Detecting performance bottlenecks..."}
+                      {optimizationProgress >= 40 &&
+                        optimizationProgress < 60 &&
+                        "⚡ Applying algorithmic improvements..."}
+                      {optimizationProgress >= 60 &&
+                        optimizationProgress < 80 &&
+                        "🎨 Optimizing syntax and patterns..."}
+                      {optimizationProgress >= 80 &&
+                        optimizationProgress < 95 &&
+                        "🛡️ Running security analysis..."}
+                      {optimizationProgress >= 95 &&
+                        "✨ Finalizing optimizations..."}
                     </div>
 
                     <div className="text-primary font-medium">
@@ -640,31 +727,44 @@ const InteractiveLiveDemo: React.FC = () => {
 
                 {!customMode && !isEditable && (
                   <button
-                    onClick={() => setIsEditable(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-lg transition-all duration-300"
+                    onClick={() => {
+                      setIsEditable(true);
+                      setUserInteractions((prev) => prev + 1);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 text-blue-300 rounded-lg transition-all duration-300 hover:scale-105"
                   >
                     <span>✏️</span>
                     <span>Edit Code</span>
                   </button>
                 )}
+
+                <div className="text-sm text-white/60">
+                  {displayCode.split("\n").length} lines • {displayCode.length}{" "}
+                  chars
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => copyToClipboard(displayCode, 'demo')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                  onClick={() => copyToClipboard(displayCode, "demo")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 ${
                     copySuccess.demo
-                      ? 'bg-green-500/20 text-green-300 border border-green-500/30'
-                      : 'bg-white/10 hover:bg-white/20 text-white/80 border border-white/20'
+                      ? "bg-green-500/20 text-green-300 border border-green-500/30"
+                      : "bg-white/10 hover:bg-white/20 text-white/80 border border-white/20"
                   }`}
                 >
-                  <span>{copySuccess.demo ? '✓' : '📋'}</span>
-                  <span>{copySuccess.demo ? 'Copied!' : 'Copy'}</span>
+                  <span>{copySuccess.demo ? "✓" : "📋"}</span>
+                  <span>{copySuccess.demo ? "Copied!" : "Copy"}</span>
                 </button>
 
                 <button
-                  onClick={() => downloadCode(displayCode, `optimized_code.${currentExample.language === 'python' ? 'py' : 'js'}`)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 border border-white/20 rounded-lg transition-all duration-300"
+                  onClick={() =>
+                    downloadCode(
+                      displayCode,
+                      `optimized_code.${currentExample.language === "python" ? "py" : "js"}`,
+                    )
+                  }
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white/80 border border-white/20 rounded-lg transition-all duration-300 hover:scale-105"
                 >
                   <span>💾</span>
                   <span>Download</span>
@@ -679,7 +779,9 @@ const InteractiveLiveDemo: React.FC = () => {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">📊</span>
-                  <h3 className="text-blue-300 font-semibold text-xl">Performance Metrics</h3>
+                  <h3 className="text-blue-300 font-semibold text-xl">
+                    Performance Metrics
+                  </h3>
                 </div>
                 <button
                   onClick={() => setShowMetrics(false)}
@@ -693,19 +795,30 @@ const InteractiveLiveDemo: React.FC = () => {
                 {performanceMetrics.map((metric, index) => (
                   <div
                     key={metric.name}
-                    className="bg-white/5 rounded-lg p-4 text-center hover:bg-white/10 transition-all duration-300 hover:scale-105"
+                    className="bg-white/5 rounded-lg p-4 text-center hover:bg-white/10 transition-all duration-300 hover:scale-105 animate-fade-in-up"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className="text-2xl mb-2">{metric.icon}</div>
-                    <div className="text-white/80 text-sm mb-2">{metric.name}</div>
+                    <div className="text-white/80 text-sm mb-2">
+                      {metric.name}
+                    </div>
                     <div className="flex items-center justify-between text-xs mb-2">
-                      <span className="text-red-300">Before: {metric.before}{metric.unit}</span>
-                      <span className="text-green-300">After: {metric.after}{metric.unit}</span>
+                      <span className="text-red-300">
+                        Before: {metric.before}
+                        {metric.unit}
+                      </span>
+                      <span className="text-green-300">
+                        After: {metric.after}
+                        {metric.unit}
+                      </span>
                     </div>
                     <div className="w-full bg-white/10 rounded-full h-2">
                       <div
                         className="bg-green-500 h-2 rounded-full transition-all duration-1000"
-                        style={{ width: `${(metric.after / metric.before) * 100}%` }}
+                        style={{
+                          width: `${(metric.after / metric.before) * 100}%`,
+                          transitionDelay: `${index * 200}ms`,
+                        }}
                       ></div>
                     </div>
                   </div>
@@ -715,22 +828,29 @@ const InteractiveLiveDemo: React.FC = () => {
           )}
 
           {/* Optimization Results */}
-          {(showOptimized && !customMode) && (
+          {showOptimized && !customMode && !isOptimizing && (
             <div className="mt-8 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-6 animate-fade-in">
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-2xl">🚀</span>
-                <h3 className="text-green-300 font-semibold text-xl">Optimizations Applied</h3>
+                <h3 className="text-green-300 font-semibold text-xl">
+                  Optimizations Applied
+                </h3>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="text-white font-medium mb-3">Performance Improvements:</h4>
+                  <h4 className="text-white font-medium mb-3">
+                    Performance Improvements:
+                  </h4>
                   <ul className="space-y-2">
                     {currentExample.improvements.map((improvement, index) => (
                       <li
                         key={index}
                         className="flex items-start gap-3 text-green-200/90 text-sm animate-fade-in-left"
-                        style={{ animationDelay: `${index * 100}ms` }}
+                        style={{
+                          animationDelay: `${index * 100}ms`,
+                          animationFillMode: "both",
+                        }}
                       >
                         <span className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></span>
                         <span>{improvement}</span>
@@ -740,14 +860,20 @@ const InteractiveLiveDemo: React.FC = () => {
                 </div>
 
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-green-300 mb-2">
+                  <div className="text-4xl font-bold text-green-300 mb-2 animate-count-up">
                     +{currentExample.performanceGain}%
                   </div>
-                  <div className="text-green-200/80 text-sm mb-4">Performance Improvement</div>
+                  <div className="text-green-200/80 text-sm mb-4">
+                    Performance Improvement
+                  </div>
 
                   <div className="bg-white/5 rounded-lg p-4">
-                    <div className="text-white/70 text-sm mb-2">Complexity Reduction</div>
-                    <div className="text-lg font-medium text-white">{currentExample.complexity}</div>
+                    <div className="text-white/70 text-sm mb-2">
+                      Complexity Reduction
+                    </div>
+                    <div className="text-lg font-medium text-white">
+                      {currentExample.complexity}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -772,7 +898,9 @@ const InteractiveLiveDemo: React.FC = () => {
 
               <div className="grid md:grid-cols-2 gap-4 text-sm">
                 <div className="space-y-2">
-                  <div className="text-yellow-200 font-medium">🎯 Interaction Tips:</div>
+                  <div className="text-yellow-200 font-medium">
+                    🎯 Interaction Tips:
+                  </div>
                   <ul className="text-yellow-200/80 space-y-1">
                     <li>• Drag and drop code directly into the editor</li>
                     <li>• Try the quick snippet examples above</li>
@@ -781,7 +909,9 @@ const InteractiveLiveDemo: React.FC = () => {
                   </ul>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-yellow-200 font-medium">⚡ Performance Tricks:</div>
+                  <div className="text-yellow-200 font-medium">
+                    ⚡ Performance Tricks:
+                  </div>
                   <ul className="text-yellow-200/80 space-y-1">
                     <li>• Look for nested loops (O(n²) complexity)</li>
                     <li>• Replace .forEach with .map/.filter when possible</li>
@@ -800,8 +930,9 @@ const InteractiveLiveDemo: React.FC = () => {
                 Ready to Optimize Your Real Code?
               </h3>
               <p className="text-white/70 mb-6 max-w-2xl mx-auto">
-                Experience the full power of OptimizeCode.ai with our enhanced optimizer.
-                Upload files, get detailed analysis, and optimize entire projects.
+                Experience the full power of OptimizeCode.ai with our enhanced
+                optimizer. Upload files, get detailed analysis, and optimize
+                entire projects.
               </p>
               <div className="flex justify-center gap-4">
                 <a
