@@ -10,7 +10,6 @@ import {
   useScrollAnimation,
 } from "../components/animations";
 import InteractiveCodePreview from "../components/InteractiveCodePreview";
-import InteractiveDemoWidget from "../components/InteractiveDemoWidget";
 
 interface CodeExample {
   id: string;
@@ -125,13 +124,20 @@ def find_matching_pairs(list1, list2):
 const HomePage: React.FC = () => {
   const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
   const [isTypewriterActive, setIsTypewriterActive] = useState(false);
+  const [showOptimized, setShowOptimized] = useState(false);
+  const [showImprovements, setShowImprovements] = useState(false);
   const demoSectionRef = useRef<HTMLDivElement>(null);
 
-  // Auto-cycle through examples every 8 seconds
+  // Auto-cycle through examples every 12 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentExampleIndex((prev) => (prev + 1) % codeExamples.length);
-    }, 8000);
+      setShowOptimized(false);
+      setShowImprovements(false);
+
+      setTimeout(() => {
+        setCurrentExampleIndex((prev) => (prev + 1) % codeExamples.length);
+      }, 500);
+    }, 12000);
 
     return () => clearInterval(interval);
   }, []);
@@ -147,6 +153,29 @@ const HomePage: React.FC = () => {
       setIsTypewriterActive(true);
     }
   }, [isDemoVisible]);
+
+  // Handle the sequence of showing original -> optimized -> improvements
+  useEffect(() => {
+    if (isTypewriterActive) {
+      setShowOptimized(false);
+      setShowImprovements(false);
+
+      // Show optimized code after original code finishes typing
+      const optimizedTimer = setTimeout(() => {
+        setShowOptimized(true);
+      }, 4000);
+
+      // Show improvements after optimized code finishes typing
+      const improvementsTimer = setTimeout(() => {
+        setShowImprovements(true);
+      }, 7000);
+
+      return () => {
+        clearTimeout(optimizedTimer);
+        clearTimeout(improvementsTimer);
+      };
+    }
+  }, [currentExampleIndex, isTypewriterActive]);
 
   return (
     <div className="homepage">
@@ -629,7 +658,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. Interactive Demo Section with Automatic Typewriter */}
+      {/* 7. Static Code Demo with Typewriter Effect */}
       <section
         id="demo"
         ref={demoRef}
@@ -644,80 +673,117 @@ const HomePage: React.FC = () => {
               </h2>
               <p className="text-xl text-white/70 max-w-2xl mx-auto">
                 Experience the power of AI code optimization in real-time. Watch
-                automatic examples or paste your own code!
+                automatic examples transform before your eyes.
               </p>
             </div>
           </AnimatedSection>
 
-          {/* Automatic Code Example Showcase */}
-          <div className="max-w-6xl mx-auto mb-12">
-            {/* Example Indicators */}
+          {/* Static Code Example Showcase */}
+          <div className="max-w-6xl mx-auto">
+            {/* Example Tabs */}
             <div className="flex justify-center mb-8">
-              <div className="flex gap-4 bg-white/5 border border-white/10 rounded-xl p-4">
+              <div className="flex gap-2 bg-white/5 border border-white/10 rounded-xl p-2">
                 {codeExamples.map((example, index) => (
-                  <button
+                  <div
                     key={example.id}
-                    onClick={() => setCurrentExampleIndex(index)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-500 ${
                       currentExampleIndex === index
-                        ? "bg-primary text-white"
-                        : "text-white/60 hover:text-white hover:bg-white/10"
+                        ? "bg-primary text-white transform scale-105"
+                        : "text-white/60"
                     }`}
                   >
                     <span className="mr-2">
                       {example.language === "javascript" ? "🟨" : "🐍"}
                     </span>
                     {example.name}
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Code Comparison */}
-            <div className="grid lg:grid-cols-2 gap-8">
-              {/* Original Code */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-semibold text-white">
-                    📝 Original Code
-                  </h3>
-                  <span className="px-3 py-1 bg-red-500/20 text-red-300 text-sm rounded-full">
-                    Unoptimized
-                  </span>
+            {/* Browser-style Code Window */}
+            <div className="bg-gray-900/80 border border-white/10 rounded-xl overflow-hidden backdrop-blur-lg">
+              {/* Browser Header */}
+              <div className="flex items-center justify-between px-6 py-3 bg-gray-800/60 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                 </div>
-                <div className="bg-gray-900/70 border border-red-500/20 rounded-lg p-6 min-h-[300px] overflow-hidden">
-                  <pre className="text-red-200/90 font-mono text-sm whitespace-pre-wrap">
-                    {isTypewriterActive && (
+
+                {/* Tab Headers */}
+                <div className="flex gap-1">
+                  <div
+                    className={`px-4 py-1 text-sm rounded-t-lg transition-all duration-500 ${
+                      !showOptimized
+                        ? "bg-gray-700 text-white"
+                        : "bg-gray-600/50 text-white/60"
+                    }`}
+                  >
+                    original.{codeExamples[currentExampleIndex].language}
+                  </div>
+                  <div
+                    className={`px-4 py-1 text-sm rounded-t-lg transition-all duration-500 ${
+                      showOptimized
+                        ? "bg-gray-700 text-white"
+                        : "bg-gray-600/50 text-white/60"
+                    }`}
+                  >
+                    optimized.{codeExamples[currentExampleIndex].language}
+                  </div>
+                </div>
+
+                {/* Performance Badge */}
+                <div
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-500 ${
+                    showOptimized
+                      ? "bg-green-500/20 text-green-300 scale-100 opacity-100"
+                      : "bg-green-500/20 text-green-300 scale-90 opacity-0"
+                  }`}
+                >
+                  ⚡ 47% faster
+                </div>
+              </div>
+
+              {/* Code Content */}
+              <div className="relative min-h-[400px] overflow-hidden">
+                {/* Original Code */}
+                <div
+                  className={`absolute inset-0 p-6 transition-all duration-700 ease-in-out ${
+                    showOptimized
+                      ? "opacity-0 translate-x-[-100%]"
+                      : "opacity-100 translate-x-0"
+                  }`}
+                >
+                  <pre className="text-red-200/90 font-mono text-sm leading-relaxed">
+                    {isTypewriterActive && !showOptimized && (
                       <TypewriterText
                         key={`original-${currentExampleIndex}`}
                         text={codeExamples[currentExampleIndex].originalCode}
-                        speed={25}
-                        cursor={false}
+                        speed={30}
+                        cursor={true}
+                        cursorChar="▋"
                       />
                     )}
                   </pre>
                 </div>
-              </div>
 
-              {/* Optimized Code */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-semibold text-white">
-                    ⚡ Optimized Code
-                  </h3>
-                  <span className="px-3 py-1 bg-green-500/20 text-green-300 text-sm rounded-full">
-                    AI Enhanced
-                  </span>
-                </div>
-                <div className="bg-gray-900/70 border border-green-500/20 rounded-lg p-6 min-h-[300px] overflow-hidden">
-                  <pre className="text-green-200/90 font-mono text-sm whitespace-pre-wrap">
-                    {isTypewriterActive && (
+                {/* Optimized Code */}
+                <div
+                  className={`absolute inset-0 p-6 transition-all duration-700 ease-in-out ${
+                    showOptimized
+                      ? "opacity-100 translate-x-0"
+                      : "opacity-0 translate-x-[100%]"
+                  }`}
+                >
+                  <pre className="text-green-200/90 font-mono text-sm leading-relaxed">
+                    {showOptimized && (
                       <TypewriterText
                         key={`optimized-${currentExampleIndex}`}
                         text={codeExamples[currentExampleIndex].optimizedCode}
-                        speed={25}
-                        delay={3000}
-                        cursor={false}
+                        speed={30}
+                        cursor={true}
+                        cursorChar="▋"
                       />
                     )}
                   </pre>
@@ -726,48 +792,55 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Improvements List */}
-            <div className="mt-8 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-lg p-6">
-              <h4 className="text-green-300 font-semibold mb-4 flex items-center gap-2">
-                🚀 AI Improvements Applied:
-              </h4>
-              <div className="grid md:grid-cols-2 gap-4">
-                {codeExamples[currentExampleIndex].improvements.map(
-                  (improvement, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-3 animate-fade-in-left"
-                      style={{
-                        animationDelay: `${(index + 1) * 500 + 4000}ms`,
-                      }}
-                    >
-                      <span className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></span>
-                      <span className="text-green-200/90 text-sm">
-                        {improvement}
-                      </span>
-                    </div>
-                  ),
-                )}
+            <div
+              className={`mt-8 transition-all duration-700 ease-in-out ${
+                showImprovements
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-8"
+              }`}
+            >
+              <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-6">
+                <h4 className="text-green-300 font-semibold mb-4 flex items-center gap-2">
+                  🚀 Optimizations Applied:
+                </h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {codeExamples[currentExampleIndex].improvements.map(
+                    (improvement, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-3 animate-fade-in-up"
+                        style={{
+                          animationDelay: `${index * 200}ms`,
+                          animationFillMode: "both",
+                        }}
+                      >
+                        <span className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></span>
+                        <span className="text-green-200/90 text-sm">
+                          {improvement}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Progress Indicator */}
             <div className="flex justify-center mt-8">
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 {codeExamples.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    className={`w-3 h-3 rounded-full transition-all duration-500 ${
                       index === currentExampleIndex
-                        ? "bg-primary"
-                        : "bg-white/20"
+                        ? "bg-primary scale-125"
+                        : "bg-white/20 scale-100"
                     }`}
                   />
                 ))}
               </div>
             </div>
           </div>
-
-          <InteractiveDemoWidget />
         </div>
       </section>
 
