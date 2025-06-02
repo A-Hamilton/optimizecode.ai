@@ -10,7 +10,7 @@ import {
   useScrollAnimation,
 } from "../components/animations";
 import InteractiveCodePreview from "../components/InteractiveCodePreview";
-import SimpleOptimizationDemo from "../components/SimpleOptimizationDemo";
+import BasicOptimizationDemo from "../components/BasicOptimizationDemo";
 
 interface CodeExample {
   id: string;
@@ -660,8 +660,8 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. Simple Optimization Demo */}
-      <SimpleOptimizationDemo />
+      {/* 7. Basic Optimization Demo */}
+      <BasicOptimizationDemo />
 
       {/* 8. Pricing Teaser */}
       <section className="pricing-teaser">
