@@ -564,47 +564,77 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* 6. Animated Performance Metrics */}
-      <section className="metrics" ref={metricsRef}>
+      <section className="metrics">
         <div className="container">
-          <h2 className="section-title">Proven Results</h2>
-          <div className="metrics-grid">
-            <div className="metric animated">
-              <div className="metric-value">
-                {animatedMetrics.performance || "40%"}
+          <AnimatedSection animation="animate-fade-in-up">
+            <h2 className="section-title">Proven Results</h2>
+          </AnimatedSection>
+
+          <StaggeredList
+            className="metrics-grid"
+            staggerDelay={150}
+            animation="animate-scale-in"
+          >
+            {[
+              {
+                value: 40,
+                suffix: "%",
+                label: "Faster Execution",
+                description: "Average performance improvement",
+                icon: "⚡",
+                color: "text-green-400",
+              },
+              {
+                value: 60,
+                suffix: "%",
+                label: "Cost Reduction",
+                description: "Cloud infrastructure savings",
+                icon: "💰",
+                color: "text-blue-400",
+              },
+              {
+                value: 2,
+                suffix: "M+",
+                label: "Lines Optimized",
+                description: "Code transformations completed",
+                icon: "📝",
+                color: "text-purple-400",
+              },
+              {
+                value: 15,
+                suffix: "+",
+                label: "Languages Supported",
+                description: "Programming languages and frameworks",
+                icon: "🔧",
+                color: "text-orange-400",
+              },
+            ].map((metric, index) => (
+              <div
+                key={index}
+                className="metric group hover:scale-110 hover:-translate-y-3 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500"
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <span className="text-3xl group-hover:animate-bounce">
+                    {metric.icon}
+                  </span>
+                </div>
+                <div
+                  className={`metric-value ${metric.color} group-hover:animate-pulse-gentle`}
+                >
+                  <AnimatedCounter
+                    end={metric.value}
+                    suffix={metric.suffix}
+                    duration={2000}
+                    threshold={0.3}
+                  />
+                </div>
+                <div className="metric-label group-hover:text-primary transition-colors duration-300">
+                  {metric.label}
+                </div>
+                <div className="metric-description">{metric.description}</div>
               </div>
-              <div className="metric-label">Faster Execution</div>
-              <div className="metric-description">
-                Average performance improvement
-              </div>
-            </div>
-            <div className="metric animated">
-              <div className="metric-value">
-                {animatedMetrics.cost || "60%"}
-              </div>
-              <div className="metric-label">Cost Reduction</div>
-              <div className="metric-description">
-                Cloud infrastructure savings
-              </div>
-            </div>
-            <div className="metric animated">
-              <div className="metric-value">
-                {animatedMetrics.lines || "2M+"}
-              </div>
-              <div className="metric-label">Lines Optimized</div>
-              <div className="metric-description">
-                Code transformations completed
-              </div>
-            </div>
-            <div className="metric animated">
-              <div className="metric-value">
-                {animatedMetrics.languages || "15+"}
-              </div>
-              <div className="metric-label">Languages Supported</div>
-              <div className="metric-description">
-                Programming languages and frameworks
-              </div>
-            </div>
-          </div>
+            ))}
+          </StaggeredList>
         </div>
       </section>
 
