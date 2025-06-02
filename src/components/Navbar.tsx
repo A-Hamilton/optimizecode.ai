@@ -180,25 +180,32 @@ const Navbar: React.FC = () => {
 
               <div className="relative">
                 <button
-                  className="flex items-center gap-2 text-white/80 hover:bg-white/10 px-3 py-2 rounded-lg transition-all duration-300 text-sm font-medium"
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="flex items-center gap-2 text-white/80 hover:bg-white/10 px-3 py-2 rounded-lg transition-all duration-300 text-sm font-medium group hover:scale-105"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDropdownOpen(!isDropdownOpen);
+                  }}
                 >
                   {currentUser.photoURL ? (
                     <img
                       src={currentUser.photoURL}
                       alt="Profile"
-                      className="w-6 h-6 rounded-full"
+                      className="w-6 h-6 rounded-full group-hover:ring-2 group-hover:ring-primary/50 transition-all duration-300"
                     />
                   ) : (
-                    <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-xs">
+                    <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-xs group-hover:scale-110 transition-transform duration-300">
                       {currentUser.displayName?.[0] ||
                         currentUser.email?.[0] ||
                         "U"}
                     </div>
                   )}
-                  <span>{currentUser.displayName || "Account"}</span>
+                  <span className="group-hover:text-primary transition-colors duration-300">
+                    {currentUser.displayName || "Account"}
+                  </span>
                   <svg
-                    className="w-4 h-4"
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -212,8 +219,11 @@ const Navbar: React.FC = () => {
                   </svg>
                 </button>
 
-                {isMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-2 z-50">
+                {isDropdownOpen && (
+                  <div
+                    className={`absolute right-0 top-full mt-2 w-64 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-2 z-50 ${slideAnimation}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {/* User Info Header */}
                     <div className="px-4 py-3 border-b border-white/10">
                       <div className="flex items-center gap-3">
