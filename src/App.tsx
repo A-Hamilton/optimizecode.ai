@@ -13,6 +13,7 @@ import AboutPage from "./pages/AboutPage";
 import SecurityPage from "./pages/SecurityPage";
 import SupportPage from "./pages/SupportPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
@@ -43,6 +44,7 @@ function App(): JSX.Element {
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
