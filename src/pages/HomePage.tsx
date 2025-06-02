@@ -477,46 +477,88 @@ const HomePage: React.FC = () => {
       {/* 5. How It Works with visual connectors */}
       <section className="how-it-works">
         <div className="container">
-          <h2 className="section-title">Simple 3-Step Process</h2>
+          <AnimatedSection animation="animate-fade-in-up">
+            <h2 className="section-title">Simple 3-Step Process</h2>
+          </AnimatedSection>
+
           <div className="steps">
-            <div className="step">
-              <div className="step-number">1</div>
-              <div className="step-content">
-                <h3>📤 Upload Your Code</h3>
-                <p>
-                  Drag & drop files, paste code, or connect your GitHub
-                  repository
-                </p>
+            <AnimatedSection animation="animate-scale-in" delay={200}>
+              <div className="step group hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+                <div className="step-number bg-gradient-to-br from-primary to-primary-dark animate-pulse-gentle group-hover:animate-bounce">
+                  1
+                </div>
+                <div className="step-content">
+                  <h3 className="group-hover:text-primary transition-colors duration-300">
+                    <span className="group-hover:animate-bounce inline-block">
+                      📤
+                    </span>{" "}
+                    Upload Your Code
+                  </h3>
+                  <p>
+                    Drag & drop files, paste code, or connect your GitHub
+                    repository
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="step-connector">
-              <div className="connector-line"></div>
-              <div className="connector-arrow">→</div>
-            </div>
-            <div className="step">
-              <div className="step-number">2</div>
-              <div className="step-content">
-                <h3>🤖 AI Analysis</h3>
-                <p>
-                  Our advanced AI analyzes performance, security, and
-                  optimization opportunities
-                </p>
+            </AnimatedSection>
+
+            <AnimatedSection animation="animate-draw-line" delay={600}>
+              <div className="step-connector">
+                <div className="connector-line"></div>
+                <div className="connector-arrow animate-pulse-gentle hover:animate-wiggle transition-all duration-300">
+                  →
+                </div>
               </div>
-            </div>
-            <div className="step-connector">
-              <div className="connector-line"></div>
-              <div className="connector-arrow">→</div>
-            </div>
-            <div className="step">
-              <div className="step-number">3</div>
-              <div className="step-content">
-                <h3>✨ Get Optimized Code</h3>
-                <p>
-                  Review improvements and apply changes with detailed
-                  explanations
-                </p>
+            </AnimatedSection>
+
+            <AnimatedSection animation="animate-scale-in" delay={800}>
+              <div className="step group hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+                <div className="step-number bg-gradient-to-br from-primary to-primary-dark animate-pulse-gentle group-hover:animate-bounce">
+                  2
+                </div>
+                <div className="step-content">
+                  <h3 className="group-hover:text-primary transition-colors duration-300">
+                    <span className="group-hover:animate-spin inline-block">
+                      🤖
+                    </span>{" "}
+                    AI Analysis
+                  </h3>
+                  <p>
+                    Our advanced AI analyzes performance, security, and
+                    optimization opportunities
+                  </p>
+                </div>
               </div>
-            </div>
+            </AnimatedSection>
+
+            <AnimatedSection animation="animate-draw-line" delay={1200}>
+              <div className="step-connector">
+                <div className="connector-line"></div>
+                <div className="connector-arrow animate-pulse-gentle hover:animate-wiggle transition-all duration-300">
+                  →
+                </div>
+              </div>
+            </AnimatedSection>
+
+            <AnimatedSection animation="animate-scale-in" delay={1400}>
+              <div className="step group hover:scale-105 hover:-translate-y-2 transition-all duration-500">
+                <div className="step-number bg-gradient-to-br from-primary to-primary-dark animate-pulse-gentle group-hover:animate-bounce">
+                  3
+                </div>
+                <div className="step-content">
+                  <h3 className="group-hover:text-primary transition-colors duration-300">
+                    <span className="group-hover:animate-heart-beat inline-block">
+                      ✨
+                    </span>{" "}
+                    Get Optimized Code
+                  </h3>
+                  <p>
+                    Review improvements and apply changes with detailed
+                    explanations
+                  </p>
+                </div>
+              </div>
+            </AnimatedSection>
           </div>
         </div>
       </section>
