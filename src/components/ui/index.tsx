@@ -412,18 +412,54 @@ export const Notification: React.FC<NotificationProps> = ({
   autoClose = true,
   duration = 5000,
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [progress, setProgress] = useState(100);
+
   useEffect(() => {
+    // Show notification
+    setIsVisible(true);
+
     if (autoClose && onClose) {
-      const timer = setTimeout(onClose, duration);
-      return () => clearTimeout(timer);
+      // Progress bar animation
+      const progressTimer = setInterval(() => {
+        setProgress((prev) => {
+          const newProgress = prev - 100 / (duration / 50);
+          return newProgress <= 0 ? 0 : newProgress;
+        });
+      }, 50);
+
+      // Auto close timer
+      const closeTimer = setTimeout(() => {
+        handleClose();
+      }, duration);
+
+      return () => {
+        clearTimeout(closeTimer);
+        clearInterval(progressTimer);
+      };
     }
   }, [autoClose, duration, onClose]);
 
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose?.();
+    }, 300); // Match animation duration
+  };
+
   const getIcon = () => {
+    const iconClasses =
+      "w-5 h-5 transition-transform duration-200 group-hover:scale-110";
+
     switch (type) {
       case "success":
         return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg
+            className={`${iconClasses} animate-bounce-in`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
             <path
               fillRule="evenodd"
               d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -433,7 +469,11 @@ export const Notification: React.FC<NotificationProps> = ({
         );
       case "error":
         return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg
+            className={`${iconClasses} animate-wiggle`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
             <path
               fillRule="evenodd"
               d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -443,7 +483,11 @@ export const Notification: React.FC<NotificationProps> = ({
         );
       case "warning":
         return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg
+            className={`${iconClasses} animate-pulse-gentle`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
             <path
               fillRule="evenodd"
               d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
@@ -453,7 +497,11 @@ export const Notification: React.FC<NotificationProps> = ({
         );
       case "info":
         return (
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg
+            className={`${iconClasses} animate-scale-in`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
             <path
               fillRule="evenodd"
               d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -465,16 +513,40 @@ export const Notification: React.FC<NotificationProps> = ({
   };
 
   return (
-    <div className={`notification notification-${type}`}>
+    <div
+      className={`notification notification-${type} group relative overflow-hidden ${
+        isVisible && !isClosing
+          ? "animate-slide-in-right"
+          : isClosing
+            ? "animate-slide-out-right"
+            : "opacity-0 translate-x-full"
+      }`}
+    >
+      {/* Progress bar */}
+      {autoClose && (
+        <div className="absolute bottom-0 left-0 h-1 bg-white/20 w-full">
+          <div
+            className="h-full bg-white/40 transition-all duration-75 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
       <div className="flex-shrink-0">{getIcon()}</div>
-      <div className="flex-1">
-        {title && <div className="font-medium mb-1">{title}</div>}
-        <div className="text-sm">{message}</div>
+      <div className="flex-1 min-w-0">
+        {title && (
+          <div className="font-medium mb-1 animate-fade-in-up animate-delay-100">
+            {title}
+          </div>
+        )}
+        <div className="text-sm animate-fade-in-up animate-delay-200">
+          {message}
+        </div>
       </div>
       {onClose && (
         <button
-          onClick={onClose}
-          className="notification-close"
+          onClick={handleClose}
+          className="notification-close transition-all duration-200 hover:scale-110 hover:rotate-90"
           aria-label="Close notification"
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
