@@ -37,7 +37,7 @@ const initializeFirebase = () => {
 
       // Fallback to demo mode if Firebase fails
       console.log("🔄 Falling back to demo mode...");
-      global.FIREBASE_DEMO_MODE = true;
+      process.env.FIREBASE_DEMO_MODE = "true";
     }
   }
 
