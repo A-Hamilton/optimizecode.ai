@@ -15,12 +15,10 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   files,
 }) => {
   const { userProfile } = useAuth();
+  const { showSuccess, showError, showWarning, showInfo } =
+    useNotificationHelpers();
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "error" | "warning" | "info";
-  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,14 +26,6 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   const maxFiles = userProfile?.limits?.maxFileUploads || 2;
   const maxFileSize = (userProfile?.limits?.maxFileSize || 1) * 1024 * 1024; // Convert MB to bytes
   const planName = userProfile?.subscription?.plan || "free";
-
-  const showNotification = (
-    message: string,
-    type: "error" | "warning" | "info" = "info",
-  ) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
-  };
 
   const InlineNotification: React.FC<NotificationProps> = ({
     message,
