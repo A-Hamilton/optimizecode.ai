@@ -21,6 +21,11 @@ export interface CodeInputProps {
 export interface FileDropZoneProps {
   files: CodeFile[];
   onFilesSelected: (files: CodeFile[]) => void;
+  onFilesChange?: (files: CodeFile[]) => void;
+  showNotification?: (
+    message: string,
+    type?: "error" | "warning" | "info",
+  ) => void;
 }
 
 export interface ResultsDisplayProps {
