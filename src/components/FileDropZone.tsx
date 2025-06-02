@@ -290,9 +290,9 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
     // Check file count limit first
     const totalFilesAfterUpload = files.length + selectedFiles.length;
     if (maxFiles !== -1 && totalFilesAfterUpload > maxFiles) {
-      showNotification(
+      showError(
         `File limit exceeded! Your ${planName} plan allows up to ${maxFiles} files per optimization. You currently have ${files.length} files and are trying to add ${selectedFiles.length} more.`,
-        "error",
+        "File Limit Exceeded",
       );
       setIsProcessing(false);
       return;
