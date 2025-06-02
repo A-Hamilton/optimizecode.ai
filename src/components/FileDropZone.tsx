@@ -121,7 +121,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
 
   // COMPLETELY REWRITTEN - Foolproof exclusion logic with user plan limits
   const getAllFiles = async (
-    entry: any,
+    entry: FileSystemEntry,
     currentPath: string = "",
   ): Promise<File[]> => {
     const files: File[] = [];
