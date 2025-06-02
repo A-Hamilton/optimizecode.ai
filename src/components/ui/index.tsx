@@ -1,9 +1,19 @@
-// OptimizeCode.ai UI Component Library
-import React, { useState, useEffect } from "react";
+// OptimizeCode.ai Enhanced UI Component Library
+import React, { useState, useEffect, useRef, forwardRef, useId } from "react";
 import "./DesignSystem.css";
 
 // ========================================
-// BUTTON COMPONENT
+// TYPES & INTERFACES
+// ========================================
+
+export interface BaseComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+  id?: string;
+}
+
+// ========================================
+// ENHANCED BUTTON COMPONENT
 // ========================================
 
 export interface ButtonProps
@@ -20,110 +30,148 @@ export interface ButtonProps
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
   fullWidth?: boolean;
+  tooltip?: string;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  variant = "primary",
-  size = "base",
-  loading = false,
-  icon,
-  iconPosition = "left",
-  fullWidth = false,
-  className = "",
-  disabled,
-  onClick,
-  ...props
-}) => {
-  const [ripples, setRipples] = useState<
-    Array<{ id: number; x: number; y: number }>
-  >([]);
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      children,
+      variant = "primary",
+      size = "base",
+      loading = false,
+      icon,
+      iconPosition = "left",
+      fullWidth = false,
+      className = "",
+      disabled,
+      onClick,
+      tooltip,
+      "aria-label": ariaLabel,
+      ...props
+    },
+    ref,
+  ) => {
+    const [ripples, setRipples] = useState<
+      Array<{ id: number; x: number; y: number }>
+    >([]);
+    const buttonId = useId();
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled || loading) return;
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (disabled || loading) return;
 
-    // Create ripple effect
-    const button = event.currentTarget;
-    const rect = button.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+      // Create ripple effect
+      const button = event.currentTarget;
+      const rect = button.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
 
-    const newRipple = {
-      id: Date.now(),
-      x,
-      y,
+      const newRipple = {
+        id: Date.now(),
+        x,
+        y,
+      };
+
+      setRipples((prev) => [...prev, newRipple]);
+
+      // Remove ripple after animation
+      setTimeout(() => {
+        setRipples((prev) =>
+          prev.filter((ripple) => ripple.id !== newRipple.id),
+        );
+      }, 600);
+
+      // Call original onClick
+      onClick?.(event);
     };
 
-    setRipples((prev) => [...prev, newRipple]);
+    const baseClasses = "btn touch-manipulation";
+    const variantClasses = `btn-${variant}`;
+    const sizeClasses = `btn-${size}`;
+    const widthClasses = fullWidth ? "w-full" : "";
 
-    // Remove ripple after animation
-    setTimeout(() => {
-      setRipples((prev) => prev.filter((ripple) => ripple.id !== newRipple.id));
-    }, 600);
+    const classes = [
+      baseClasses,
+      variantClasses,
+      sizeClasses,
+      widthClasses,
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-    // Call original onClick
-    if (onClick) {
-      onClick(event);
-    }
-  };
+    const effectiveAriaLabel =
+      ariaLabel || (typeof children === "string" ? children : undefined);
 
-  const baseClasses = "btn relative overflow-hidden";
-  const variantClasses = `btn-${variant}`;
-  const sizeClasses = `btn-${size}`;
-  const widthClasses = fullWidth ? "w-full" : "";
-  const animationClasses =
-    "transition-all duration-300 ease-out transform hover:scale-105 active:scale-95";
+    return (
+      <>
+        <button
+          ref={ref}
+          id={buttonId}
+          className={classes}
+          disabled={disabled || loading}
+          onClick={handleClick}
+          aria-label={effectiveAriaLabel}
+          aria-describedby={tooltip ? `${buttonId}-tooltip` : undefined}
+          {...props}
+        >
+          {/* Ripple effects */}
+          {ripples.map((ripple) => (
+            <span
+              key={ripple.id}
+              className="absolute bg-white/30 rounded-full pointer-events-none animate-ripple"
+              style={{
+                left: ripple.x - 10,
+                top: ripple.y - 10,
+                width: 20,
+                height: 20,
+              }}
+              aria-hidden="true"
+            />
+          ))}
 
-  const classes = [
-    baseClasses,
-    variantClasses,
-    sizeClasses,
-    widthClasses,
-    animationClasses,
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+          {loading && (
+            <div className="loading-spinner" role="status" aria-label="Loading">
+              <span className="sr-only">Loading...</span>
+            </div>
+          )}
 
-  return (
-    <button
-      className={classes}
-      disabled={disabled || loading}
-      onClick={handleClick}
-      {...props}
-    >
-      {/* Ripple effects */}
-      {ripples.map((ripple) => (
-        <span
-          key={ripple.id}
-          className="absolute bg-white/30 rounded-full pointer-events-none animate-ripple"
-          style={{
-            left: ripple.x - 10,
-            top: ripple.y - 10,
-            width: 20,
-            height: 20,
-          }}
-        />
-      ))}
+          {!loading && icon && iconPosition === "left" && (
+            <span
+              className="transition-transform duration-200 group-hover:scale-110"
+              aria-hidden="true"
+            >
+              {icon}
+            </span>
+          )}
 
-      {loading && <div className="loading-spinner" />}
-      {!loading && icon && iconPosition === "left" && (
-        <span className="transition-transform duration-200 group-hover:scale-110">
-          {icon}
-        </span>
-      )}
-      <span className="relative z-10">{children}</span>
-      {!loading && icon && iconPosition === "right" && (
-        <span className="transition-transform duration-200 group-hover:scale-110">
-          {icon}
-        </span>
-      )}
-    </button>
-  );
-};
+          <span className="relative z-10">{children}</span>
+
+          {!loading && icon && iconPosition === "right" && (
+            <span
+              className="transition-transform duration-200 group-hover:scale-110"
+              aria-hidden="true"
+            >
+              {icon}
+            </span>
+          )}
+        </button>
+
+        {/* Tooltip */}
+        {tooltip && (
+          <div id={`${buttonId}-tooltip`} role="tooltip" className="sr-only">
+            {tooltip}
+          </div>
+        )}
+      </>
+    );
+  },
+);
+
+Button.displayName = "Button";
 
 // ========================================
-// INPUT COMPONENT
+// ENHANCED INPUT COMPONENT
 // ========================================
 
 export interface InputProps
@@ -135,136 +183,172 @@ export interface InputProps
   helpText?: string;
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
+  onIconClick?: () => void;
 }
 
-export const Input: React.FC<InputProps> = ({
-  label,
-  error,
-  success,
-  required = false,
-  helpText,
-  icon,
-  iconPosition = "left",
-  className = "",
-  id,
-  ...props
-}) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
-  const hasError = !!error;
-  const hasSuccess = !!success;
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  (
+    {
+      label,
+      error,
+      success,
+      required = false,
+      helpText,
+      icon,
+      iconPosition = "left",
+      onIconClick,
+      className = "",
+      id,
+      "aria-describedby": ariaDescribedBy,
+      ...props
+    },
+    ref,
+  ) => {
+    const [isFocused, setIsFocused] = useState(false);
+    const inputId = id || useId();
+    const hasError = !!error;
+    const hasSuccess = !!success;
+    const errorId = `${inputId}-error`;
+    const successId = `${inputId}-success`;
+    const helpId = `${inputId}-help`;
 
-  const inputClasses = [
-    "form-input",
-    "transition-all duration-300 ease-out",
-    "border-2 focus:border-primary focus:ring-2 focus:ring-primary/20",
-    hasError ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "",
-    hasSuccess
-      ? "border-green-500 focus:border-green-500 focus:ring-green-500/20"
-      : "",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+    const describedBy =
+      [
+        ariaDescribedBy,
+        hasError ? errorId : null,
+        hasSuccess ? successId : null,
+        helpText ? helpId : null,
+      ]
+        .filter(Boolean)
+        .join(" ") || undefined;
 
-  return (
-    <div className="form-group">
-      {label && (
-        <label
-          htmlFor={inputId}
-          className={`form-label transition-colors duration-200 ${
-            isFocused ? "text-primary" : ""
-          } ${required ? "required" : ""}`}
-        >
-          {label}
-        </label>
-      )}
+    const inputClasses = [
+      "form-input",
+      hasError ? "error" : "",
+      hasSuccess ? "success" : "",
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-      <div className="relative group">
-        {icon && iconPosition === "left" && (
-          <div
-            className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors duration-200 ${
-              isFocused ? "text-primary" : "text-gray-400"
-            }`}
+    return (
+      <div className="form-group">
+        {label && (
+          <label
+            htmlFor={inputId}
+            className={`form-label ${
+              isFocused ? "text-primary-400" : ""
+            } ${required ? "required" : ""}`}
           >
-            {icon}
+            {label}
+            {required && <span className="sr-only"> (required)</span>}
+          </label>
+        )}
+
+        <div className="relative group">
+          {icon && iconPosition === "left" && (
+            <div
+              className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors duration-200 ${
+                isFocused ? "text-primary-400" : "text-gray-400"
+              } ${onIconClick ? "cursor-pointer" : ""}`}
+              onClick={onIconClick}
+              role={onIconClick ? "button" : undefined}
+              tabIndex={onIconClick ? 0 : -1}
+              aria-label={onIconClick ? "Icon action" : undefined}
+            >
+              {icon}
+            </div>
+          )}
+
+          <input
+            ref={ref}
+            id={inputId}
+            className={inputClasses}
+            style={{
+              paddingLeft:
+                icon && iconPosition === "left" ? "2.5rem" : undefined,
+              paddingRight:
+                icon && iconPosition === "right" ? "2.5rem" : undefined,
+            }}
+            onFocus={(e) => {
+              setIsFocused(true);
+              props.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+              props.onBlur?.(e);
+            }}
+            aria-describedby={describedBy}
+            aria-invalid={hasError}
+            aria-required={required}
+            {...props}
+          />
+
+          {icon && iconPosition === "right" && (
+            <div
+              className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors duration-200 ${
+                isFocused ? "text-primary-400" : "text-gray-400"
+              } ${onIconClick ? "cursor-pointer" : ""}`}
+              onClick={onIconClick}
+              role={onIconClick ? "button" : undefined}
+              tabIndex={onIconClick ? 0 : -1}
+              aria-label={onIconClick ? "Icon action" : undefined}
+            >
+              {icon}
+            </div>
+          )}
+        </div>
+
+        {error && (
+          <div id={errorId} className="form-error animate-fade-in" role="alert">
+            <svg
+              className="w-4 h-4 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{error}</span>
           </div>
         )}
 
-        <input
-          id={inputId}
-          className={inputClasses}
-          style={{
-            paddingLeft: icon && iconPosition === "left" ? "2.5rem" : undefined,
-            paddingRight:
-              icon && iconPosition === "right" ? "2.5rem" : undefined,
-          }}
-          onFocus={(e) => {
-            setIsFocused(true);
-            props.onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setIsFocused(false);
-            props.onBlur?.(e);
-          }}
-          {...props}
-        />
-
-        {icon && iconPosition === "right" && (
-          <div
-            className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors duration-200 ${
-              isFocused ? "text-primary" : "text-gray-400"
-            }`}
-          >
-            {icon}
+        {success && (
+          <div id={successId} className="form-success animate-fade-in">
+            <svg
+              className="w-4 h-4 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{success}</span>
           </div>
         )}
 
-        {/* Focus line effect */}
-        <div
-          className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
-            isFocused ? "w-full" : "w-0"
-          }`}
-        />
+        {helpText && !error && !success && (
+          <p id={helpId} className="form-help">
+            {helpText}
+          </p>
+        )}
       </div>
+    );
+  },
+);
 
-      {error && (
-        <div className="form-error animate-fade-in">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="form-success animate-fade-in">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {success}
-        </div>
-      )}
-
-      {helpText && !error && !success && (
-        <p className="text-sm text-gray-400 mt-2 transition-opacity duration-200">
-          {helpText}
-        </p>
-      )}
-    </div>
-  );
-};
+Input.displayName = "Input";
 
 // ========================================
-// TEXTAREA COMPONENT
+// ENHANCED TEXTAREA COMPONENT
 // ========================================
 
 export interface TextareaProps
@@ -274,125 +358,232 @@ export interface TextareaProps
   success?: string;
   required?: boolean;
   helpText?: string;
+  autoResize?: boolean;
 }
 
-export const Textarea: React.FC<TextareaProps> = ({
-  label,
-  error,
-  success,
-  required = false,
-  helpText,
-  className = "",
-  id,
-  ...props
-}) => {
-  const textareaId =
-    id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
-  const hasError = !!error;
-  const textareaClasses = [
-    "form-input",
-    "form-textarea",
-    hasError ? "error" : "",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+  (
+    {
+      label,
+      error,
+      success,
+      required = false,
+      helpText,
+      autoResize = false,
+      className = "",
+      id,
+      onChange,
+      "aria-describedby": ariaDescribedBy,
+      ...props
+    },
+    ref,
+  ) => {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const inputId = id || useId();
+    const hasError = !!error;
+    const hasSuccess = !!success;
+    const errorId = `${inputId}-error`;
+    const successId = `${inputId}-success`;
+    const helpId = `${inputId}-help`;
 
-  return (
-    <div className="form-group">
-      {label && (
-        <label
-          htmlFor={textareaId}
-          className={`form-label ${required ? "required" : ""}`}
-        >
-          {label}
-        </label>
-      )}
+    const describedBy =
+      [
+        ariaDescribedBy,
+        hasError ? errorId : null,
+        hasSuccess ? successId : null,
+        helpText ? helpId : null,
+      ]
+        .filter(Boolean)
+        .join(" ") || undefined;
 
-      <textarea id={textareaId} className={textareaClasses} {...props} />
+    const textareaClasses = [
+      "form-input",
+      "form-textarea",
+      hasError ? "error" : "",
+      hasSuccess ? "success" : "",
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-      {error && (
-        <div className="form-error">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {error}
-        </div>
-      )}
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (autoResize && textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      }
+      onChange?.(e);
+    };
 
-      {success && (
-        <div className="form-success">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {success}
-        </div>
-      )}
+    return (
+      <div className="form-group">
+        {label && (
+          <label
+            htmlFor={inputId}
+            className={`form-label ${required ? "required" : ""}`}
+          >
+            {label}
+            {required && <span className="sr-only"> (required)</span>}
+          </label>
+        )}
 
-      {helpText && !error && !success && (
-        <p className="text-sm text-gray-400 mt-2">{helpText}</p>
-      )}
-    </div>
-  );
-};
+        <textarea
+          ref={(node) => {
+            textareaRef.current = node;
+            if (typeof ref === "function") {
+              ref(node);
+            } else if (ref) {
+              ref.current = node;
+            }
+          }}
+          id={inputId}
+          className={textareaClasses}
+          onChange={handleChange}
+          aria-describedby={describedBy}
+          aria-invalid={hasError}
+          aria-required={required}
+          {...props}
+        />
+
+        {error && (
+          <div id={errorId} className="form-error animate-fade-in" role="alert">
+            <svg
+              className="w-4 h-4 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {success && (
+          <div id={successId} className="form-success animate-fade-in">
+            <svg
+              className="w-4 h-4 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{success}</span>
+          </div>
+        )}
+
+        {helpText && !error && !success && (
+          <p id={helpId} className="form-help">
+            {helpText}
+          </p>
+        )}
+      </div>
+    );
+  },
+);
+
+Textarea.displayName = "Textarea";
 
 // ========================================
-// CARD COMPONENT
+// ENHANCED CARD COMPONENT
 // ========================================
 
-export interface CardProps {
-  children: React.ReactNode;
-  className?: string;
+export interface CardProps extends BaseComponentProps {
   hover?: boolean;
+  interactive?: boolean;
+  padding?: "none" | "sm" | "base" | "lg";
+  as?: keyof JSX.IntrinsicElements;
+  onClick?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  (
+    {
+      children,
+      className = "",
+      hover = true,
+      interactive = false,
+      padding = "base",
+      as: Component = "div",
+      onClick,
+      ...props
+    },
+    ref,
+  ) => {
+    const paddingClasses = {
+      none: "",
+      sm: "p-4",
+      base: "p-6",
+      lg: "p-8",
+    };
+
+    const classes = [
+      "card",
+      hover ? "hover:shadow-lg hover:border-gray-600 hover:-translate-y-1" : "",
+      interactive ? "card-interactive" : "",
+      paddingClasses[padding],
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    return (
+      <Component
+        ref={ref}
+        className={classes}
+        onClick={onClick}
+        role={interactive ? "button" : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        {...props}
+      >
+        {children}
+      </Component>
+    );
+  },
+);
+
+Card.displayName = "Card";
+
+export const CardHeader: React.FC<BaseComponentProps> = ({
   children,
   className = "",
-  hover = true,
-}) => {
-  const classes = [
-    "card",
-    hover ? "hover:shadow-lg hover:border-gray-600" : "",
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  return <div className={classes}>{children}</div>;
-};
-
-export const CardHeader: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-}> = ({ children, className = "" }) => (
-  <div className={`card-header ${className}`}>{children}</div>
+  ...props
+}) => (
+  <div className={`card-header ${className}`} {...props}>
+    {children}
+  </div>
 );
 
-export const CardBody: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-}> = ({ children, className = "" }) => (
-  <div className={`card-body ${className}`}>{children}</div>
+export const CardBody: React.FC<BaseComponentProps> = ({
+  children,
+  className = "",
+  ...props
+}) => (
+  <div className={`card-body ${className}`} {...props}>
+    {children}
+  </div>
 );
 
-export const CardFooter: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-}> = ({ children, className = "" }) => (
-  <div className={`card-footer ${className}`}>{children}</div>
+export const CardFooter: React.FC<BaseComponentProps> = ({
+  children,
+  className = "",
+  ...props
+}) => (
+  <div className={`card-footer ${className}`} {...props}>
+    {children}
+  </div>
 );
 
 // ========================================
-// NOTIFICATION SYSTEM
+// ENHANCED NOTIFICATION SYSTEM
 // ========================================
 
 export interface NotificationProps {
@@ -402,6 +593,7 @@ export interface NotificationProps {
   onClose?: () => void;
   autoClose?: boolean;
   duration?: number;
+  actions?: React.ReactNode;
 }
 
 export const Notification: React.FC<NotificationProps> = ({
@@ -411,10 +603,12 @@ export const Notification: React.FC<NotificationProps> = ({
   onClose,
   autoClose = true,
   duration = 5000,
+  actions,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [progress, setProgress] = useState(100);
+  const notificationId = useId();
 
   useEffect(() => {
     // Show notification
@@ -449,16 +643,16 @@ export const Notification: React.FC<NotificationProps> = ({
   };
 
   const getIcon = () => {
-    const iconClasses =
-      "w-5 h-5 transition-transform duration-200 group-hover:scale-110";
+    const iconClasses = "w-5 h-5 flex-shrink-0";
 
     switch (type) {
       case "success":
         return (
           <svg
-            className={`${iconClasses} animate-bounce-in`}
+            className={iconClasses}
             fill="currentColor"
             viewBox="0 0 20 20"
+            aria-hidden="true"
           >
             <path
               fillRule="evenodd"
@@ -470,9 +664,10 @@ export const Notification: React.FC<NotificationProps> = ({
       case "error":
         return (
           <svg
-            className={`${iconClasses} animate-wiggle`}
+            className={iconClasses}
             fill="currentColor"
             viewBox="0 0 20 20"
+            aria-hidden="true"
           >
             <path
               fillRule="evenodd"
@@ -484,9 +679,10 @@ export const Notification: React.FC<NotificationProps> = ({
       case "warning":
         return (
           <svg
-            className={`${iconClasses} animate-pulse-gentle`}
+            className={iconClasses}
             fill="currentColor"
             viewBox="0 0 20 20"
+            aria-hidden="true"
           >
             <path
               fillRule="evenodd"
@@ -498,9 +694,10 @@ export const Notification: React.FC<NotificationProps> = ({
       case "info":
         return (
           <svg
-            className={`${iconClasses} animate-scale-in`}
+            className={iconClasses}
             fill="currentColor"
             viewBox="0 0 20 20"
+            aria-hidden="true"
           >
             <path
               fillRule="evenodd"
@@ -512,6 +709,10 @@ export const Notification: React.FC<NotificationProps> = ({
     }
   };
 
+  const getAriaLive = () => {
+    return type === "error" ? "assertive" : "polite";
+  };
+
   return (
     <div
       className={`notification notification-${type} group relative overflow-hidden ${
@@ -521,6 +722,10 @@ export const Notification: React.FC<NotificationProps> = ({
             ? "animate-slide-out-right"
             : "opacity-0 translate-x-full"
       }`}
+      role="alert"
+      aria-live={getAriaLive()}
+      aria-labelledby={title ? `${notificationId}-title` : undefined}
+      aria-describedby={`${notificationId}-message`}
     >
       {/* Progress bar */}
       {autoClose && (
@@ -528,28 +733,49 @@ export const Notification: React.FC<NotificationProps> = ({
           <div
             className="h-full bg-white/40 transition-all duration-75 ease-linear"
             style={{ width: `${progress}%` }}
+            aria-hidden="true"
           />
         </div>
       )}
 
-      <div className="flex-shrink-0">{getIcon()}</div>
+      <div className="flex-shrink-0" aria-hidden="true">
+        {getIcon()}
+      </div>
+
       <div className="flex-1 min-w-0">
         {title && (
-          <div className="font-medium mb-1 animate-fade-in-up animate-delay-100">
+          <div
+            id={`${notificationId}-title`}
+            className="font-medium mb-1 animate-fade-in-up animate-delay-100"
+          >
             {title}
           </div>
         )}
-        <div className="text-sm animate-fade-in-up animate-delay-200">
+        <div
+          id={`${notificationId}-message`}
+          className="text-sm animate-fade-in-up animate-delay-200"
+        >
           {message}
         </div>
+        {actions && (
+          <div className="mt-3 animate-fade-in-up animate-delay-300">
+            {actions}
+          </div>
+        )}
       </div>
+
       {onClose && (
         <button
           onClick={handleClose}
-          className="notification-close transition-all duration-200 hover:scale-110 hover:rotate-90"
+          className="notification-close"
           aria-label="Close notification"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <svg
+            className="w-4 h-4"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+          >
             <path
               fillRule="evenodd"
               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -563,83 +789,138 @@ export const Notification: React.FC<NotificationProps> = ({
 };
 
 // ========================================
-// LOADING SPINNER
+// ENHANCED LOADING SPINNER
 // ========================================
 
 export interface LoadingSpinnerProps {
   size?: "sm" | "base" | "lg";
   className?: string;
+  label?: string;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = "base",
   className = "",
+  label = "Loading",
 }) => {
   const sizeClasses = {
-    sm: "w-4 h-4",
-    base: "w-6 h-6",
-    lg: "w-8 h-8",
+    sm: "loading-spinner-sm",
+    base: "",
+    lg: "loading-spinner-lg",
   };
 
   return (
-    <div className={`loading-spinner ${sizeClasses[size]} ${className}`} />
+    <div
+      className={`loading-spinner ${sizeClasses[size]} ${className}`}
+      role="status"
+      aria-label={label}
+    >
+      <span className="sr-only">{label}...</span>
+    </div>
   );
 };
 
 // ========================================
-// BADGE COMPONENT
+// ENHANCED BADGE COMPONENT
 // ========================================
 
-export interface BadgeProps {
-  children: React.ReactNode;
-  variant?: "primary" | "success" | "warning" | "danger";
-  size?: "sm" | "base";
-  className?: string;
+export interface BadgeProps extends BaseComponentProps {
+  variant?: "primary" | "success" | "warning" | "danger" | "neutral";
+  size?: "sm" | "base" | "lg";
+  dot?: boolean;
 }
 
 export const Badge: React.FC<BadgeProps> = ({
   children,
   variant = "primary",
   size = "base",
+  dot = false,
   className = "",
+  ...props
 }) => {
-  const sizeClasses =
-    size === "sm" ? "px-2 py-0.5 text-xs" : "px-2 py-1 text-xs";
-  const classes = ["badge", `badge-${variant}`, sizeClasses, className]
+  const sizeClasses = {
+    sm: "badge-sm",
+    base: "",
+    lg: "badge-lg",
+  };
+
+  const classes = ["badge", `badge-${variant}`, sizeClasses[size], className]
     .filter(Boolean)
     .join(" ");
 
-  return <span className={classes}>{children}</span>;
+  return (
+    <span className={classes} {...props}>
+      {dot && (
+        <span className="w-2 h-2 bg-current rounded-full" aria-hidden="true" />
+      )}
+      {children}
+    </span>
+  );
 };
 
 // ========================================
-// SKELETON LOADER
+// ENHANCED SKELETON LOADER
 // ========================================
 
 export interface SkeletonProps {
-  width?: string;
-  height?: string;
+  width?: string | number;
+  height?: string | number;
   className?: string;
+  variant?: "text" | "rectangular" | "circular" | "button";
+  animation?: boolean;
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
   width = "100%",
-  height = "1rem",
+  height,
   className = "",
-}) => (
-  <div className={`loading-skeleton ${className}`} style={{ width, height }} />
-);
+  variant = "rectangular",
+  animation = true,
+}) => {
+  const variantClasses = {
+    text: "skeleton-text",
+    rectangular: "",
+    circular: "skeleton-avatar",
+    button: "skeleton-button",
+  };
+
+  const defaultHeight =
+    variant === "text" ? "1em" : variant === "button" ? "44px" : "1rem";
+
+  const classes = [
+    animation ? "loading-skeleton" : "bg-gray-700",
+    variantClasses[variant],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <div
+      className={classes}
+      style={{
+        width: typeof width === "number" ? `${width}px` : width,
+        height: height
+          ? typeof height === "number"
+            ? `${height}px`
+            : height
+          : defaultHeight,
+      }}
+      aria-hidden="true"
+    />
+  );
+};
 
 // ========================================
 // EMPTY STATE COMPONENT
 // ========================================
 
-export interface EmptyStateProps {
+export interface EmptyStateProps extends BaseComponentProps {
   icon?: React.ReactNode;
   title: string;
   description?: string;
   action?: React.ReactNode;
-  className?: string;
+  size?: "sm" | "base" | "lg";
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -647,19 +928,114 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   title,
   description,
   action,
+  size = "base",
   className = "",
-}) => (
-  <div className={`text-center py-12 ${className}`}>
-    {icon && (
-      <div className="text-gray-400 mb-4 flex justify-center">{icon}</div>
-    )}
-    <h3 className="text-lg font-medium text-gray-200 mb-2">{title}</h3>
-    {description && (
-      <p className="text-gray-400 mb-6 max-w-sm mx-auto">{description}</p>
-    )}
-    {action && <div>{action}</div>}
-  </div>
-);
+  ...props
+}) => {
+  const sizeClasses = {
+    sm: "py-8",
+    base: "py-12",
+    lg: "py-16",
+  };
+
+  const iconSizeClasses = {
+    sm: "w-8 h-8",
+    base: "w-12 h-12",
+    lg: "w-16 h-16",
+  };
+
+  const titleSizeClasses = {
+    sm: "text-base",
+    base: "text-lg",
+    lg: "text-xl",
+  };
+
+  return (
+    <div className={`text-center ${sizeClasses[size]} ${className}`} {...props}>
+      {icon && (
+        <div
+          className={`text-gray-400 mb-4 flex justify-center ${iconSizeClasses[size]}`}
+        >
+          {icon}
+        </div>
+      )}
+      <h3
+        className={`${titleSizeClasses[size]} font-medium text-gray-200 mb-2`}
+      >
+        {title}
+      </h3>
+      {description && (
+        <p className="text-gray-400 mb-6 max-w-sm mx-auto leading-relaxed">
+          {description}
+        </p>
+      )}
+      {action && <div>{action}</div>}
+    </div>
+  );
+};
+
+// ========================================
+// ENHANCED DIVIDER COMPONENT
+// ========================================
+
+export interface DividerProps extends BaseComponentProps {
+  orientation?: "horizontal" | "vertical";
+  variant?: "solid" | "dashed" | "dotted";
+  spacing?: "sm" | "base" | "lg";
+  label?: string;
+}
+
+export const Divider: React.FC<DividerProps> = ({
+  orientation = "horizontal",
+  variant = "solid",
+  spacing = "base",
+  label,
+  className = "",
+  ...props
+}) => {
+  const spacingClasses = {
+    sm: orientation === "horizontal" ? "my-2" : "mx-2",
+    base: orientation === "horizontal" ? "my-4" : "mx-4",
+    lg: orientation === "horizontal" ? "my-6" : "mx-6",
+  };
+
+  const borderClasses = {
+    solid: "border-solid",
+    dashed: "border-dashed",
+    dotted: "border-dotted",
+  };
+
+  if (label && orientation === "horizontal") {
+    return (
+      <div
+        className={`relative ${spacingClasses[spacing]} ${className}`}
+        {...props}
+      >
+        <div className="absolute inset-0 flex items-center">
+          <div
+            className={`w-full border-t border-gray-600 ${borderClasses[variant]}`}
+          />
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-gray-900 text-gray-400">{label}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${
+        orientation === "horizontal"
+          ? `border-t border-gray-600 ${spacingClasses[spacing]}`
+          : `border-l border-gray-600 ${spacingClasses[spacing]} h-full`
+      } ${borderClasses[variant]} ${className}`}
+      role="separator"
+      aria-orientation={orientation}
+      {...props}
+    />
+  );
+};
 
 // ========================================
 // EXPORTS
@@ -678,4 +1054,5 @@ export default {
   Badge,
   Skeleton,
   EmptyState,
+  Divider,
 };
