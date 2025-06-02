@@ -32,29 +32,92 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   className = "",
   disabled,
+  onClick,
   ...props
 }) => {
-  const baseClasses = "btn";
+  const [ripples, setRipples] = useState<
+    Array<{ id: number; x: number; y: number }>
+  >([]);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled || loading) return;
+
+    // Create ripple effect
+    const button = event.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const newRipple = {
+      id: Date.now(),
+      x,
+      y,
+    };
+
+    setRipples((prev) => [...prev, newRipple]);
+
+    // Remove ripple after animation
+    setTimeout(() => {
+      setRipples((prev) => prev.filter((ripple) => ripple.id !== newRipple.id));
+    }, 600);
+
+    // Call original onClick
+    if (onClick) {
+      onClick(event);
+    }
+  };
+
+  const baseClasses = "btn relative overflow-hidden";
   const variantClasses = `btn-${variant}`;
   const sizeClasses = `btn-${size}`;
   const widthClasses = fullWidth ? "w-full" : "";
+  const animationClasses =
+    "transition-all duration-300 ease-out transform hover:scale-105 active:scale-95";
 
   const classes = [
     baseClasses,
     variantClasses,
     sizeClasses,
     widthClasses,
+    animationClasses,
     className,
   ]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <button className={classes} disabled={disabled || loading} {...props}>
+    <button
+      className={classes}
+      disabled={disabled || loading}
+      onClick={handleClick}
+      {...props}
+    >
+      {/* Ripple effects */}
+      {ripples.map((ripple) => (
+        <span
+          key={ripple.id}
+          className="absolute bg-white/30 rounded-full pointer-events-none animate-ripple"
+          style={{
+            left: ripple.x - 10,
+            top: ripple.y - 10,
+            width: 20,
+            height: 20,
+          }}
+        />
+      ))}
+
       {loading && <div className="loading-spinner" />}
-      {!loading && icon && iconPosition === "left" && icon}
-      {children}
-      {!loading && icon && iconPosition === "right" && icon}
+      {!loading && icon && iconPosition === "left" && (
+        <span className="transition-transform duration-200 group-hover:scale-110">
+          {icon}
+        </span>
+      )}
+      <span className="relative z-10">{children}</span>
+      {!loading && icon && iconPosition === "right" && (
+        <span className="transition-transform duration-200 group-hover:scale-110">
+          {icon}
+        </span>
+      )}
     </button>
   );
 };
