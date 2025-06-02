@@ -2,6 +2,7 @@
 import React, { useState, useRef } from "react";
 import { CodeInputProps } from "../types";
 import { useAuth } from "../contexts/AuthContext";
+import { useNotificationHelpers } from "../contexts/NotificationContext";
 
 const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
   // Make useAuth safe by handling potential provider issues
