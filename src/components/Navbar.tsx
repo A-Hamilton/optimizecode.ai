@@ -6,9 +6,37 @@ import { useConditionalAnimation } from "../hooks/useReducedMotion";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
+
+  const bounceAnimation = useConditionalAnimation("hover:animate-bounce");
+  const slideAnimation = useConditionalAnimation("animate-slide-down");
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setIsDropdownOpen(false);
+      setIsMenuOpen(false);
+    };
+
+    if (isDropdownOpen || isMenuOpen) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [isDropdownOpen, isMenuOpen]);
 
   const isActive = (path: string): boolean => location.pathname === path;
 
