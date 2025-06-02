@@ -253,101 +253,101 @@ const Navbar: React.FC = () => {
 
                     {/* Menu Items */}
                     <div className="py-1">
-                      <Link
-                        to="/dashboard"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                      {[
+                        {
+                          to: "/dashboard",
+                          label: "Dashboard",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                            />
+                          ),
+                        },
+                        {
+                          to: "/profile",
+                          label: "Profile Settings",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          ),
+                        },
+                        {
+                          to: "/subscription",
+                          label: "Billing & Plans",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                            />
+                          ),
+                        },
+                      ].map((item, index) => (
+                        <div
+                          key={item.to}
+                          className="animate-fade-in-left"
+                          style={{ animationDelay: `${index * 50}ms` }}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="m8 5 4-4 4 4"
-                          />
-                        </svg>
-                        Dashboard
-                      </Link>
-
-                      <Link
-                        to="/profile"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                        Profile Settings
-                      </Link>
-
-                      <Link
-                        to="/subscription"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                          />
-                        </svg>
-                        Billing & Plans
-                      </Link>
+                          <Link
+                            to={item.to}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/10 hover:text-primary transition-all duration-300 group hover:translate-x-1"
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            <svg
+                              className="w-4 h-4 group-hover:scale-110 transition-transform duration-300"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              {item.icon}
+                            </svg>
+                            {item.label}
+                          </Link>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="border-t border-white/10 my-1"></div>
+                    <div
+                      className="border-t border-white/10 my-1 animate-fade-in"
+                      style={{ animationDelay: "150ms" }}
+                    ></div>
 
-                    <button
-                      onClick={async () => {
-                        await logout();
-                        setIsMenuOpen(false);
-                        navigate("/");
-                      }}
-                      className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
+                    <div
+                      className="animate-fade-in-left"
+                      style={{ animationDelay: "200ms" }}
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <button
+                        onClick={async () => {
+                          await logout();
+                          setIsDropdownOpen(false);
+                          navigate("/");
+                        }}
+                        className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group hover:translate-x-1"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
-                      Sign Out
-                    </button>
+                        <svg
+                          className="w-4 h-4 group-hover:scale-110 transition-transform duration-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
+                        </svg>
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
