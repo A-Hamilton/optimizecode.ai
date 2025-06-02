@@ -48,11 +48,12 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     if (pastedData) {
       if (characterLimit === -1 || pastedData.length <= characterLimit) {
         onCodeChange(pastedData);
-        showFeedback("Code pasted successfully!");
+        showSuccess("Code pasted successfully!");
       } else {
         e.preventDefault();
-        showFeedback(
+        showError(
           `Paste too large! Limit: ${characterLimit.toLocaleString()} characters, tried to paste: ${pastedData.length.toLocaleString()}`,
+          "Paste Size Limit",
         );
       }
     }
@@ -208,7 +209,7 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
               📝 {code.length} characters
             </span>
             <span className="flex items-center gap-1">
-              📄 {code.split("\n").length} lines
+              ���� {code.split("\n").length} lines
             </span>
             {code && (
               <span className="flex items-center gap-1">
