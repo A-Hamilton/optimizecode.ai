@@ -2,6 +2,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
+import {
+  AnimatedSection,
+  StaggeredList,
+  AnimatedCounter,
+  TypewriterText,
+  useScrollAnimation,
+} from "../components/animations";
 
 interface AnimatedMetrics {
   performance: string;
