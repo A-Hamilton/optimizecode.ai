@@ -433,15 +433,6 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         </div>
       </div>
 
-      {/* Inline Notification */}
-      {notification && (
-        <InlineNotification
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
-
       <div
         className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
           isDragOver
