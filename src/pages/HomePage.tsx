@@ -136,64 +136,98 @@ const HomePage: React.FC = () => {
       <section className="hero">
         <div className="container">
           <div className="hero-content">
-            <h1 className="hero-title">
-              AI-Powered Code Optimization
-              <span className="hero-highlight"> in One Click</span>
-            </h1>
-            <p className="hero-subtitle">
-              Transform your code instantly with advanced AI. Boost performance
-              by 40%, reduce cloud costs, and improve readability across 15+
-              programming languages.
-            </p>
-            <div className="hero-actions">
-              <Link to="/optimize" className="btn-primary interactive-cta">
-                <span className="cta-text">Start Optimizing Free</span>
-                <span className="cta-arrow">→</span>
-              </Link>
-              <a href="#demo" className="btn-secondary interactive-cta">
-                <span className="cta-text">Watch Demo</span>
-                <span className="cta-icon">▶</span>
-              </a>
-            </div>
-            <p className="hero-trust">
-              <span className="trust-item">✅ Free forever</span>
-              <span className="trust-divider">•</span>
-              <span className="trust-item">🔒 No credit card required</span>
-              <span className="trust-divider">•</span>
-              <span className="trust-item">⚡ 2M+ lines optimized</span>
-            </p>
-          </div>
-          <div className="hero-visual">
-            <div className="code-preview">
-              <div className="code-header">
-                <div className="code-tabs">
-                  <span className="tab active">app.js</span>
-                  <span className="tab">optimized.js</span>
-                </div>
-                <div className="optimization-badge">✨ 47% faster</div>
+            <AnimatedSection animation="animate-fade-in-up" delay={200}>
+              <h1 className="hero-title">
+                <TypewriterText
+                  text="AI-Powered Code Optimization"
+                  speed={80}
+                  delay={500}
+                />
+                <AnimatedSection animation="animate-bounce-in" delay={3000}>
+                  <span className="hero-highlight"> in One Click</span>
+                </AnimatedSection>
+              </h1>
+            </AnimatedSection>
+
+            <AnimatedSection animation="animate-fade-in-up" delay={600}>
+              <p className="hero-subtitle">
+                Transform your code instantly with advanced AI. Boost
+                performance by 40%, reduce cloud costs, and improve readability
+                across 15+ programming languages.
+              </p>
+            </AnimatedSection>
+
+            <AnimatedSection animation="animate-fade-in-up" delay={800}>
+              <div className="hero-actions">
+                <Link
+                  to="/optimize"
+                  className="btn-primary interactive-cta group hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
+                >
+                  <span className="cta-text">Start Optimizing Free</span>
+                  <span className="cta-arrow transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
+                </Link>
+                <a
+                  href="#demo"
+                  className="btn-secondary interactive-cta group hover:shadow-lg transition-all duration-300"
+                >
+                  <span className="cta-text">Watch Demo</span>
+                  <span className="cta-icon transition-transform duration-300 group-hover:scale-125">
+                    ▶
+                  </span>
+                </a>
               </div>
-              <div className="code-content">
-                <div className="code-line">
-                  <span className="line-number">1</span>
-                  <span className="code-text">
-                    const optimizedCode = ai.transform(yourCode)
-                  </span>
+            </AnimatedSection>
+
+            <AnimatedSection animation="animate-fade-in" delay={1000}>
+              <p className="hero-trust">
+                <span className="trust-item animate-pulse-gentle">
+                  ✅ Free forever
+                </span>
+                <span className="trust-divider">•</span>
+                <span className="trust-item">🔒 No credit card required</span>
+                <span className="trust-divider">•</span>
+                <span className="trust-item">⚡ 2M+ lines optimized</span>
+              </p>
+            </AnimatedSection>
+          </div>
+
+          <AnimatedSection animation="animate-float" delay={400}>
+            <div className="hero-visual">
+              <div className="code-preview hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500">
+                <div className="code-header">
+                  <div className="code-tabs">
+                    <span className="tab active">app.js</span>
+                    <span className="tab">optimized.js</span>
+                  </div>
+                  <div className="optimization-badge animate-pulse-gentle">
+                    ✨ 47% faster
+                  </div>
                 </div>
-                <div className="code-line">
-                  <span className="line-number">2</span>
-                  <span className="code-text">
-                    // ⚡ Performance improved by 40%
-                  </span>
-                </div>
-                <div className="code-line">
-                  <span className="line-number">3</span>
-                  <span className="code-text">
-                    // 💰 Cloud costs reduced by 60%
-                  </span>
+                <div className="code-content">
+                  <div className="code-line animate-stagger-1">
+                    <span className="line-number">1</span>
+                    <span className="code-text">
+                      const optimizedCode = ai.transform(yourCode)
+                    </span>
+                  </div>
+                  <div className="code-line animate-stagger-2">
+                    <span className="line-number">2</span>
+                    <span className="code-text">
+                      // ⚡ Performance improved by 40%
+                    </span>
+                  </div>
+                  <div className="code-line animate-stagger-3">
+                    <span className="line-number">3</span>
+                    <span className="code-text">
+                      // 💰 Cloud costs reduced by 60%
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </AnimatedSection>
         </div>
       </section>
 
