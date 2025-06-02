@@ -374,9 +374,9 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       if (blockedCount > 0) {
         errorMessage += ` ${blockedCount} files were filtered out.`;
       }
-      showNotification(errorMessage, "error");
+      showError(errorMessage, "File Processing Failed");
     } else {
-      let message = `✅ Added ${codeFiles.length} source code files.`;
+      let message = `Added ${codeFiles.length} source code files successfully.`;
 
       const issueCount = oversizedCount + invalidTypeCount + blockedCount;
       if (issueCount > 0) {
@@ -388,7 +388,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         message = message.slice(0, -1) + ")"; // Remove last comma and add closing parenthesis
       }
 
-      showNotification(message, "info");
+      showSuccess(message, "Files Added");
     }
 
     // Append new files to existing files
