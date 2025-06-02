@@ -2,24 +2,17 @@
 import React, { useState, useCallback, useRef } from "react";
 import { FileDropZoneProps, CodeFile } from "../types";
 import { useAuth } from "../contexts/AuthContext";
-
-interface NotificationProps {
-  message: string;
-  type: "error" | "warning" | "info";
-  onClose: () => void;
-}
+import { useNotificationHelpers } from "../contexts/NotificationContext";
 
 const FileDropZone: React.FC<FileDropZoneProps> = ({
   onFilesSelected,
   files,
 }) => {
   const { userProfile } = useAuth();
+  const { showSuccess, showError, showWarning, showInfo } =
+    useNotificationHelpers();
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: "error" | "warning" | "info";
-  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
 
@@ -27,40 +20,6 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   const maxFiles = userProfile?.limits?.maxFileUploads || 2;
   const maxFileSize = (userProfile?.limits?.maxFileSize || 1) * 1024 * 1024; // Convert MB to bytes
   const planName = userProfile?.subscription?.plan || "free";
-
-  const showNotification = (
-    message: string,
-    type: "error" | "warning" | "info" = "info",
-  ) => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000);
-  };
-
-  const InlineNotification: React.FC<NotificationProps> = ({
-    message,
-    type,
-    onClose,
-  }) => {
-    const typeStyles = {
-      error: "bg-red-500/20 border-red-500/30 text-red-200",
-      warning: "bg-yellow-500/20 border-yellow-500/30 text-yellow-200",
-      info: "bg-blue-500/20 border-blue-500/30 text-blue-200",
-    };
-
-    return (
-      <div
-        className={`p-3 rounded-lg border mb-4 flex items-center justify-between ${typeStyles[type]}`}
-      >
-        <span className="text-sm">{message}</span>
-        <button
-          onClick={onClose}
-          className="ml-2 text-lg leading-none hover:opacity-70 transition-opacity"
-        >
-          ×
-        </button>
-      </div>
-    );
-  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
@@ -120,7 +79,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
 
   // COMPLETELY REWRITTEN - Foolproof exclusion logic with user plan limits
   const getAllFiles = async (
-    entry: any,
+    entry: FileSystemEntry,
     currentPath: string = "",
   ): Promise<File[]> => {
     const files: File[] = [];
@@ -331,9 +290,9 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
     // Check file count limit first
     const totalFilesAfterUpload = files.length + selectedFiles.length;
     if (maxFiles !== -1 && totalFilesAfterUpload > maxFiles) {
-      showNotification(
+      showError(
         `File limit exceeded! Your ${planName} plan allows up to ${maxFiles} files per optimization. You currently have ${files.length} files and are trying to add ${selectedFiles.length} more.`,
-        "error",
+        "File Limit Exceeded",
       );
       setIsProcessing(false);
       return;
@@ -415,9 +374,9 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       if (blockedCount > 0) {
         errorMessage += ` ${blockedCount} files were filtered out.`;
       }
-      showNotification(errorMessage, "error");
+      showError(errorMessage, "File Processing Failed");
     } else {
-      let message = `✅ Added ${codeFiles.length} source code files.`;
+      let message = `Added ${codeFiles.length} source code files successfully.`;
 
       const issueCount = oversizedCount + invalidTypeCount + blockedCount;
       if (issueCount > 0) {
@@ -429,7 +388,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         message = message.slice(0, -1) + ")"; // Remove last comma and add closing parenthesis
       }
 
-      showNotification(message, "info");
+      showSuccess(message, "Files Added");
     }
 
     // Append new files to existing files
@@ -473,15 +432,6 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
           )}
         </div>
       </div>
-
-      {/* Inline Notification */}
-      {notification && (
-        <InlineNotification
-          message={notification.message}
-          type={notification.type}
-          onClose={() => setNotification(null)}
-        />
-      )}
 
       <div
         className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${

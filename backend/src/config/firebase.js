@@ -37,7 +37,7 @@ const initializeFirebase = () => {
 
       // Fallback to demo mode if Firebase fails
       console.log("🔄 Falling back to demo mode...");
-      global.FIREBASE_DEMO_MODE = true;
+      process.env.FIREBASE_DEMO_MODE = "true";
     }
   }
 
@@ -46,7 +46,7 @@ const initializeFirebase = () => {
 
 // Firestore database instance
 const getFirestore = () => {
-  if (global.FIREBASE_DEMO_MODE) {
+  if (process.env.FIREBASE_DEMO_MODE === "true") {
     // Return mock Firestore for demo mode
     return {
       collection: () => ({
@@ -70,7 +70,7 @@ const getFirestore = () => {
 
 // Authentication instance
 const getAuth = () => {
-  if (global.FIREBASE_DEMO_MODE) {
+  if (process.env.FIREBASE_DEMO_MODE === "true") {
     // Return mock Auth for demo mode
     return {
       verifyIdToken: async (token) => {
@@ -185,5 +185,5 @@ module.exports = {
   getFirestore,
   getAuth,
   userService,
-  isDemoMode: () => global.FIREBASE_DEMO_MODE === true,
+  isDemoMode: () => process.env.FIREBASE_DEMO_MODE === "true",
 };

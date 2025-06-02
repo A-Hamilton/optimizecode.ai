@@ -2,6 +2,7 @@
 import React, { useState, useRef } from "react";
 import { CodeInputProps } from "../types";
 import { useAuth } from "../contexts/AuthContext";
+import { useNotificationHelpers } from "../contexts/NotificationContext";
 
 const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
   // Make useAuth safe by handling potential provider issues
@@ -13,6 +14,8 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     // If AuthProvider is not available, use default limits
     console.warn("AuthProvider not available, using default limits");
   }
+
+  const { showSuccess, showError, showWarning } = useNotificationHelpers();
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
@@ -29,9 +32,10 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     if (characterLimit === -1 || newValue.length <= characterLimit) {
       onCodeChange(newValue);
     } else {
-      // Show feedback that limit was reached
-      showFeedback(
+      // Show notification that limit was reached
+      showWarning(
         `Character limit reached (${characterLimit.toLocaleString()} max)`,
+        "Character Limit",
       );
     }
   };
@@ -44,11 +48,12 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     if (pastedData) {
       if (characterLimit === -1 || pastedData.length <= characterLimit) {
         onCodeChange(pastedData);
-        showFeedback("Code pasted successfully!");
+        showSuccess("Code pasted successfully!");
       } else {
         e.preventDefault();
-        showFeedback(
+        showError(
           `Paste too large! Limit: ${characterLimit.toLocaleString()} characters, tried to paste: ${pastedData.length.toLocaleString()}`,
+          "Paste Size Limit",
         );
       }
     }
@@ -60,48 +65,39 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(code);
+        setCopySuccess(true);
+        showSuccess("Code copied to clipboard!");
       } else {
-        // Fallback for older browsers
-        if (textareaRef.current) {
-          textareaRef.current.select();
-          document.execCommand("copy");
+        // Modern fallback using temporary textarea
+        const textArea = document.createElement("textarea");
+        textArea.value = code;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          const successful = document.execCommand("copy");
+          if (successful) {
+            setCopySuccess(true);
+            showSuccess("Code copied to clipboard!");
+          } else {
+            throw new Error("Copy command failed");
+          }
+        } finally {
+          document.body.removeChild(textArea);
         }
       }
 
-      setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (error) {
       console.error("Failed to copy code:", error);
+      showError(
+        "Failed to copy code to clipboard. Please select and copy manually.",
+        "Copy Failed",
+      );
     }
-  };
-
-  const showFeedback = (message: string): void => {
-    // Create temporary notification
-    const notification = document.createElement("div");
-    notification.textContent = message;
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #22c55e;
-      color: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      z-index: 10000;
-      animation: slideIn 0.3s ease;
-    `;
-
-    document.body.appendChild(notification);
-    setTimeout(() => {
-      notification.style.animation = "slideOut 0.3s ease";
-      setTimeout(() => {
-        if (document.body.contains(notification)) {
-          document.body.removeChild(notification);
-        }
-      }, 300);
-    }, 2000);
   };
 
   const formatCode = (): void => {
@@ -117,7 +113,7 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
       .replace(/;/g, ";\n");
 
     onCodeChange(formatted);
-    showFeedback("Code formatted!");
+    showSuccess("Code formatted successfully!");
   };
 
   const getLanguageFromCode = (): string => {

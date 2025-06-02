@@ -1,13 +1,42 @@
 // Updated for TypeScript migration
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useConditionalAnimation } from "../hooks/useReducedMotion";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
+
+  const bounceAnimation = useConditionalAnimation("hover:animate-bounce");
+  const slideAnimation = useConditionalAnimation("animate-slide-down");
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setIsDropdownOpen(false);
+      setIsMenuOpen(false);
+    };
+
+    if (isDropdownOpen || isMenuOpen) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [isDropdownOpen, isMenuOpen]);
 
   const isActive = (path: string): boolean => location.pathname === path;
 
@@ -15,38 +44,68 @@ const Navbar: React.FC = () => {
     to: string;
     children: React.ReactNode;
     onClick?: () => void;
-  }> = ({ to, children, onClick }) => (
+    mobile?: boolean;
+  }> = ({ to, children, onClick, mobile = false }) => (
     <Link
       to={to}
       className={`relative text-sm font-medium transition-all duration-300 group ${
-        isActive(to) ? "text-primary" : "text-white/80 hover:text-primary"
+        mobile ? "text-base py-2" : ""
+      } ${
+        isActive(to)
+          ? "text-primary"
+          : "text-white/80 hover:text-primary hover:scale-105"
       }`}
       onClick={onClick}
     >
       {children}
+
       {/* Active indicator - underline */}
       <span
-        className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary transform transition-transform duration-300 ${
-          isActive(to) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        className={`absolute ${mobile ? "bottom-0" : "bottom-0"} left-0 w-full h-0.5 bg-gradient-to-r from-primary to-primary-light transform transition-all duration-300 ${
+          isActive(to)
+            ? "scale-x-100 opacity-100"
+            : "scale-x-0 group-hover:scale-x-100 opacity-70"
         }`}
       />
+
       {/* Subtle background for active state */}
       <span
-        className={`absolute inset-0 -inset-x-3 -inset-y-2 bg-primary/10 rounded-lg transform transition-all duration-300 -z-10 ${
-          isActive(to) ? "scale-100 opacity-100" : "scale-95 opacity-0"
+        className={`absolute inset-0 -inset-x-3 -inset-y-2 bg-gradient-to-r from-primary/10 to-primary-light/10 rounded-lg transform transition-all duration-300 -z-10 ${
+          isActive(to)
+            ? "scale-100 opacity-100"
+            : "scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-50"
+        }`}
+      />
+
+      {/* Hover glow effect */}
+      <span
+        className={`absolute inset-0 -inset-x-2 -inset-y-1 bg-primary/5 rounded-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 -z-20 ${
+          isActive(to) ? "hidden" : ""
         }`}
       />
     </Link>
   );
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-gray-900/95 backdrop-blur-xl border-b border-white/10 z-50">
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled
+          ? "bg-gray-900/98 backdrop-blur-xl border-b border-white/20 shadow-xl"
+          : "bg-gray-900/95 backdrop-blur-lg border-b border-white/10"
+      }`}
+    >
+      <div
+        className={`max-w-7xl mx-auto px-4 flex items-center justify-between transition-all duration-300 ${
+          isScrolled ? "h-14" : "h-16"
+        }`}
+      >
         <Link
           to="/"
-          className="text-xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent hover:scale-105 transition-transform duration-300"
+          className={`text-xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent transition-all duration-300 group ${
+            isScrolled ? "text-lg" : "text-xl"
+          } hover:scale-110 ${bounceAnimation}`}
         >
-          OptimizeCode.ai
+          <span className="group-hover:animate-pulse">OptimizeCode.ai</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -61,28 +120,47 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Navigation */}
         <div
-          className={`md:hidden flex items-center gap-6 ${
-            isMenuOpen ? "flex" : "hidden"
-          } absolute top-16 left-0 right-0 bg-gray-900/98 backdrop-blur-xl border-b border-white/10 flex-col p-6`}
+          className={`md:hidden absolute ${isScrolled ? "top-14" : "top-16"} left-0 right-0 bg-gray-900/98 backdrop-blur-xl border-b border-white/10 transition-all duration-300 ${
+            isMenuOpen ? `flex flex-col p-6 gap-4 ${slideAnimation}` : "hidden"
+          }`}
+          onClick={(e) => e.stopPropagation()}
         >
-          <NavLink to="/product" onClick={() => setIsMenuOpen(false)}>
-            Product
-          </NavLink>
-          <NavLink to="/solutions" onClick={() => setIsMenuOpen(false)}>
-            Solutions
-          </NavLink>
-          <NavLink to="/pricing" onClick={() => setIsMenuOpen(false)}>
-            Pricing
-          </NavLink>
-          <NavLink to="/docs" onClick={() => setIsMenuOpen(false)}>
-            Docs
-          </NavLink>
-          <NavLink to="/blog" onClick={() => setIsMenuOpen(false)}>
-            Blog
-          </NavLink>
-          <NavLink to="/about" onClick={() => setIsMenuOpen(false)}>
-            About
-          </NavLink>
+          {[
+            { to: "/product", label: "Product" },
+            { to: "/solutions", label: "Solutions" },
+            { to: "/pricing", label: "Pricing" },
+            { to: "/docs", label: "Docs" },
+            { to: "/blog", label: "Blog" },
+            { to: "/about", label: "About" },
+          ].map((item, index) => (
+            <div
+              key={item.to}
+              className={`animate-fade-in-up`}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <NavLink
+                to={item.to}
+                onClick={() => setIsMenuOpen(false)}
+                mobile={true}
+              >
+                {item.label}
+              </NavLink>
+            </div>
+          ))}
+
+          {/* Mobile CTA */}
+          <div
+            className="pt-4 border-t border-white/10 animate-fade-in-up"
+            style={{ animationDelay: "300ms" }}
+          >
+            <Link
+              to="/optimize"
+              className="btn-primary w-full text-center group hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <span className="group-hover:animate-pulse">Try Free Now</span>
+            </Link>
+          </div>
         </div>
 
         {/* Action Buttons */}
@@ -102,25 +180,32 @@ const Navbar: React.FC = () => {
 
               <div className="relative">
                 <button
-                  className="flex items-center gap-2 text-white/80 hover:bg-white/10 px-3 py-2 rounded-lg transition-all duration-300 text-sm font-medium"
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="flex items-center gap-2 text-white/80 hover:bg-white/10 px-3 py-2 rounded-lg transition-all duration-300 text-sm font-medium group hover:scale-105"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDropdownOpen(!isDropdownOpen);
+                  }}
                 >
                   {currentUser.photoURL ? (
                     <img
                       src={currentUser.photoURL}
                       alt="Profile"
-                      className="w-6 h-6 rounded-full"
+                      className="w-6 h-6 rounded-full group-hover:ring-2 group-hover:ring-primary/50 transition-all duration-300"
                     />
                   ) : (
-                    <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-xs">
+                    <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center text-xs group-hover:scale-110 transition-transform duration-300">
                       {currentUser.displayName?.[0] ||
                         currentUser.email?.[0] ||
                         "U"}
                     </div>
                   )}
-                  <span>{currentUser.displayName || "Account"}</span>
+                  <span className="group-hover:text-primary transition-colors duration-300">
+                    {currentUser.displayName || "Account"}
+                  </span>
                   <svg
-                    className="w-4 h-4"
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      isDropdownOpen ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -134,8 +219,11 @@ const Navbar: React.FC = () => {
                   </svg>
                 </button>
 
-                {isMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-2 z-50">
+                {isDropdownOpen && (
+                  <div
+                    className={`absolute right-0 top-full mt-2 w-64 bg-gray-900/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl py-2 z-50 ${slideAnimation}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {/* User Info Header */}
                     <div className="px-4 py-3 border-b border-white/10">
                       <div className="flex items-center gap-3">
@@ -165,101 +253,101 @@ const Navbar: React.FC = () => {
 
                     {/* Menu Items */}
                     <div className="py-1">
-                      <Link
-                        to="/dashboard"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+                      {[
+                        {
+                          to: "/dashboard",
+                          label: "Dashboard",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                            />
+                          ),
+                        },
+                        {
+                          to: "/profile",
+                          label: "Profile Settings",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          ),
+                        },
+                        {
+                          to: "/subscription",
+                          label: "Billing & Plans",
+                          icon: (
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                            />
+                          ),
+                        },
+                      ].map((item, index) => (
+                        <div
+                          key={item.to}
+                          className="animate-fade-in-left"
+                          style={{ animationDelay: `${index * 50}ms` }}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="m8 5 4-4 4 4"
-                          />
-                        </svg>
-                        Dashboard
-                      </Link>
-
-                      <Link
-                        to="/profile"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                        Profile Settings
-                      </Link>
-
-                      <Link
-                        to="/subscription"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                          />
-                        </svg>
-                        Billing & Plans
-                      </Link>
+                          <Link
+                            to={item.to}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/10 hover:text-primary transition-all duration-300 group hover:translate-x-1"
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            <svg
+                              className="w-4 h-4 group-hover:scale-110 transition-transform duration-300"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              {item.icon}
+                            </svg>
+                            {item.label}
+                          </Link>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="border-t border-white/10 my-1"></div>
+                    <div
+                      className="border-t border-white/10 my-1 animate-fade-in"
+                      style={{ animationDelay: "150ms" }}
+                    ></div>
 
-                    <button
-                      onClick={async () => {
-                        await logout();
-                        setIsMenuOpen(false);
-                        navigate("/");
-                      }}
-                      className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/10 transition-colors"
+                    <div
+                      className="animate-fade-in-left"
+                      style={{ animationDelay: "200ms" }}
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <button
+                        onClick={async () => {
+                          await logout();
+                          setIsDropdownOpen(false);
+                          navigate("/");
+                        }}
+                        className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group hover:translate-x-1"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
-                      Sign Out
-                    </button>
+                        <svg
+                          className="w-4 h-4 group-hover:scale-110 transition-transform duration-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
+                        </svg>
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -269,16 +357,20 @@ const Navbar: React.FC = () => {
             <>
               <Link
                 to="/optimize"
-                className={`btn-primary relative overflow-hidden group ${
-                  isActive("/optimize") ? "ring-2 ring-primary/50" : ""
+                className={`btn-primary relative overflow-hidden group hover:shadow-lg hover:shadow-primary/25 hover:scale-105 transition-all duration-300 ${
+                  isActive("/optimize")
+                    ? "ring-2 ring-primary/50 shadow-lg shadow-primary/20"
+                    : ""
                 }`}
               >
-                <span className="relative z-10">Try Free</span>
+                <span className="relative z-10 group-hover:animate-pulse">
+                  Try Free
+                </span>
                 <span className="absolute inset-0 bg-gradient-to-r from-primary-light to-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link
                 to="/login"
-                className={`text-white/80 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium ${
+                className={`text-white/80 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium hover:scale-105 hover:text-primary ${
                   isActive("/login") ? "bg-white/10 text-white" : ""
                 }`}
               >
@@ -290,22 +382,25 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden flex flex-col gap-1 p-2 group"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden flex flex-col gap-1 p-2 group hover:scale-110 transition-transform duration-300"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMenuOpen(!isMenuOpen);
+          }}
           aria-label="Toggle menu"
         >
           <span
-            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 group-hover:bg-primary ${
               isMenuOpen ? "rotate-45 translate-y-1.5" : ""
             }`}
           ></span>
           <span
-            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 group-hover:bg-primary ${
               isMenuOpen ? "opacity-0" : ""
             }`}
           ></span>
           <span
-            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 group-hover:bg-primary ${
               isMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
             }`}
           ></span>

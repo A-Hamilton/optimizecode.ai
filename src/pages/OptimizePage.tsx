@@ -6,6 +6,8 @@ import { PLAN_DETAILS } from "../types/user";
 import CodeInput from "../components/CodeInput";
 import FileDropZone from "../components/FileDropZone";
 import ResultsDisplay from "../components/ResultsDisplay";
+import { AnimatedSection, AnimatedCounter } from "../components/animations";
+import { useNotificationHelpers } from "../contexts/NotificationContext";
 import "./OptimizePage.css";
 
 const OptimizePage: React.FC = () => {
