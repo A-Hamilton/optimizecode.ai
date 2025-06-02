@@ -12,7 +12,142 @@ import {
 import InteractiveCodePreview from "../components/InteractiveCodePreview";
 import InteractiveDemoWidget from "../components/InteractiveDemoWidget";
 
+interface CodeExample {
+  id: string;
+  name: string;
+  language: string;
+  originalCode: string;
+  optimizedCode: string;
+  improvements: string[];
+}
+
+const codeExamples: CodeExample[] = [
+  {
+    id: "js-array",
+    name: "Array Processing",
+    language: "javascript",
+    originalCode: `// Inefficient array processing
+function processUsers(users) {
+  var result = [];
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].active === true) {
+      var user = users[i];
+      result.push({
+        id: user.id,
+        name: user.name,
+        email: user.email
+      });
+    }
+  }
+  return result;
+}`,
+    optimizedCode: `// Optimized with modern ES6+ features
+const processUsers = (users) =>
+  users
+    .filter(user => user.active)
+    .map(({ id, name, email }) => ({ id, name, email }));`,
+    improvements: [
+      "Reduced from 12 lines to 4 lines",
+      "40% better performance",
+      "Modern ES6+ syntax",
+      "Functional programming approach",
+    ],
+  },
+  {
+    id: "js-async",
+    name: "Async Operations",
+    language: "javascript",
+    originalCode: `// Callback hell and error handling issues
+function fetchUserData(userId, callback) {
+  fetch('/api/users/' + userId)
+    .then(response => {
+      response.json().then(data => {
+        if (data.error) {
+          callback(data.error, null);
+        } else {
+          callback(null, data);
+        }
+      }).catch(err => callback(err, null));
+    })
+    .catch(err => callback(err, null));
+}`,
+    optimizedCode: `// Clean async/await with proper error handling
+const fetchUserData = async (userId) => {
+  try {
+    const response = await fetch(\`/api/users/\${userId}\`);
+    const data = await response.json();
+    
+    if (data.error) throw new Error(data.error);
+    return data;
+  } catch (error) {
+    throw new Error(\`Failed to fetch user: \${error.message}\`);
+  }
+};`,
+    improvements: [
+      "Eliminated callback hell",
+      "Improved error handling",
+      "Modern async/await syntax",
+      "Better readability and maintainability",
+    ],
+  },
+  {
+    id: "py-list",
+    name: "Python List Processing",
+    language: "python",
+    originalCode: `# Inefficient list processing with nested loops
+def find_matching_pairs(list1, list2):
+    matches = []
+    for item1 in list1:
+        for item2 in list2:
+            if item1['id'] == item2['user_id']:
+                matches.append({
+                    'user': item1,
+                    'data': item2
+                })
+    return matches`,
+    optimizedCode: `# Optimized with dictionary lookup for O(n) complexity
+def find_matching_pairs(list1, list2):
+    user_dict = {item['id']: item for item in list1}
+    return [
+        {'user': user_dict[item['user_id']], 'data': item}
+        for item in list2 
+        if item['user_id'] in user_dict
+    ]`,
+    improvements: [
+      "Reduced time complexity from O(n²) to O(n)",
+      "60% performance improvement",
+      "More pythonic approach",
+      "Better memory efficiency",
+    ],
+  },
+];
+
 const HomePage: React.FC = () => {
+  const [currentExampleIndex, setCurrentExampleIndex] = useState(0);
+  const [isTypewriterActive, setIsTypewriterActive] = useState(false);
+  const demoSectionRef = useRef<HTMLDivElement>(null);
+
+  // Auto-cycle through examples every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentExampleIndex((prev) => (prev + 1) % codeExamples.length);
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Trigger typewriter when demo section comes into view
+  const { ref: demoRef, isVisible: isDemoVisible } = useScrollAnimation({
+    threshold: 0.3,
+    triggerOnce: true,
+  });
+
+  useEffect(() => {
+    if (isDemoVisible) {
+      setIsTypewriterActive(true);
+    }
+  }, [isDemoVisible]);
+
   return (
     <div className="homepage">
       {/* 1. Hero Section */}
@@ -317,9 +452,12 @@ const HomePage: React.FC = () => {
                 </div>
                 <Link
                   to={feature.link}
-                  className="feature-link group-hover:text-primary transition-all duration-300 hover:translate-x-2"
+                  className="feature-link group-hover:text-primary transition-all duration-300 hover:translate-x-2 flex items-center gap-2"
                 >
-                  Learn more →
+                  Learn more
+                  <span className="transform transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
                 </Link>
               </div>
             ))}
@@ -359,7 +497,7 @@ const HomePage: React.FC = () => {
               <div className="step-connector">
                 <div className="connector-line"></div>
                 <div className="connector-arrow animate-pulse-gentle hover:animate-wiggle transition-all duration-300">
-                  →
+                  <span className="text-primary text-xl">→</span>
                 </div>
               </div>
             </AnimatedSection>
@@ -388,7 +526,7 @@ const HomePage: React.FC = () => {
               <div className="step-connector">
                 <div className="connector-line"></div>
                 <div className="connector-arrow animate-pulse-gentle hover:animate-wiggle transition-all duration-300">
-                  →
+                  <span className="text-primary text-xl">→</span>
                 </div>
               </div>
             </AnimatedSection>
@@ -491,8 +629,12 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. Interactive Demo Section */}
-      <section className="interactive-demo py-20 bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+      {/* 7. Interactive Demo Section with Automatic Typewriter */}
+      <section
+        id="demo"
+        ref={demoRef}
+        className="interactive-demo py-20 bg-gradient-to-br from-gray-800/50 to-gray-900/50"
+      >
         <div className="container">
           <AnimatedSection animation="animate-fade-in-up">
             <div className="text-center mb-12">
@@ -501,11 +643,129 @@ const HomePage: React.FC = () => {
                 <span className="text-primary">Live Demo</span>
               </h2>
               <p className="text-xl text-white/70 max-w-2xl mx-auto">
-                Experience the power of AI code optimization in real-time. Paste
-                your code below and watch it transform!
+                Experience the power of AI code optimization in real-time. Watch
+                automatic examples or paste your own code!
               </p>
             </div>
           </AnimatedSection>
+
+          {/* Automatic Code Example Showcase */}
+          <div className="max-w-6xl mx-auto mb-12">
+            {/* Example Indicators */}
+            <div className="flex justify-center mb-8">
+              <div className="flex gap-4 bg-white/5 border border-white/10 rounded-xl p-4">
+                {codeExamples.map((example, index) => (
+                  <button
+                    key={example.id}
+                    onClick={() => setCurrentExampleIndex(index)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                      currentExampleIndex === index
+                        ? "bg-primary text-white"
+                        : "text-white/60 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span className="mr-2">
+                      {example.language === "javascript" ? "🟨" : "🐍"}
+                    </span>
+                    {example.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Code Comparison */}
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Original Code */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-semibold text-white">
+                    📝 Original Code
+                  </h3>
+                  <span className="px-3 py-1 bg-red-500/20 text-red-300 text-sm rounded-full">
+                    Unoptimized
+                  </span>
+                </div>
+                <div className="bg-gray-900/70 border border-red-500/20 rounded-lg p-6 min-h-[300px] overflow-hidden">
+                  <pre className="text-red-200/90 font-mono text-sm whitespace-pre-wrap">
+                    {isTypewriterActive && (
+                      <TypewriterText
+                        key={`original-${currentExampleIndex}`}
+                        text={codeExamples[currentExampleIndex].originalCode}
+                        speed={25}
+                        cursor={false}
+                      />
+                    )}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Optimized Code */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-semibold text-white">
+                    ⚡ Optimized Code
+                  </h3>
+                  <span className="px-3 py-1 bg-green-500/20 text-green-300 text-sm rounded-full">
+                    AI Enhanced
+                  </span>
+                </div>
+                <div className="bg-gray-900/70 border border-green-500/20 rounded-lg p-6 min-h-[300px] overflow-hidden">
+                  <pre className="text-green-200/90 font-mono text-sm whitespace-pre-wrap">
+                    {isTypewriterActive && (
+                      <TypewriterText
+                        key={`optimized-${currentExampleIndex}`}
+                        text={codeExamples[currentExampleIndex].optimizedCode}
+                        speed={25}
+                        delay={3000}
+                        cursor={false}
+                      />
+                    )}
+                  </pre>
+                </div>
+              </div>
+            </div>
+
+            {/* Improvements List */}
+            <div className="mt-8 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-lg p-6">
+              <h4 className="text-green-300 font-semibold mb-4 flex items-center gap-2">
+                🚀 AI Improvements Applied:
+              </h4>
+              <div className="grid md:grid-cols-2 gap-4">
+                {codeExamples[currentExampleIndex].improvements.map(
+                  (improvement, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 animate-fade-in-left"
+                      style={{
+                        animationDelay: `${(index + 1) * 500 + 4000}ms`,
+                      }}
+                    >
+                      <span className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="text-green-200/90 text-sm">
+                        {improvement}
+                      </span>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+
+            {/* Progress Indicator */}
+            <div className="flex justify-center mt-8">
+              <div className="flex gap-2">
+                {codeExamples.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentExampleIndex
+                        ? "bg-primary"
+                        : "bg-white/20"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
 
           <InteractiveDemoWidget />
         </div>
