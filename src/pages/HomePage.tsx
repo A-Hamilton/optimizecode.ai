@@ -490,7 +490,27 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. Pricing Teaser */}
+      {/* 7. Interactive Demo Section */}
+      <section className="interactive-demo py-20 bg-gradient-to-br from-gray-800/50 to-gray-900/50">
+        <div className="container">
+          <AnimatedSection animation="animate-fade-in-up">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4">
+                Try OptimizeCode.ai{" "}
+                <span className="text-primary">Live Demo</span>
+              </h2>
+              <p className="text-xl text-white/70 max-w-2xl mx-auto">
+                Experience the power of AI code optimization in real-time. Paste
+                your code below and watch it transform!
+              </p>
+            </div>
+          </AnimatedSection>
+
+          <InteractiveDemoWidget />
+        </div>
+      </section>
+
+      {/* 8. Pricing Teaser */}
       <section className="pricing-teaser">
         <div className="container">
           <AnimatedSection
