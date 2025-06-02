@@ -149,9 +149,21 @@ export const Input: React.FC<InputProps> = ({
   id,
   ...props
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
   const hasError = !!error;
-  const inputClasses = ["form-input", hasError ? "error" : "", className]
+  const hasSuccess = !!success;
+
+  const inputClasses = [
+    "form-input",
+    "transition-all duration-300 ease-out",
+    "border-2 focus:border-primary focus:ring-2 focus:ring-primary/20",
+    hasError ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "",
+    hasSuccess
+      ? "border-green-500 focus:border-green-500 focus:ring-green-500/20"
+      : "",
+    className,
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -160,15 +172,21 @@ export const Input: React.FC<InputProps> = ({
       {label && (
         <label
           htmlFor={inputId}
-          className={`form-label ${required ? "required" : ""}`}
+          className={`form-label transition-colors duration-200 ${
+            isFocused ? "text-primary" : ""
+          } ${required ? "required" : ""}`}
         >
           {label}
         </label>
       )}
 
-      <div className="relative">
+      <div className="relative group">
         {icon && iconPosition === "left" && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+          <div
+            className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors duration-200 ${
+              isFocused ? "text-primary" : "text-gray-400"
+            }`}
+          >
             {icon}
           </div>
         )}
@@ -181,18 +199,37 @@ export const Input: React.FC<InputProps> = ({
             paddingRight:
               icon && iconPosition === "right" ? "2.5rem" : undefined,
           }}
+          onFocus={(e) => {
+            setIsFocused(true);
+            props.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setIsFocused(false);
+            props.onBlur?.(e);
+          }}
           {...props}
         />
 
         {icon && iconPosition === "right" && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+          <div
+            className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors duration-200 ${
+              isFocused ? "text-primary" : "text-gray-400"
+            }`}
+          >
             {icon}
           </div>
         )}
+
+        {/* Focus line effect */}
+        <div
+          className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
+            isFocused ? "w-full" : "w-0"
+          }`}
+        />
       </div>
 
       {error && (
-        <div className="form-error">
+        <div className="form-error animate-fade-in">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -205,7 +242,7 @@ export const Input: React.FC<InputProps> = ({
       )}
 
       {success && (
-        <div className="form-success">
+        <div className="form-success animate-fade-in">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -218,7 +255,9 @@ export const Input: React.FC<InputProps> = ({
       )}
 
       {helpText && !error && !success && (
-        <p className="text-sm text-gray-400 mt-2">{helpText}</p>
+        <p className="text-sm text-gray-400 mt-2 transition-opacity duration-200">
+          {helpText}
+        </p>
       )}
     </div>
   );
