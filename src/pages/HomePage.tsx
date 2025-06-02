@@ -641,20 +641,35 @@ const HomePage: React.FC = () => {
       {/* 7. Pricing Teaser */}
       <section className="pricing-teaser">
         <div className="container">
-          <div className="pricing-content">
-            <h2>Start Optimizing Today</h2>
-            <p>Free forever plan • No credit card required • Upgrade anytime</p>
-            <div className="pricing-actions">
-              <Link to="/optimize" className="btn-primary interactive-cta">
+          <AnimatedSection
+            animation="animate-fade-in-up"
+            className="pricing-content"
+          >
+            <h2 className="animate-fade-in-up">Start Optimizing Today</h2>
+            <p className="animate-fade-in-up animate-delay-200">
+              Free forever plan • No credit card required • Upgrade anytime
+            </p>
+            <div className="pricing-actions animate-fade-in-up animate-delay-400">
+              <Link
+                to="/optimize"
+                className="btn-primary interactive-cta group hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+              >
                 <span className="cta-text">Try Free Now</span>
-                <span className="cta-arrow">→</span>
+                <span className="cta-arrow transition-transform duration-300 group-hover:translate-x-2 group-hover:animate-bounce">
+                  →
+                </span>
               </Link>
-              <Link to="/pricing" className="btn-outline interactive-cta">
+              <Link
+                to="/pricing"
+                className="btn-outline interactive-cta group hover:shadow-lg transition-all duration-300"
+              >
                 <span className="cta-text">View Pricing</span>
-                <span className="cta-icon">💰</span>
+                <span className="cta-icon transition-transform duration-300 group-hover:scale-125 group-hover:animate-bounce">
+                  💰
+                </span>
               </Link>
             </div>
-          </div>
+          </AnimatedSection>
         </div>
       </section>
     </div>
