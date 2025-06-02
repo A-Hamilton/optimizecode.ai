@@ -165,7 +165,7 @@ const HomePage: React.FC = () => {
                 >
                   <span className="cta-text">Start Optimizing Free</span>
                   <span className="cta-arrow transition-transform duration-300 group-hover:translate-x-1">
-                    ��
+                    →
                   </span>
                 </Link>
                 <a
@@ -356,59 +356,80 @@ const HomePage: React.FC = () => {
       {/* 4. Feature Highlights with consistent iconography */}
       <section className="features">
         <div className="container">
-          <h2 className="section-title">
-            Powerful Features for Modern Development
-          </h2>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">⚡</div>
-              <h3>Lightning Speed</h3>
-              <p>
-                Optimize code in seconds, not hours. Our AI processes millions
-                of lines instantly.
-              </p>
-              <div className="feature-stat">40% faster execution</div>
-              <Link to="/product" className="feature-link">
-                Learn more →
-              </Link>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">💰</div>
-              <h3>Cost Savings</h3>
-              <p>
-                Reduce cloud computing costs through intelligent resource
-                optimization.
-              </p>
-              <div className="feature-stat">60% lower bills</div>
-              <Link to="/solutions" className="feature-link">
-                Learn more →
-              </Link>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">📖</div>
-              <h3>Better Readability</h3>
-              <p>
-                Transform complex code into clean, maintainable, well-documented
-                solutions.
-              </p>
-              <div className="feature-stat">90% cleaner code</div>
-              <Link to="/product" className="feature-link">
-                Learn more →
-              </Link>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">🛡️</div>
-              <h3>Enhanced Security</h3>
-              <p>
-                Identify and fix security vulnerabilities while optimizing
-                performance.
-              </p>
-              <div className="feature-stat">Zero breaches</div>
-              <Link to="/security" className="feature-link">
-                Learn more →
-              </Link>
-            </div>
-          </div>
+          <AnimatedSection animation="animate-fade-in-up">
+            <h2 className="section-title">
+              Powerful Features for Modern Development
+            </h2>
+          </AnimatedSection>
+
+          <StaggeredList
+            className="features-grid"
+            staggerDelay={150}
+            animation="animate-fade-in-up"
+          >
+            {[
+              {
+                icon: "⚡",
+                title: "Lightning Speed",
+                description:
+                  "Optimize code in seconds, not hours. Our AI processes millions of lines instantly.",
+                stat: "40% faster execution",
+                link: "/product",
+                hoverAnimation: "hover:animate-wiggle",
+              },
+              {
+                icon: "💰",
+                title: "Cost Savings",
+                description:
+                  "Reduce cloud computing costs through intelligent resource optimization.",
+                stat: "60% lower bills",
+                link: "/solutions",
+                hoverAnimation: "hover:animate-bounce",
+              },
+              {
+                icon: "📖",
+                title: "Better Readability",
+                description:
+                  "Transform complex code into clean, maintainable, well-documented solutions.",
+                stat: "90% cleaner code",
+                link: "/product",
+                hoverAnimation: "hover:animate-pulse-gentle",
+              },
+              {
+                icon: "🛡️",
+                title: "Enhanced Security",
+                description:
+                  "Identify and fix security vulnerabilities while optimizing performance.",
+                stat: "Zero breaches",
+                link: "/security",
+                hoverAnimation: "hover:animate-heart-beat",
+              },
+            ].map((feature, index) => (
+              <div
+                key={index}
+                className="feature-card group hover:scale-105 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500"
+              >
+                <div
+                  className={`feature-icon text-4xl transition-all duration-300 group-hover:scale-125 ${feature.hoverAnimation}`}
+                >
+                  {feature.icon}
+                </div>
+                <h3 className="group-hover:text-primary transition-colors duration-300">
+                  {feature.title}
+                </h3>
+                <p>{feature.description}</p>
+                <div className="feature-stat animate-pulse-gentle">
+                  {feature.stat}
+                </div>
+                <Link
+                  to={feature.link}
+                  className="feature-link group-hover:text-primary transition-all duration-300 hover:translate-x-2"
+                >
+                  Learn more →
+                </Link>
+              </div>
+            ))}
+          </StaggeredList>
         </div>
       </section>
 
