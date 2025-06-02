@@ -70,7 +70,7 @@ const getFirestore = () => {
 
 // Authentication instance
 const getAuth = () => {
-  if (global.FIREBASE_DEMO_MODE) {
+  if (process.env.FIREBASE_DEMO_MODE === "true") {
     // Return mock Auth for demo mode
     return {
       verifyIdToken: async (token) => {
