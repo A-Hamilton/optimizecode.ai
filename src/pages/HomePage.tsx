@@ -10,6 +10,7 @@ import {
   useScrollAnimation,
 } from "../components/animations";
 import InteractiveCodePreview from "../components/InteractiveCodePreview";
+import InteractiveDemoWidget from "../components/InteractiveDemoWidget";
 
 const HomePage: React.FC = () => {
   return (
