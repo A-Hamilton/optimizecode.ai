@@ -44,25 +44,43 @@ const Navbar: React.FC = () => {
     to: string;
     children: React.ReactNode;
     onClick?: () => void;
-  }> = ({ to, children, onClick }) => (
+    mobile?: boolean;
+  }> = ({ to, children, onClick, mobile = false }) => (
     <Link
       to={to}
       className={`relative text-sm font-medium transition-all duration-300 group ${
-        isActive(to) ? "text-primary" : "text-white/80 hover:text-primary"
+        mobile ? "text-base py-2" : ""
+      } ${
+        isActive(to)
+          ? "text-primary"
+          : "text-white/80 hover:text-primary hover:scale-105"
       }`}
       onClick={onClick}
     >
       {children}
+
       {/* Active indicator - underline */}
       <span
-        className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary transform transition-transform duration-300 ${
-          isActive(to) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        className={`absolute ${mobile ? "bottom-0" : "bottom-0"} left-0 w-full h-0.5 bg-gradient-to-r from-primary to-primary-light transform transition-all duration-300 ${
+          isActive(to)
+            ? "scale-x-100 opacity-100"
+            : "scale-x-0 group-hover:scale-x-100 opacity-70"
         }`}
       />
+
       {/* Subtle background for active state */}
       <span
-        className={`absolute inset-0 -inset-x-3 -inset-y-2 bg-primary/10 rounded-lg transform transition-all duration-300 -z-10 ${
-          isActive(to) ? "scale-100 opacity-100" : "scale-95 opacity-0"
+        className={`absolute inset-0 -inset-x-3 -inset-y-2 bg-gradient-to-r from-primary/10 to-primary-light/10 rounded-lg transform transition-all duration-300 -z-10 ${
+          isActive(to)
+            ? "scale-100 opacity-100"
+            : "scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-50"
+        }`}
+      />
+
+      {/* Hover glow effect */}
+      <span
+        className={`absolute inset-0 -inset-x-2 -inset-y-1 bg-primary/5 rounded-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 -z-20 ${
+          isActive(to) ? "hidden" : ""
         }`}
       />
     </Link>
