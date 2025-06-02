@@ -165,7 +165,7 @@ const HomePage: React.FC = () => {
                 >
                   <span className="cta-text">Start Optimizing Free</span>
                   <span className="cta-arrow transition-transform duration-300 group-hover:translate-x-1">
-                    →
+                    ��
                   </span>
                 </Link>
                 <a
@@ -234,29 +234,33 @@ const HomePage: React.FC = () => {
       {/* 2. Enhanced Social Proof Bar */}
       <section className="social-proof">
         <div className="container">
-          <p className="social-proof-text">Trusted by developers at</p>
-          <div className="social-proof-logos">
-            <div className="logo-item">
-              <span className="logo-icon">🚀</span>
-              <span className="logo-name">Startups</span>
-            </div>
-            <div className="logo-item">
-              <span className="logo-icon">🏢</span>
-              <span className="logo-name">Fortune 500</span>
-            </div>
-            <div className="logo-item">
-              <span className="logo-icon">🎯</span>
-              <span className="logo-name">Scale-ups</span>
-            </div>
-            <div className="logo-item">
-              <span className="logo-icon">💻</span>
-              <span className="logo-name">Agencies</span>
-            </div>
-            <div className="logo-item">
-              <span className="logo-icon">🔬</span>
-              <span className="logo-name">Research Labs</span>
-            </div>
-          </div>
+          <AnimatedSection animation="animate-fade-in">
+            <p className="social-proof-text">Trusted by developers at</p>
+          </AnimatedSection>
+
+          <StaggeredList
+            className="social-proof-logos"
+            staggerDelay={100}
+            animation="animate-fade-in-up"
+          >
+            {[
+              { icon: "🚀", name: "Startups" },
+              { icon: "🏢", name: "Fortune 500" },
+              { icon: "🎯", name: "Scale-ups" },
+              { icon: "💻", name: "Agencies" },
+              { icon: "🔬", name: "Research Labs" },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="logo-item group hover:scale-110 hover:-translate-y-1 transition-all duration-300"
+              >
+                <span className="logo-icon group-hover:animate-bounce">
+                  {item.icon}
+                </span>
+                <span className="logo-name">{item.name}</span>
+              </div>
+            ))}
+          </StaggeredList>
         </div>
       </section>
 
