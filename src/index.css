@@ -1,6 +1,7 @@
 /* Import Design System */
 @import "./components/ui/DesignSystem.css";
 @import "./styles/animations.css";
+@import "./styles/accessibility.css";
 
 @tailwind base;
 @tailwind components;
