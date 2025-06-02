@@ -32,9 +32,10 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     if (characterLimit === -1 || newValue.length <= characterLimit) {
       onCodeChange(newValue);
     } else {
-      // Show feedback that limit was reached
-      showFeedback(
+      // Show notification that limit was reached
+      showWarning(
         `Character limit reached (${characterLimit.toLocaleString()} max)`,
+        "Character Limit",
       );
     }
   };
