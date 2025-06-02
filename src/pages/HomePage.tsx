@@ -77,37 +77,7 @@ const HomePage: React.FC = () => {
 
           <AnimatedSection animation="animate-float" delay={400}>
             <div className="hero-visual">
-              <div className="code-preview hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500">
-                <div className="code-header">
-                  <div className="code-tabs">
-                    <span className="tab active">app.js</span>
-                    <span className="tab">optimized.js</span>
-                  </div>
-                  <div className="optimization-badge animate-pulse-gentle">
-                    ✨ 47% faster
-                  </div>
-                </div>
-                <div className="code-content">
-                  <div className="code-line animate-stagger-1">
-                    <span className="line-number">1</span>
-                    <span className="code-text">
-                      const optimizedCode = ai.transform(yourCode)
-                    </span>
-                  </div>
-                  <div className="code-line animate-stagger-2">
-                    <span className="line-number">2</span>
-                    <span className="code-text">
-                      // ⚡ Performance improved by 40%
-                    </span>
-                  </div>
-                  <div className="code-line animate-stagger-3">
-                    <span className="line-number">3</span>
-                    <span className="code-text">
-                      // 💰 Cloud costs reduced by 60%
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <InteractiveCodePreview />
             </div>
           </AnimatedSection>
         </div>
