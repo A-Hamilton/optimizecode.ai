@@ -9,6 +9,7 @@ import {
   TypewriterText,
   useScrollAnimation,
 } from "../components/animations";
+import InteractiveCodePreview from "../components/InteractiveCodePreview";
 
 const HomePage: React.FC = () => {
   return (
