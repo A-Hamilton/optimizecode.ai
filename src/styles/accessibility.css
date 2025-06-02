@@ -1,0 +1,590 @@
+/* Enhanced Accessibility Styles for OptimizeCode.ai */
+
+/* ========================================
+   FOCUS MANAGEMENT
+========================================= */
+
+/* Enhanced focus ring system */
+.focus-ring {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-white),
+    0 0 0 4px var(--color-primary-500);
+}
+
+.focus-ring-inset {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--color-primary-500);
+}
+
+.focus-ring-primary {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
+}
+
+.focus-ring-danger {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.5);
+}
+
+.focus-ring-success {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5);
+}
+
+/* Focus visible only when keyboard navigation is used */
+.focus-visible-only:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+.focus-visible-only:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+/* ========================================
+   KEYBOARD NAVIGATION
+========================================= */
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary-500);
+  color: var(--color-white);
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: var(--radius-base);
+  font-weight: var(--font-medium);
+  z-index: var(--z-max);
+  transition: top var(--transition-fast);
+  font-size: var(--text-sm);
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Keyboard navigation indicators */
+.keyboard-nav-active *:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Focus trap for modals and dropdowns */
+.focus-trap {
+  position: relative;
+}
+
+.focus-trap-boundary {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ========================================
+   SCREEN READER SUPPORT
+========================================= */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Show content only to screen readers when focused */
+.sr-only-focusable:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: inherit !important;
+  margin: inherit !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+}
+
+/* Live regions for screen readers */
+.live-region {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.live-region[aria-live="polite"] {
+  /* Polite announcements */
+}
+
+.live-region[aria-live="assertive"] {
+  /* Urgent announcements */
+}
+
+/* ========================================
+   HIGH CONTRAST MODE SUPPORT
+========================================= */
+
+@media (prefers-contrast: high) {
+  :root {
+    --color-primary-500: #0000ff;
+    --color-success: #008000;
+    --color-danger: #ff0000;
+    --color-warning: #ff8800;
+    --color-gray-600: #606060;
+    --color-gray-700: #404040;
+    --color-gray-800: #202020;
+    --color-gray-900: #000000;
+  }
+
+  .btn {
+    border: 2px solid currentColor;
+    font-weight: var(--font-bold);
+  }
+
+  .form-input,
+  .form-textarea,
+  .form-select {
+    border: 2px solid var(--color-gray-400);
+    background: var(--color-white);
+    color: var(--color-black);
+  }
+
+  .card {
+    border: 2px solid var(--color-gray-400);
+    background: var(--color-white);
+    color: var(--color-black);
+  }
+
+  .notification {
+    border: 3px solid currentColor;
+    font-weight: var(--font-medium);
+  }
+
+  /* Ensure sufficient contrast for links */
+  a {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  a:hover,
+  a:focus {
+    text-decoration-thickness: 3px;
+  }
+}
+
+/* ========================================
+   REDUCED MOTION SUPPORT
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable specific animations that might cause issues */
+  .animate-bounce,
+  .animate-pulse,
+  .animate-spin,
+  .animate-ping,
+  .animate-wiggle,
+  .animate-float,
+  .animate-heart-beat,
+  .animate-gradient-shift,
+  .animate-shimmer,
+  .loading-skeleton {
+    animation: none !important;
+  }
+
+  /* Keep essential loading indicators but make them static */
+  .loading-spinner {
+    animation: none !important;
+    border-left-color: var(--color-primary-500);
+  }
+
+  /* Reduce hover effects */
+  .btn:hover,
+  .card:hover {
+    transform: none !important;
+  }
+
+  /* Keep focus indicators */
+  *:focus,
+  *:focus-visible {
+    transition: box-shadow 0.15s ease !important;
+  }
+}
+
+/* ========================================
+   COLOR SCHEME PREFERENCES
+========================================= */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-primary-500: #4f46e5;
+    --bg-primary: var(--color-white);
+    --bg-secondary: var(--color-gray-50);
+    --bg-surface: rgba(0, 0, 0, 0.05);
+    --bg-surface-hover: rgba(0, 0, 0, 0.08);
+  }
+
+  body {
+    background: linear-gradient(
+      135deg,
+      var(--color-gray-50),
+      var(--color-gray-100)
+    );
+    color: var(--color-gray-900);
+  }
+
+  .card {
+    background: var(--color-white);
+    border-color: var(--color-gray-200);
+    color: var(--color-gray-900);
+  }
+
+  .form-input,
+  .form-textarea {
+    background: var(--color-white);
+    border-color: var(--color-gray-300);
+    color: var(--color-gray-900);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--color-gray-500);
+  }
+}
+
+/* ========================================
+   TOUCH AND MOBILE ACCESSIBILITY
+========================================= */
+
+/* Ensure minimum touch targets (44x44px) */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Improve touch feedback */
+.touch-feedback {
+  -webkit-tap-highlight-color: rgba(99, 102, 241, 0.3);
+  touch-action: manipulation;
+}
+
+/* Disable tap highlight for custom interactive elements */
+.no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ========================================
+   SEMANTIC CONTENT STRUCTURE
+========================================= */
+
+/* Main landmark */
+main {
+  outline: none;
+}
+
+/* Navigation landmarks */
+nav {
+  outline: none;
+}
+
+/* Content sections */
+section {
+  outline: none;
+}
+
+/* Headings hierarchy */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-4);
+}
+
+h1 {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+}
+
+h2 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+}
+
+h3 {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+}
+
+h4 {
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+}
+
+/* ========================================
+   LINK ACCESSIBILITY
+========================================= */
+
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: all var(--transition-fast);
+}
+
+a:hover,
+a:focus {
+  color: var(--color-link-hover);
+  text-decoration-color: currentColor;
+}
+
+a:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* External link indicators */
+a[href^="http"]:not([href*="optimizecode.ai"])::after,
+a[target="_blank"]::after {
+  content: " ↗";
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+/* ========================================
+   FORM ACCESSIBILITY ENHANCEMENTS
+========================================= */
+
+/* Required field indicators */
+.required::after {
+  content: "*";
+  color: var(--color-danger);
+  margin-left: var(--space-1);
+  font-weight: var(--font-bold);
+}
+
+/* Error states */
+[aria-invalid="true"] {
+  border-color: var(--color-danger) !important;
+}
+
+[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Success states */
+[aria-invalid="false"] {
+  border-color: var(--color-success);
+}
+
+/* Fieldset and legend styling */
+fieldset {
+  border: 1px solid var(--color-gray-600);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+legend {
+  font-weight: var(--font-medium);
+  padding: 0 var(--space-2);
+  color: var(--color-gray-200);
+}
+
+/* ========================================
+   TABLE ACCESSIBILITY
+========================================= */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-4);
+}
+
+th,
+td {
+  padding: var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-gray-600);
+}
+
+th {
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-200);
+  background-color: var(--bg-surface);
+}
+
+tbody tr:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+/* ========================================
+   DIALOG AND MODAL ACCESSIBILITY
+========================================= */
+
+[role="dialog"],
+[role="alertdialog"] {
+  outline: none;
+}
+
+.modal-backdrop {
+  background-color: var(--bg-backdrop);
+  backdrop-filter: blur(4px);
+}
+
+/* ========================================
+   ERROR PREVENTION AND RECOVERY
+========================================= */
+
+/* Error boundaries */
+.error-boundary {
+  padding: var(--space-6);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-lg);
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger-light);
+}
+
+.error-boundary h2 {
+  color: var(--color-danger);
+  margin-bottom: var(--space-4);
+}
+
+/* Loading states */
+[aria-busy="true"] {
+  cursor: wait;
+  pointer-events: none;
+}
+
+/* ========================================
+   PRINT ACCESSIBILITY
+========================================= */
+
+@media print {
+  /* Hide decorative elements */
+  .sr-only,
+  .loading-spinner,
+  .animate-pulse,
+  [aria-hidden="true"] {
+    display: none !important;
+  }
+
+  /* Ensure good contrast */
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  /* Show link URLs */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .no-page-break {
+    page-break-inside: avoid;
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES FOR ACCESSIBILITY
+========================================= */
+
+/* Visually hidden but available to screen readers */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Remove animations for users who prefer reduced motion */
+.respect-motion-preferences {
+  animation: inherit;
+  transition: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .respect-motion-preferences {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* High contrast borders */
+.high-contrast-border {
+  border: 1px solid currentColor;
+}
+
+@media (prefers-contrast: high) {
+  .high-contrast-border {
+    border-width: 2px;
+  }
+}
+
+/* Accessible color utilities */
+.text-accessible {
+  color: var(--color-gray-100);
+}
+
+.bg-accessible {
+  background-color: var(--color-gray-800);
+}
+
+.border-accessible {
+  border-color: var(--color-gray-600);
+}
+
+/* Focus management for SPA */
+.focus-management {
+  outline: none;
+}
+
+.focus-management:focus {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
