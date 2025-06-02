@@ -46,7 +46,7 @@ const initializeFirebase = () => {
 
 // Firestore database instance
 const getFirestore = () => {
-  if (global.FIREBASE_DEMO_MODE) {
+  if (process.env.FIREBASE_DEMO_MODE === "true") {
     // Return mock Firestore for demo mode
     return {
       collection: () => ({
