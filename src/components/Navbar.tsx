@@ -357,16 +357,20 @@ const Navbar: React.FC = () => {
             <>
               <Link
                 to="/optimize"
-                className={`btn-primary relative overflow-hidden group ${
-                  isActive("/optimize") ? "ring-2 ring-primary/50" : ""
+                className={`btn-primary relative overflow-hidden group hover:shadow-lg hover:shadow-primary/25 hover:scale-105 transition-all duration-300 ${
+                  isActive("/optimize")
+                    ? "ring-2 ring-primary/50 shadow-lg shadow-primary/20"
+                    : ""
                 }`}
               >
-                <span className="relative z-10">Try Free</span>
+                <span className="relative z-10 group-hover:animate-pulse">
+                  Try Free
+                </span>
                 <span className="absolute inset-0 bg-gradient-to-r from-primary-light to-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
               </Link>
               <Link
                 to="/login"
-                className={`text-white/80 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium ${
+                className={`text-white/80 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium hover:scale-105 hover:text-primary ${
                   isActive("/login") ? "bg-white/10 text-white" : ""
                 }`}
               >
@@ -378,22 +382,25 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden flex flex-col gap-1 p-2 group"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden flex flex-col gap-1 p-2 group hover:scale-110 transition-transform duration-300"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMenuOpen(!isMenuOpen);
+          }}
           aria-label="Toggle menu"
         >
           <span
-            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 group-hover:bg-primary ${
               isMenuOpen ? "rotate-45 translate-y-1.5" : ""
             }`}
           ></span>
           <span
-            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 group-hover:bg-primary ${
               isMenuOpen ? "opacity-0" : ""
             }`}
           ></span>
           <span
-            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 ${
+            className={`w-6 h-0.5 bg-white/80 transition-all duration-300 group-hover:bg-primary ${
               isMenuOpen ? "-rotate-45 -translate-y-1.5" : ""
             }`}
           ></span>
