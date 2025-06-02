@@ -185,5 +185,5 @@ module.exports = {
   getFirestore,
   getAuth,
   userService,
-  isDemoMode: () => global.FIREBASE_DEMO_MODE === true,
+  isDemoMode: () => process.env.FIREBASE_DEMO_MODE === "true",
 };
