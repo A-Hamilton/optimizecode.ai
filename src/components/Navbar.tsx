@@ -87,13 +87,25 @@ const Navbar: React.FC = () => {
   );
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-gray-900/95 backdrop-blur-xl border-b border-white/10 z-50">
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled
+          ? "bg-gray-900/98 backdrop-blur-xl border-b border-white/20 shadow-xl"
+          : "bg-gray-900/95 backdrop-blur-lg border-b border-white/10"
+      }`}
+    >
+      <div
+        className={`max-w-7xl mx-auto px-4 flex items-center justify-between transition-all duration-300 ${
+          isScrolled ? "h-14" : "h-16"
+        }`}
+      >
         <Link
           to="/"
-          className="text-xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent hover:scale-105 transition-transform duration-300"
+          className={`text-xl font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent transition-all duration-300 group ${
+            isScrolled ? "text-lg" : "text-xl"
+          } hover:scale-110 ${bounceAnimation}`}
         >
-          OptimizeCode.ai
+          <span className="group-hover:animate-pulse">OptimizeCode.ai</span>
         </Link>
 
         {/* Desktop Navigation */}
