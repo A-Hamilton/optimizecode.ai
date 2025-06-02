@@ -14,6 +14,8 @@ const CodeInput: React.FC<CodeInputProps> = ({ code, onCodeChange }) => {
     // If AuthProvider is not available, use default limits
     console.warn("AuthProvider not available, using default limits");
   }
+
+  const { showSuccess, showError, showWarning } = useNotificationHelpers();
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [copySuccess, setCopySuccess] = useState<boolean>(false);
