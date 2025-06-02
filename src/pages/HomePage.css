@@ -842,6 +842,244 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.metric {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.metric:hover {
+  transform: translateY(-5px);
+  border-color: rgba(100, 108, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(100, 108, 255, 0.1);
+}
+
+.metric-value {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #646cff, #747bff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.metric-label {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.metric-description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+/* Interactive Demo Section */
+.interactive-demo {
+  padding: 6rem 0;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+}
+
+/* Pricing Teaser */
+.pricing-teaser {
+  padding: 6rem 0;
+  background: linear-gradient(135deg, rgba(100, 108, 255, 0.1), rgba(116, 123, 255, 0.1));
+}
+
+.pricing-content {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pricing-content h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.pricing-content p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.pricing-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .hero .container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+  }
+
+  .split-layout {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .steps {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .step-connector {
+    transform: rotate(90deg);
+    min-height: 60px;
+    padding: 0.5rem 0;
+  }
+
+  .connector-line {
+    width: 40px;
+    height: 2px;
+  }
+
+  .connector-arrow {
+    font-size: 1.5rem;
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 4rem 0;
+    min-height: 60vh;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .interactive-cta {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .social-proof-logos {
+    gap: 2rem;
+  }
+
+  .problem-side,
+  .solution-side {
+    padding: 1.5rem;
+  }
+
+  .pain-points,
+  .solutions {
+    gap: 1.5rem;
+  }
+
+  .pricing-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  .hero {
+    padding: 3rem 0;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .metric-value {
+    font-size: 2.5rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step {
+    padding: 1.5rem;
+  }
+
+  .step-number {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  .interactive-demo {
+    padding: 4rem 0;
+  }
+
+  .pricing-teaser {
+    padding: 4rem 0;
+  }
+}
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
 }
 
 .metric {
