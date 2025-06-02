@@ -755,11 +755,13 @@ const OptimizationPanel: React.FC<OptimizationPanelProps> = ({
                   language={language}
                   original={currentContent.original}
                   modified={currentContent.optimized}
-                  options={{
-                    ...editorOptions,
-                    renderSideBySide: true,
-                    diffWordWrap: "on",
-                  }}
+                  options={
+                    {
+                      ...editorOptions,
+                      enableSplitViewResizing: true,
+                      renderSideBySide: true,
+                    } as any
+                  }
                   theme="vs-dark"
                 />
               </div>
