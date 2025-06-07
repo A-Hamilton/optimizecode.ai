@@ -35,7 +35,7 @@ interface AuthContextType {
   ) => Promise<{ success: boolean; error: string | null }>;
   trackUsage: () => Promise<{
     success: boolean;
-    remainingFiles: number;
+    remainingOptimizations: number;
     error?: string;
   }>;
   refreshProfile: () => Promise<void>;
